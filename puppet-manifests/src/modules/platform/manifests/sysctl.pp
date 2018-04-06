@@ -40,6 +40,11 @@ class platform::sysctl
       value => '0',
     }
   }
+
+  # Turn on sched stats
+  sysctl::value { 'kernel.sched_schedstats':
+    value => '1',
+  }
 }
 
 
