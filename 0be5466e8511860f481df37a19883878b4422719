@@ -1,0 +1,10 @@
+Code-Review+1: Lin Shuicheng <shuicheng.lin@intel.com>
+Code-Review+2: Erich Cordoba <erich.cordoba.malibran@intel.com>
+Code-Review+2: Dean Troyer <dtroyer@gmail.com>
+Workflow+1: Dean Troyer <dtroyer@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 13 Jun 2018 15:43:32 +0000
+Reviewed-on: https://review.openstack.org/574497
+Project: openstack/stx-config
+Branch: refs/heads/master
