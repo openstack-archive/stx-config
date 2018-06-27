@@ -1,0 +1,10 @@
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Workflow+1: Bart Wensley <barton.wensley@windriver.com>
+Code-Review+1: Tee Ngo <tee.ngo@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 27 Jun 2018 16:15:01 +0000
+Reviewed-on: https://review.openstack.org/578137
+Project: openstack/stx-config
+Branch: refs/heads/master
