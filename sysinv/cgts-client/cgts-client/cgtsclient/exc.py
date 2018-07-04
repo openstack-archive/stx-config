@@ -11,6 +11,7 @@
 #    under the License.
 
 import sys
+from sysinv.openstack.common.gettextutils import _
 
 
 class BaseException(Exception):
@@ -168,6 +169,71 @@ class EndpointNotFound(Exception):
 class AmbiguousAuthSystem(ClientException):
     """Could not obtain token and endpoint using provided credentials."""
     pass
+
+
+class CgtsclientException(Exception):
+    """Base Cgts-Client Exception
+
+    To correctly use this class, inherit from it and define
+    a 'message' property. That message will get printf'd
+    with the keyword arguments provided to the constructor.
+
+    """
+    message = _("An unknown exception occurred.")
+    code = 500
+    headers = {}
+    safe = False
+
+    def __init__(self, message=None, **kwargs):
+        self.kwargs = kwargs
+
+        if 'code' not in self.kwargs:
+            try:
+                self.kwargs['code'] = self.code
+            except AttributeError:
+                pass
+
+        if not message:
+            try:
+                message = self.message % kwargs
+
+            except Exception as e:
+                # kwargs doesn't match a variable in the message
+                # log the issue and the kwargs
+                LOG.exception(_('Exception in string format operation'))
+                for name, value in kwargs.iteritems():
+                    LOG.error("%s: %s" % (name, value))
+
+                if CONF.fatal_exception_format_errors:
+                    raise e
+                else:
+                    # at least get the core message out if something happened
+                    message = self.message
+
+        super(CgtsclientException, self).__init__(message)
+
+    def format_message(self):
+        if self.__class__.__name__.endswith('_Remote'):
+            return self.args[0]
+        else:
+            return unicode(self)
+
+
+class AmbiguousEndpoints(CgtsclientException):
+    message = _("Endpoints are ambiguous: reason=%(reason)s")
+
+
+class EndpointTypeNotFound(CgtsclientException):
+    message = _("The type of the endpoint was not found: reason=%(reason)s")
+
+
+class SslCertificateValidationError(CgtsclientException):
+    message = _("Validation of the Ssl certificate failed, reason=%(reason)s")
+
+
+class EndpointException(CgtsclientException):
+    message = _("Generic endpoint exception: reason=%(reason)s")
+
 
 # Alias for backwards compatibility
 AmbigiousAuthSystem = AmbiguousAuthSystem

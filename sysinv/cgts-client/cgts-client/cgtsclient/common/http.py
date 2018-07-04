@@ -23,7 +23,7 @@ import socket
 import httplib2
 
 import six
-import six.moves.urllib.parse as urlparse
+import urlparse
 
 try:
     import ssl
