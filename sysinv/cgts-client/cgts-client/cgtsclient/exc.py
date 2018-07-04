@@ -169,6 +169,23 @@ class AmbiguousAuthSystem(ClientException):
     """Could not obtain token and endpoint using provided credentials."""
     pass
 
+
+class AmbiguousEndpoints(Exception):
+    pass
+
+
+class EndpointTypeNotFound(Exception):
+    pass
+
+
+class SslCertificateValidationError(Exception):
+    pass
+
+
+class EndpointException(Exception):
+    pass
+
+
 # Alias for backwards compatibility
 AmbigiousAuthSystem = AmbiguousAuthSystem
 
