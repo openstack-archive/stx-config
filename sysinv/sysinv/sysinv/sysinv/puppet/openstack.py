@@ -195,8 +195,7 @@ class OpenstackBasePuppet(base.BasePuppet):
         sys_controller_network_addr_pool = self.dbapi.address_pool_get(
             sys_controller_network.pool_uuid)
         addr = sys_controller_network_addr_pool.floating_address
-        host = self._format_url_address(addr)
-        return host
+        return addr
 
     @staticmethod
     def _format_keystone_endpoint(protocol, port, address, path):
