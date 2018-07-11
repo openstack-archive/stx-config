@@ -9,7 +9,7 @@
 .*.swp
 .coverage
 .installed.cfg
-.testrepository
+.stestr/
 .tox
 .venv
 AUTHORS
