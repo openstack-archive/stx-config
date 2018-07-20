@@ -1,0 +1,9 @@
+Code-Review+1: Teresa Ho <teresa.ho@windriver.com>
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Workflow+1: Jack Ding <Jack.Ding@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 20 Jul 2018 19:31:25 +0000
+Reviewed-on: https://review.openstack.org/584468
+Project: openstack/stx-config
+Branch: refs/heads/master
