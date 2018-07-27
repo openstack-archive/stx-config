@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# devstack/plugin.sh
+# Triggers stx_config specific functions to install and configure stx_config
+
+# Dependencies:
+#
+# - ``functions`` file
+# - ``DATA_DIR`` must be defined
+
+# ``stack.sh`` calls the entry points in this order:
+#
+echo_summary "sysinv devstack plugin.sh called: $1/$2"
+source $DEST/stx-config/devstack/lib/stx-config
+# check for service enabled
+
+if is_service_enabled si-api si-cond; then
+
+    if [[ "$1" == "stack" && "$2" == "install" ]]; then
+        # Perform installation of sysinv source
+        echo_summary "Installing sysinv service"
+        install_sysinv
+
+    elif [[ "$1" == "stack" && "$2" == "post-config" ]]; then
+        # Configure after the other layer 1 and 2 services have been configured
+        echo_summary "Configuring sysinv"
+        configure_sysinv
+
+    elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
+        # Initialize and start the sysinv service
+        echo_summary "Initializing and start sysinv "
+        init_sysinv
+        start_sysinv
+    fi
+
+    if [[ "$1" == "unstack" ]]; then
+        # Shut down sysinv services
+        stop_sysinv
+        :
+    fi
+
+    if [[ "$1" == "clean" ]]; then
+        cleanup_sysinv
+        :
+    fi
+fi
