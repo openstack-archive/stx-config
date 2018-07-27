@@ -1,0 +1,185 @@
+#!/bin/bash
+#
+# lib/stx-config
+# Functions to control the configuration and operation of the **sysinv** service
+
+# Dependencies:
+#
+# - ``functions`` file
+# - ``DEST``, ``DATA_DIR``, ``STACK_USER`` must be defined
+# - ``SERVICE_{TENANT_NAME|PASSWORD}`` must be defined
+# - ``SERVICE_HOST``
+# - ``KEYSTONE_TOKEN_FORMAT`` must be defined
+
+# ``stack.sh`` calls the entry points in this order:
+#
+# - install_cgtsclient
+# - install_sysinv
+# - configure_sysinv
+# - init_sysinv
+# - start_sysinv
+# - stop_sysinv
+# - cleanup_sysinv
+
+SYSINV_CLIENT_NAME=cgts-client
+GITDIR["$SYSINV_CLIENT"]=$DEST/stx-config/sysinv/cgts-client/cgts-client
+GITDIR["sysinv"]=$DEST/stx-config/sysinv/sysinv/sysinv
+SYSINV_SERVICE_PROTOCOL=${SYSINV_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
+SYSINV_SERVICE_PORT=${SYSINV_SERVICE_PORT:-6385}
+SYSINV_DIR=$DEST/stx-config/sysinv/sysinv/
+SYSINV_ETC_GOENABLEDD=/etc/goenabled.d/
+SYSINV_ETC_SYSINV=/etc/sysinv/
+SYSINV_CONF_FILE=$SYSINV_ETC_SYSINV/sysinv.conf
+SYSINV_API_PASTE_INI=$SYSINV_ETC_SYSINV/api-paste.ini
+SYSINV_ETC_MOTDD=/etc/motd.d/
+SYSINV_OCF_RESOURCED=/urs/lib/ocf/resource.d
+SYSINV_BINDIR=/usr/bin/
+SYSINV_API_PORT=$SYSINV_SERVICE_PORT
+SYSINV_AUTH_STRATEGY=${SYSINV_AUTH_STRATEGY:-keystone}
+SYSINV_AUTH_CACHE_DIR=${SYSINV_AUTH_CACHE_DIR:-/var/cache/sysinv}
+_XTRACE_STX-CONFIG=$(set +o | grep xtrace)
+set -o xtrace
+$_XTRACE+STX-CONFIG
+
+function install_cgtsclient{
+	#we have define GITDIR of cgts-client, although it was not a independence git repo. 
+	setup_dev_lib "cgts-client"
+    sudo install -D -m 0644 -o $STACK_USER {${GITDIR["$SYSINV_CLIENT_NAME"]/tools/,/etc/bash_completion.d/}system.bash_completion
+}
+}
+
+function configure_sysinv{
+  cp $SYSINV_DIR/sysinv/etc/sysinv.conf.sample $SYSINV_CONF_FILE
+  iniset $SYSINV_CONF_FILE DEFAULT MTC_INV_LABLE /v1/hosts/
+  iniset $SYSINV_CONF_FILE DEFAULT sysinv_api_port $SYSINV_API_PORT
+  iniset $SYSINV_CONF_FILE DEFAULT use_syslog True
+  iniset $SYSINV_CONF_FILE DEFAULT rabbit_host $RABBIT_HOST
+  iniset $SYSINV_CONF_FILE DEFAULT rabbit_hosts $RABBIT_HOST:5672
+  iniset $SYSINV_CONF_FILE DEFAULT rabbit_port 5672
+  iniset $SYSINV_CONF_FILE DEFAULT verbose True
+  iniset $SYSINV_CONF_FILE DEFAULT sysinv_api_bind_ip $HOST_IP
+  iniset $SYSINV_CONF_FILE DEFAULT auth_strategy $IRONIC_AUTH_STRATEGY
+  iniset $SYSINV_CONF_FILE DEFAULT control_excange openstack
+  iniset $SYSINV_CONF_FILE DEFAULT rabbit_userid $RABBIT_USERID
+  iniset $SYSINV_CONF_FILE DEFAULT rabbit_virtual_host /
+  iniset $SYSINV_CONF_FILE DEFAULT  api_paste_config $CINDER_API_PASTE_INI
+  iniset $SYSINV_CONF_FILE DEFAULT  debug True
+  iniset $SYSINV_CONF_FILE DEFAULT  rabbit_password $RABBIT_PASSWORD
+  iniset_rpc_backend sysinv $SYSINV_CONF_FILE
+  iniset $SYSINV_CONF_FILE DEFAULT rabbit_ha_queues False
+  setup_logging $IRONIC_CONF_FILE
+  configure_auth_token_middleware $SYSINV_CONF_FILE sysinv $IRONIC_AUTH_CACHE_DIR/api
+  iniset $IRONIC_CONF_FILE database connection `database_connection_url sysinv`
+
+}
+
+# create_sysinv_cache_dir() - Part of the init_sysinv() process
+function create_sysinv_cache_dir {
+    # Create cache dir
+    sudo mkdir -p $SYSINV_AUTH_CACHE_DIR/api
+	sudo chown $STACK_USER $SYSINV_AUTH_CACHE_DIR/api
+	rm -f $SYSINV_AUTH_CACHE_DIR/api/*
+	sudo mkdir -p $SYSINV_AUTH_CACHE_DIR/registry
+	sudo chown $STACK_USER $SYSINV_AUTH_CACHE_DIR/registry
+	rm -f $SYSINV_AUTH_CACHE_DIR/registry/*
+}
+
+function create_sysinv_accounts {
+    get_or_create_service "sysinv" "sysinv" "SyiInv services"
+	create_service_user "sysinv" "admin"
+}
+function install_sysinv{
+ local req_services="key rabbit nova neutron"
+  for srv in $req_services;do
+	  if ! is_service_enabled "$srv"; then
+		  die $LINENO "$srv should be enabled for SysInv"
+	  fi
+  done
+
+  setup_develop $SYSINV_DIR
+  sudo install -d -m 755 $SYSINV_ETC_GOENABLEDD
+  sudo install -p -D -m 755 $SYSINV_DIR/etc/sysinv/sysinv_goenabled_check.sh $SYSINV_ETC_GOENABLEDD/sysinv_goenabled_check.sh
+  sudo install -d -m $SYSINV_ETC_SYSINV
+  sudo install -p -D -m 755 $SYSINV_DIR/etc/sysinv/policy.json $SYSINV_ETC_SYSINV/policy.json
+  sudo install -p -D -m 640 $SYSINV_DIR/etc/sysinv/profileSchema.xsd  $SYSINV_ETC_SYSINV/profileSchema.xsd
+  sudo install -p -D -m 655 $SYSINV_DIR/etc/sysinv/crushmap.bin  $SYSINV_ETC_SYSINV/crushmap.bin
+  sudo install -p -D -m 655 $SYSINV_DIR/etc/sysinv/SYSINV_ETC_SYSINV/crushmap.bin
+  sudo install -d -m 755 $SYSINV_ETC_MOTDD
+  sudo install -p -D -m 755 $SYSINV_DIR/etc/sysinv/motd-system $SYSINV_ETC_MOTDD/10-system
+  sudo install -d -m 755 $SYSINV_ETC_SYSINV/upgrades
+  sudo install -p -D -m 755 $SYSINV_DIR/etc/sysinv/delete_load.sh $SYSINV_ETC_SYSINV/upgrades/delete_load.sh
+  sudo install -p -D -m 755 $SYSINV_DIR/scripts/sysinv-api /usr/lib/ocf/resource.d/platform/sysinv-api
+  sudo install -p -D -m 755 $SYSINV_DIR/scripts/sysinv-conductor /usr/lib/ocf/resource.d/platform/sysinv-conductor
+  sudo install -p -D -m 755 $SYSINV_DIR/scripts/sysinv-api.service /usr/lib/systemd/system/sysinv-api.service
+  sudo install -p -D -m 755 $SYSINV_DIR/scripts/sysinv-conductor.service /usr/lib/systemd/system/sysinv-conductor.service
+  sudo install -d -m 755 $SYSINV_BINDIR
+  sudo install -p -D -m 755 $SYSINV_DIR/sysinv/cmd/partition_info.sh $SYSINV_BINDIR/partition_info.sh
+  sudo install -p -D -m 755 $SYSINV_DIR/sysinv/cmd/manage-partitions $SYSINV_BINDIR/manage-partitions
+  sudo install -p -D -m 755 $SYSINV_DIR/sysinv/cmd/query_pci_id $SYSINV_BINDIR/query_pci_id
+
+}
+
+function init_sysinv{
+    if [[ "$HOST_TOPOLOGY_ROLE" != "subnode" ]]; then
+       # (Re)create  ironic database
+       recreate_database sysinv
+	   $SYSINV_BINDIR/sysinv-dbsync --config-file=$SYSINV_CONF_FILE
+	fi
+	create_sysinv_cache_dir
+}
+
+function start_sysinv_api{
+    run_process si-api "$SYSINV_BINDIR/sysinv-api --config-file=$SYSINV_CONF_FILE"
+
+    # Get right service port for testing
+    local service_port=$SYSINV_SERVICE_PORT
+    local service_protocol=$SYSINV_SERVICE_PROTOCOL
+    if is_service_enabled tls-proxy; then
+        service_port=$SYSINV_SERVICE_PORT
+        service_protocol="http"
+    fi
+
+    echo "Waiting for si-api ($SERVICE_HOST:$service_port) to start..."
+
+    if ! timeout $SERVICE_TIMEOUT sh -c "while ! wget --no-proxy -q -O- $service_protocol://$SERVICE_HOST:$service_port/; do sleep 1; done"; then
+    die $LINENO "si-api did not start"
+    fi
+
+    if is_service_enabled tls-proxy; then
+       start_tls_proxy sysinv '*' $SYSINV_SERVICE_PORT $SERVICE_HOST $SYSINV_SERVICE_PORT
+																													    fi
+
+}
+
+function start_sysinv_conductor{
+	    run_process si-cond "$SYSINV_BIN_DIR/sysinv-conductor --config-file=$SYSINV_CONF_FILE"
+        # TODO: Find a way to check whether the conductor has started.
+}
+
+function start_sysinv{
+    if is_service_enabled si-api; then
+	        start_sysinv_api
+	fi
+    if is_service_enabled si-cond; then
+	        start_sysinv_conductor
+	fi
+}
+
+function stop_sysinv_api{
+	   stop_process si-api
+}
+
+function stop_sysinv_conductor{
+	   stop_process si-cond
+}
+
+function stop_sysinv{
+	stop_sysinv_api
+	stop_sysinv_conductor
+}
+
+
+function cleanup_sysinv{
+	sudo rm -rf $SYSINV_AUTHO_CACHE_DIR $SYSINV_ETC_SYSINV
+}
+
