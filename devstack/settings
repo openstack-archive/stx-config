@@ -1,0 +1,8 @@
+# Devstack settings
+
+# Defaults
+# --------
+
+
+######### Plugin Specific ##########
+enable_service sysinv si-api si-cond
