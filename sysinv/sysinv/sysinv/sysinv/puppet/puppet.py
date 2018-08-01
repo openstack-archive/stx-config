@@ -13,6 +13,9 @@ import os
 import tempfile
 import yaml
 
+from oslo_utils import importutils
+from stevedore import extension
+
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.openstack.common import log as logging
@@ -105,6 +108,15 @@ class PuppetOperator(object):
         self.kubernetes = kubernetes.KubernetesPuppet(self)
         self.service_parameter = service_parameter.ServiceParamPuppet(self)
         self.smapi = smapi.SmPuppet(self)
+        puppet_plugins = extension.ExtensionManager(
+            namespace='sysinv.puppet_plugins',
+            invoke_on_load=True, invoke_args=(self,))
+        self.puppet_plugins = sorted(puppet_plugins, key=lambda x: x.name)
+
+        for plugin in self.puppet_plugins:
+            plugin_name = plugin.name[4:]
+            setattr(self, plugin_name, plugin.obj)
+            LOG.debug("Loaded puppet plugin %s" % plugin.name)
 
     @property
     def context(self):
@@ -146,6 +158,9 @@ class PuppetOperator(object):
             config.update(self.dcmanager.get_static_config())
             config.update(self.dcorch.get_static_config())
             config.update(self.smapi.get_static_config())
+
+            for puppet_plugin in self.puppet_plugins:
+                config.update(puppet_plugin.obj.get_static_config())
 
             filename = 'static.yaml'
             self._write_config(filename, config)
@@ -191,6 +206,9 @@ class PuppetOperator(object):
             config.update(self.dcorch.get_secure_static_config())
             config.update(self.smapi.get_secure_static_config())
 
+            for puppet_plugin in self.puppet_plugins:
+                config.update(puppet_plugin.obj.get_secure_static_config())
+
             filename = 'secure_static.yaml'
             self._write_config(filename, config)
         except Exception:
@@ -232,6 +250,9 @@ class PuppetOperator(object):
             # service_parameter must be last to permit overrides
             config.update(self.service_parameter.get_system_config())
 
+            for puppet_plugin in self.puppet_plugins:
+                config.update(puppet_plugin.obj.get_system_config())
+
             filename = 'system.yaml'
             self._write_config(filename, config)
         except Exception:
@@ -262,27 +283,35 @@ class PuppetOperator(object):
             config.update(self.dcorch.get_secure_system_config())
             config.update(self.kubernetes.get_secure_system_config())
 
+            for puppet_plugin in self.puppet_plugins:
+                config.update(puppet_plugin.obj.get_secure_system_config())
+
             filename = 'secure_system.yaml'
             self._write_config(filename, config)
         except Exception:
             LOG.exception("failed to create secure_system config")
             raise
 
+    @puppet_context
     def update_host_config(self, host, config_uuid=None):
         """Update the host hiera configuration files for the supplied host"""
 
+        config = {}
         if host.personality == constants.CONTROLLER:
-            self.update_controller_config(host, config_uuid)
+            config = self.update_controller_config(host, config_uuid)
         elif host.personality == constants.COMPUTE:
-            self.update_compute_config(host, config_uuid)
+            config = self.update_compute_config(host, config_uuid)
         elif host.personality == constants.STORAGE:
-            self.update_storage_config(host, config_uuid)
+            config = self.update_storage_config(host, config_uuid)
         else:
             raise exception.SysinvException(_(
                 "Invalid method call: unsupported personality: %s") %
-                    host.personality)
+                host.personality)
+        for puppet_plugin in self.puppet_plugins:
+            config.update(puppet_plugin.obj.get_host_config(host))
 
-    @puppet_context
+        self._write_host_config(host, config)
+
     def update_controller_config(self, host, config_uuid=None):
         """Update the configuration for a specific controller host"""
         try:
@@ -304,12 +333,11 @@ class PuppetOperator(object):
             # service_parameter must be last to permit overrides
             config.update(self.service_parameter.get_host_config(host))
 
-            self._write_host_config(host, config)
+            return config
         except Exception:
             LOG.exception("failed to create host config: %s" % host.uuid)
             raise
 
-    @puppet_context
     def update_compute_config(self, host, config_uuid=None):
         """Update the configuration for a specific compute host"""
         try:
@@ -329,12 +357,11 @@ class PuppetOperator(object):
             # service_parameter must be last to permit overrides
             config.update(self.service_parameter.get_host_config(host))
 
-            self._write_host_config(host, config)
+            return config
         except Exception:
             LOG.exception("failed to create host config: %s" % host.uuid)
             raise
 
-    @puppet_context
     def update_storage_config(self, host, config_uuid=None):
         """Update the configuration for a specific storage host"""
         try:
@@ -349,7 +376,7 @@ class PuppetOperator(object):
             # service_parameter must be last to permit overrides
             config.update(self.service_parameter.get_host_config(host))
 
-            self._write_host_config(host, config)
+            return config
         except Exception:
             LOG.exception("failed to create host config: %s" % host.uuid)
             raise
