@@ -58,7 +58,8 @@ class PlatformPuppet(base.BasePuppet):
         config.update(self._get_user_config())
         return config
 
-    def get_host_config(self, host, config_uuid):
+    def get_host_config(self, host):
+        config_uuid = self._operator.config_uuid
         config = {}
         config.update(self._get_host_platform_config(host, config_uuid))
         config.update(self._get_host_ntp_config(host))

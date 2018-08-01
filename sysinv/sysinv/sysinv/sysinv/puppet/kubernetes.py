@@ -65,8 +65,8 @@ class KubernetesPuppet(base.BasePuppet):
 
     def get_host_config(self, host):
         config = {}
-        if self._kubernetes_enabled():
-            if host.personality == constants.COMPUTE:
+        if host.personality == constants.COMPUTE:
+            if self._kubernetes_enabled():
                 create_node = False
                 try:
                     # Check if this host has already been configured as a
