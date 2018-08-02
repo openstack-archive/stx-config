@@ -52,7 +52,9 @@ def upgrade(migrate_engine):
         Column('port_id', Integer, ForeignKey('ports.id',
                                               ondelete='CASCADE')),
 
-        Column('msap', String(511), nullable=False),
+#        Column('msap', String(511), nullable=False),
+#       This is just try 
+        Column('msap', String(255), nullable=False),
 
         UniqueConstraint('msap', 'port_id',
                          name='u_msap_port_id'),

@@ -446,8 +446,8 @@ def upgrade(migrate_engine):
         Column('forihostid', Integer,
                ForeignKey('i_host.id', ondelete='CASCADE')),
 
-        Column('activity', String),  # active/standby
-        Column('state', String),
+        Column('activity', String(255)),  # active/standby
+        Column('state', String(255)),
         Column('reason', Text),  # JSON encodedlist of string
 
         UniqueConstraint('servicename', 'hostname',

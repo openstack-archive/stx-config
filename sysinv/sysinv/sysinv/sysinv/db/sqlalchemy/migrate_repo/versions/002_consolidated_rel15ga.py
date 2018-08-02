@@ -541,7 +541,7 @@ def upgrade(migrate_engine):
         Column('pv_state', pvStateEnum, default="unprovisioned"),
 
         Column('pv_type', pvTypeEnum, default="disk"),
-        Column('idisk_uuid', String()),
+        Column('idisk_uuid', String(64)),
         Column('idisk_device_node', String(64)),
 
         Column('lvm_pv_name', String(64)),
