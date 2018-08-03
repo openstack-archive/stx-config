@@ -1,0 +1,9 @@
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Code-Review+2: Jack Ding <Jack.Ding@windriver.com>
+Workflow+1: Jack Ding <Jack.Ding@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 03 Aug 2018 15:31:48 +0000
+Reviewed-on: https://review.openstack.org/588519
+Project: openstack/stx-config
+Branch: refs/heads/master
