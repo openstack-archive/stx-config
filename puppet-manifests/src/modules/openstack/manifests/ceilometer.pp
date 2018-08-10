@@ -82,6 +82,14 @@ class openstack::ceilometer::agent::notification {
   $ceilometer_directory_csv = "${ceilometer_directory}/csv"
   $ceilometer_directory_versioned = "${ceilometer_directory}/${::platform::params::software_version}"
 
+  file { "/etc/ceilometer/pipeline.yaml":
+    ensure  => 'present',
+    content => template('openstack/pipeline.yaml.erb'),
+    mode    => '0640',
+    owner   => 'root',
+    group   => 'ceilometer',
+    tag     => 'ceilometer-yamls',
+  } ->
   file { "${ceilometer_directory}":
     ensure  => 'directory',
     owner   => 'root',
@@ -101,7 +109,7 @@ class openstack::ceilometer::agent::notification {
     mode    => '0755',
   } ->
   file { "${ceilometer_directory_versioned}/pipeline.yaml":
-    source => '/etc/ceilometer/controller.yaml',
+    source => '/etc/ceilometer/pipeline.yaml',
     ensure  => 'file',
     owner   => 'root',
     group   => 'root',
@@ -131,6 +139,15 @@ class openstack::ceilometer::agent::notification {
 
 class openstack::ceilometer::polling {
   include ::platform::params
+
+  file { "/etc/ceilometer/polling.yaml":
+    ensure  => 'present',
+    content => template('openstack/polling.yaml.erb'),
+    mode    => '0640',
+    owner   => 'root',
+    group   => 'ceilometer',
+    tag     => 'ceilometer-yamls',
+  }
 
   if $::personality == 'controller' {
     $central_namespace = true
