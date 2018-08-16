@@ -54,6 +54,7 @@ from . import device
 from . import service_parameter
 from . import kubernetes
 from . import smapi
+from . import swift
 
 
 LOG = logging.getLogger(__name__)
@@ -107,6 +108,7 @@ class PuppetOperator(object):
         self.device = device.DevicePuppet(self)
         self.ironic = ironic.IronicPuppet(self)
         self.kubernetes = kubernetes.KubernetesPuppet(self)
+        self.swift = swift.SwiftPuppet(self)
         self.service_parameter = service_parameter.ServiceParamPuppet(self)
         self.smapi = smapi.SmPuppet(self)
         self.fm = fm.FmPuppet(self)
@@ -209,6 +211,7 @@ class PuppetOperator(object):
             config.update(self.dcorch.get_secure_static_config())
             config.update(self.smapi.get_secure_static_config())
             config.update(self.fm.get_secure_static_config())
+            config.update(self.swift.get_secure_static_config())
 
             for puppet_plugin in self.puppet_plugins:
                 config.update(puppet_plugin.obj.get_secure_static_config())
@@ -252,6 +255,7 @@ class PuppetOperator(object):
             config.update(self.kubernetes.get_system_config())
             config.update(self.smapi.get_system_config())
             config.update(self.fm.get_system_config())
+            config.update(self.swift.get_system_config())
             # service_parameter must be last to permit overrides
             config.update(self.service_parameter.get_system_config())
 
