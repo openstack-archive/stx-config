@@ -1,0 +1,12 @@
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Code-Review+1: Ovidiu Poncea <ovidiu.poncea@windriver.com>
+Code-Review+1: Bob Church <robert.church@windriver.com>
+Code-Review+1: Stefan Dinescu <stefan.dinescu@windriver.com>
+Code-Review+2: John Kung <john.kung@windriver.com>
+Workflow+1: John Kung <john.kung@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 16 Aug 2018 19:45:07 +0000
+Reviewed-on: https://review.openstack.org/590824
+Project: openstack/stx-config
+Branch: refs/heads/master
