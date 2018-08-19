@@ -1,0 +1,9 @@
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Code-Review+2: Erich Cordoba <erich.cordoba.malibran@intel.com>
+Workflow+1: Erich Cordoba <erich.cordoba.malibran@intel.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Sun, 19 Aug 2018 15:38:12 +0000
+Reviewed-on: https://review.openstack.org/593177
+Project: openstack/stx-config
+Branch: refs/heads/master
