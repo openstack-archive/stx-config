@@ -1873,3 +1873,26 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         for col, coltype in ntps_col.items():
             self.assertTrue(isinstance(ntps.c[col].type,
                             getattr(sqlalchemy.types, coltype)))
+
+    def _check_075(self, engine, data):
+        # Assert data types for all columns in new table "ptp"
+        ptp = db_utils.get_table(engine, 'ptp')
+        ptp_cols = {
+            'created_at': 'DateTime',
+            'updated_at': 'DateTime',
+            'deleted_at': 'DateTime',
+            'id': 'Integer',
+            'uuid': 'String',
+            'enabled': 'Boolean',
+            # 'mode': # enum types cannot be checked, can only check if they exist or not
+            # 'transport': # enum types cannot be checked, can only check if they exist or not
+            # 'mechanism': # enum types cannot be checked, can only check if they exist or not
+            'system_id': 'Integer',
+        }
+        for col, coltype in ptp_cols.items():
+            self.assertTrue(isinstance(ptp.c[col].type,
+                                       getattr(sqlalchemy.types, coltype)))
+        # Assert that the enum columns "transport" and "mechanism" exist
+        self.assertColumnExists(engine, 'ptp', 'mode')
+        self.assertColumnExists(engine, 'ptp', 'transport')
+        self.assertColumnExists(engine, 'ptp', 'mechanism')

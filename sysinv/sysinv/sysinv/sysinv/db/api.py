@@ -1947,6 +1947,102 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def ptp_create(self, values):
+        """Create a new ptp for an isystem.
+
+        :param forisystemid: ptp belongs to this isystem
+        :param values: A dict containing several items used to identify
+                       and track the ptp settings.
+                        {
+                         'enabled': 'True',
+                         'mode': 'hardware',
+                         'transport': 'l2',
+                         'mechanism': 'e2e',
+                        }
+        :returns: An ptp.
+        """
+
+    @abc.abstractmethod
+    def ptp_get(self, server):
+        """Return an ptp.
+
+        :param isystem: The id or uuid of an ptp.
+        :returns: A ptp.
+        """
+
+    @abc.abstractmethod
+    def ptp_get_one(self):
+        """Return exactly one ptp.
+
+        :returns: A ptp.
+        """
+
+    @abc.abstractmethod
+    def ptp_get_list(self, limit=None, marker=None,
+                      sort_key=None, sort_dir=None):
+        """Return a list of ptp.
+
+        :param limit: Maximum number of ptp to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        """
+
+    @abc.abstractmethod
+    def ptp_get_by_isystem(self, isystem_id, limit=None, marker=None,
+                            sort_key=None, sort_dir=None):
+        """List all the ptp for a given isystem.
+
+        :param isystem: The id or uuid of an isystem.
+        :param limit: Maximum number of ptp to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted
+        :param sort_dir: direction in which results should be sorted
+                         (asc, desc)
+        :returns: A list of ptp.
+        """
+
+    @abc.abstractmethod
+    def ptp_update(self, server, values):
+        """Update properties of an ptp.
+
+        :param ptp_id: The id or uuid of an ptp.
+        :param values: Dict of values to update.
+                       May be a partial list, eg. when setting the
+                       properties for capabilities. For example:
+
+                       {
+                        'capabilities':
+                            {
+                             'my-field-1': val1,
+                             'my-field-2': val2,
+                            }
+                       }
+        :returns: An intp.
+        """
+
+    @abc.abstractmethod
+    def ptp_destroy(self, server):
+        """Destroy an ptp.
+
+        :param id: The id or uuid of an ptp.
+        """
+
+    @abc.abstractmethod
+    def ptp_fill_empty_system_id(self, system_id):
+        """fills all empty system_id in a ptp.
+         ptp did not always fill this entry in properly
+         so existing systems might still have no value in the
+         system_id field. This function fills in the system_id
+         in existing systems that were missing this value.
+
+        :param system_id: The value to fill system_id with
+        """
+
+    @abc.abstractmethod
     def iextoam_get_one(self):
         """Return exactly one iextoam.
 

@@ -3595,6 +3595,92 @@ class Connection(api.Connection):
 
             query.delete()
 
+    def _ptp_get(self, server):
+        query = model_query(models.ptp)
+        query = add_identity_filter(query, server)
+
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.PTPNotFound(server=server)
+
+    @objects.objectify(objects.ptp)
+    def ptp_create(self, values):
+        if not values.get('uuid'):
+            values['uuid'] = uuidutils.generate_uuid()
+        ptp = models.ptp()
+        ptp.update(values)
+        with _session_for_write() as session:
+            try:
+                session.add(ptp)
+                session.flush()
+            except db_exc.DBDuplicateEntry:
+                raise exception.PTPAlreadyExists(uuid=values['uuid'])
+            return self._ptp_get(values['uuid'])
+
+    @objects.objectify(objects.ptp)
+    def ptp_get(self, server):
+        return self._ptp_get(server)
+
+    @objects.objectify(objects.ptp)
+    def ptp_get_one(self):
+        query = model_query(models.ptp)
+
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.NotFound()
+
+    @objects.objectify(objects.ptp)
+    def ptp_get_list(self, limit=None, marker=None,
+                     sort_key=None, sort_dir=None):
+
+        query = model_query(models.ptp)
+
+        return _paginate_query(models.ptp, limit, marker,
+                               sort_key, sort_dir, query)
+
+    @objects.objectify(objects.ptp)
+    def ptp_get_by_isystem(self, isystem_id, limit=None, marker=None,
+                           sort_key=None, sort_dir=None):
+        # isystem_get() to raise an exception if the isystem is not found
+        isystem_obj = self.isystem_get(isystem_id)
+        query = model_query(models.ptp)
+        query = query.filter_by(system_id=isystem_obj.id)
+        return _paginate_query(models.ptp, limit, marker,
+                               sort_key, sort_dir, query)
+
+    @objects.objectify(objects.ptp)
+    def ptp_update(self, server, values):
+        with _session_for_write() as session:
+            query = model_query(models.ptp, session=session)
+            query = add_identity_filter(query, server)
+
+            count = query.update(values, synchronize_session='fetch')
+            if count != 1:
+                raise exception.PTPNotFound(server=server)
+            return query.one()
+
+    def ptp_destroy(self, server):
+        with _session_for_write() as session:
+            query = model_query(models.ptp, session=session)
+            query = add_identity_filter(query, server)
+
+            try:
+                query.one()
+            except NoResultFound:
+                raise exception.PTPNotFound(server=server)
+
+            query.delete()
+
+    def ptp_fill_empty_system_id(self, system_id):
+        values = {'system_id': system_id}
+        with _session_for_write() as session:
+            query = model_query(models.ptp,
+                                session=session)
+            query = query.filter_by(system_id=None)
+            query.update(values, synchronize_session='fetch')
+
     # NOTE: method is deprecated and provided for API compatibility.
     # object class will convert Network entity to an iextoam object
     @objects.objectify(objects.oam_network)

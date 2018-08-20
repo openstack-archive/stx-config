@@ -809,6 +809,27 @@ class intp(Base):
     system = relationship("isystem", lazy="joined", join_depth=1)
 
 
+class ptp(Base):
+    ptpModeEnum = Enum('hardware', 'software', 'legacy', name='ptpModeEnum')
+    ptpTransportEnum = Enum('l2', 'udp', name='ptpTransportEnum')
+    ptpMechanismEnum = Enum('e2e', 'p2p', name='ptpMechanismEnum')
+
+    __tablename__ = 'ptp'
+
+    id = Column(Integer, primary_key=True)
+    uuid = Column(String(36))
+
+    enabled = Column(Boolean, default=False)
+    mode = Column(ptpModeEnum, default='hardware')
+    transport = Column(ptpTransportEnum, default='l2')
+    mechanism = Column(ptpMechanismEnum, default='e2e')
+
+    system_id = Column(Integer,
+                      ForeignKey('i_system.id', ondelete='CASCADE'))
+
+    system = relationship("isystem", lazy="joined", join_depth=1)
+
+
 class StorageTier(Base):
     __tablename__ = 'storage_tiers'
 
