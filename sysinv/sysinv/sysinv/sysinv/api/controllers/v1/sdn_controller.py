@@ -161,8 +161,8 @@ class SDNControllerController(rest.RestController):
         self._parent = parent
 
     def _get_sdn_controller_collection(self, uuid, marker, limit, sort_key,
-                                        sort_dir, expand=False,
-                                        resource_url=None):
+                                       sort_dir, expand=False,
+                                       resource_url=None):
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -194,12 +194,12 @@ class SDNControllerController(rest.RestController):
         # first. If the provided SDN controller ip_address is a
         # hostname or FQDN then we will resolve its IP address as well
         oam_family, NULL = _getIPAddressFromHostname(
-                                constants.OAMCONTROLLER_HOSTNAME)
+            constants.OAMCONTROLLER_HOSTNAME)
         sdn_family, NULL = _getIPAddressFromHostname(ip_address)
 
         if oam_family != sdn_family:
             raise wsme.exc.ClientSideError(
-                    exception.SDNControllerMismatchedAF.message)
+                exception.SDNControllerMismatchedAF.message)
 
     def _clear_existing_sdn_controller_alarms(self, uuid):
         # Clear any existing OVSDB manager alarm, corresponding
@@ -215,8 +215,8 @@ class SDNControllerController(rest.RestController):
             for alarm in alarms:
                 if key in alarm.entity_instance_id:
                     obj.clear_fault(
-                            fm_constants.FM_ALARM_ID_NETWORK_OVSDB_MANAGER,
-                            alarm.entity_instance_id)
+                        fm_constants.FM_ALARM_ID_NETWORK_OVSDB_MANAGER,
+                        alarm.entity_instance_id)
 
         # Clear any existing Openflow Controller alarm, corresponding
         # to this SDN controller. We need need to clear this alarm
@@ -233,9 +233,9 @@ class SDNControllerController(rest.RestController):
             for alarm in alarms:
                 if key in alarm.entity_instance_id:
                     obj.clear_fault(
-                            fm_constants.
-                            FM_ALARM_ID_NETWORK_OPENFLOW_CONTROLLER,
-                            alarm.entity_instance_id)
+                        fm_constants.
+                        FM_ALARM_ID_NETWORK_OPENFLOW_CONTROLLER,
+                        alarm.entity_instance_id)
 
     # this decorator will declare the function signature of this get call
     # and take care of calling the adequate decorators of the Pecan framework
@@ -246,7 +246,7 @@ class SDNControllerController(rest.RestController):
         """Retrieve a list of SDN controllers."""
 
         return self._get_sdn_controller_collection(uuid, marker, limit,
-                                                    sort_key, sort_dir)
+                                                   sort_key, sort_dir)
 
     # call the SDNController class decorator and not the Collection class
     @wsme_pecan.wsexpose(SDNController, types.uuid)
@@ -266,7 +266,7 @@ class SDNControllerController(rest.RestController):
             # Ensure that SDN is enabled before proceeding
             if not utils.get_sdn_enabled():
                 raise wsme.exc.ClientSideError(
-                        exception.SDNNotEnabled.message)
+                    exception.SDNNotEnabled.message)
 
             # Ensure that compulsory parameters are there
             # This is merely sanity since the args parse layer
@@ -276,12 +276,12 @@ class SDNControllerController(rest.RestController):
             transport = sdn_controller.transport
             if not (len(ip_address) and port and len(transport)):
                 raise wsme.exc.ClientSideError(
-                        exception.SDNControllerRequiredParamsMissing.message)
+                    exception.SDNControllerRequiredParamsMissing.message)
 
             self._verify_sdn_controller_af(ip_address)
 
             new_controller = pecan.request.dbapi.sdn_controller_create(
-                                                sdn_controller.as_dict())
+                sdn_controller.as_dict())
         except exception.SysinvException as e:
             LOG.exception(e)
             raise wsme.exc.ClientSideError(_("Invalid data"))
@@ -318,7 +318,7 @@ class SDNControllerController(rest.RestController):
 
         # update DB record
         updated_sdn_controller = pecan.request.dbapi.sdn_controller_update(
-                uuid, updates)
+            uuid, updates)
         # apply SDN manifest to target personalities
         pecan.request.rpcapi.update_sdn_controller_config(pecan.request.context)
 

@@ -15,12 +15,8 @@
 
 # TODO(deva): move eventlet imports to sysinv.__init__ once we move to PBR
 import os
-
-os.environ['EVENTLET_NO_GREENDNS'] = 'yes'
-
 import eventlet
-
-eventlet.monkey_patch(os=False)
-
 from sysinv.openstack.common import gettextutils
+eventlet.monkey_patch(os=False)
+os.environ['EVENTLET_NO_GREENDNS'] = 'yes'
 gettextutils.install('sysinv')

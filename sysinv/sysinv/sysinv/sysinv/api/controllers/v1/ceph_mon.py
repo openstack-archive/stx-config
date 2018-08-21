@@ -222,7 +222,7 @@ class CephMonController(rest.RestController):
 
         if self._from_ihosts and not ihost_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -419,10 +419,10 @@ def _create(ceph_mon):
         # Check if mon exists
         ceph_mons = pecan.request.dbapi.ceph_mon_get_by_ihost(chost.uuid)
         if ceph_mons:
-                pecan.request.dbapi.ceph_mon_update(
-                    ceph_mons[0].uuid, {'ceph_mon_gib': ceph_mon['ceph_mon_gib']}
-                )
-                new_ceph_mons.append(ceph_mons[0])
+            pecan.request.dbapi.ceph_mon_update(
+                ceph_mons[0].uuid, {'ceph_mon_gib': ceph_mon['ceph_mon_gib']}
+            )
+            new_ceph_mons.append(ceph_mons[0])
         else:
             ceph_mon_new = dict()
             ceph_mon_new['uuid'] = None

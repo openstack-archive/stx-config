@@ -78,14 +78,14 @@ MANAGER_TOPIC = 'sysinv.agent_manager'
 LOG = log.getLogger(__name__)
 
 agent_opts = [
-       cfg.StrOpt('api_url',
-                  default=None,
-                  help=('Url of SysInv API service. If not set SysInv can '
-                        'get current value from Keystone service catalog.')),
-       cfg.IntOpt('audit_interval',
-                  default=60,
-                  help='Maximum time since the last check-in of a agent'),
-              ]
+    cfg.StrOpt('api_url',
+               default=None,
+               help=('Url of SysInv API service. If not set SysInv can '
+                     'get current value from Keystone service catalog.')),
+    cfg.IntOpt('audit_interval',
+               default=60,
+               help='Maximum time since the last check-in of a agent'),
+]
 
 CONF = cfg.CONF
 CONF.register_opts(agent_opts, 'agent')
@@ -210,9 +210,9 @@ class AgentManager(service.PeriodicService):
                           info['networktype'], info['numa_node']))
 
             LOG.info("Affine %s interface %s with cpulist %s" %
-                    (info['networktype'], info['name'], cpulist))
+                     (info['networktype'], info['name'], cpulist))
             cmd = '/usr/bin/affine-interrupts.sh %s %s' % \
-                    (info['name'], cpulist)
+                (info['name'], cpulist)
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             proc.communicate()
             LOG.info("%s return %d" % (cmd, proc.returncode))
@@ -224,7 +224,7 @@ class AgentManager(service.PeriodicService):
         # Retrieve the serial line carrier detect flag
         ttys_dcd = None
         rpcapi = conductor_rpcapi.ConductorAPI(
-                           topic=conductor_rpcapi.MANAGER_TOPIC)
+            topic=conductor_rpcapi.MANAGER_TOPIC)
         try:
             ttys_dcd = rpcapi.get_host_ttys_dcd(context, host_id)
         except exception.SysinvException:
@@ -442,6 +442,7 @@ class AgentManager(service.PeriodicService):
         """ Synchronization decorator to acquire and release
             network_config_lock.
         """
+
         def wrap(self, *args, **kwargs):
             try:
                 # Get lock to avoid conflict with apply_network_config.sh
@@ -560,7 +561,7 @@ class AgentManager(service.PeriodicService):
         """
 
         rpcapi = conductor_rpcapi.ConductorAPI(
-                           topic=conductor_rpcapi.MANAGER_TOPIC)
+            topic=conductor_rpcapi.MANAGER_TOPIC)
 
         ihost = None
 
@@ -616,7 +617,7 @@ class AgentManager(service.PeriodicService):
                 if hostname != constants.LOCALHOST_HOSTNAME:
                     try:
                         ihost = rpcapi.get_ihost_by_hostname(icontext,
-                                           hostname)
+                                                             hostname)
                     except Timeout:
                         LOG.info("get_ihost_by_hostname rpc Timeout.")
                         return  # wait for next audit cycle
@@ -997,9 +998,9 @@ class AgentManager(service.PeriodicService):
                     volume.vg_state == constants.LVG_ADD):
 
                 LOG.info("_wait_for_nova_lvg: Must wait before reporting node "
-                            "availability. Conductor sees unprovisioned "
-                            "nova-local state. Would result in an invalid host "
-                            "aggregate assignment.")
+                         "availability. Conductor sees unprovisioned "
+                         "nova-local state. Would result in an invalid host "
+                         "aggregate assignment.")
                 rc = True
 
         return rc
@@ -1040,7 +1041,7 @@ class AgentManager(service.PeriodicService):
 
         icontext = mycontext.get_admin_context()
         rpcapi = conductor_rpcapi.ConductorAPI(
-                               topic=conductor_rpcapi.MANAGER_TOPIC)
+            topic=conductor_rpcapi.MANAGER_TOPIC)
 
         if self._ihost_uuid:
             if os.path.isfile(tsc.INITIAL_CONFIG_COMPLETE_FLAG):
@@ -1111,7 +1112,7 @@ class AgentManager(service.PeriodicService):
                 self._iconfig_read_config_reported = config_uuid
 
             if (self._ihost_personality == constants.CONTROLLER and
-                     not self._notify_subfunctions_alarm_clear):
+                    not self._notify_subfunctions_alarm_clear):
 
                 subfunctions_list = self.subfunctions_list_get()
                 if ((constants.CONTROLLER in subfunctions_list) and
@@ -1121,15 +1122,15 @@ class AgentManager(service.PeriodicService):
 
                         ihost_notify_dict = {'subfunctions_configured': True}
                         rpcapi.notify_subfunctions_config(icontext,
-                                                        self._ihost_uuid,
-                                                        ihost_notify_dict)
+                                                          self._ihost_uuid,
+                                                          ihost_notify_dict)
                         self._notify_subfunctions_alarm_clear = True
                     else:
                         if not self._notify_subfunctions_alarm_raise:
                             ihost_notify_dict = {'subfunctions_configured': False}
                             rpcapi.notify_subfunctions_config(icontext,
-                                                                self._ihost_uuid,
-                                                                ihost_notify_dict)
+                                                              self._ihost_uuid,
+                                                              ihost_notify_dict)
                             self._notify_subfunctions_alarm_raise = True
                 else:
                     self._notify_subfunctions_alarm_clear = True
@@ -1265,7 +1266,7 @@ class AgentManager(service.PeriodicService):
 
         do_compute = constants.COMPUTE in self.subfunctions_list_get()
         rpcapi = conductor_rpcapi.ConductorAPI(
-                               topic=conductor_rpcapi.MANAGER_TOPIC)
+            topic=conductor_rpcapi.MANAGER_TOPIC)
         # Update the lldp agent
         self._lldp_operator.lldp_update_systemname(context, systemname,
                                                    do_compute)
@@ -1351,7 +1352,7 @@ class AgentManager(service.PeriodicService):
                 os.umask(0)
                 if f_content is not None:
                     with os.fdopen(os.open(file_name, os.O_CREAT | os.O_WRONLY,
-                               permissions), 'wb') as f:
+                                           permissions), 'wb') as f:
                         f.write(f_content)
 
             self._update_config_applied(iconfig_uuid)
@@ -1409,8 +1410,8 @@ class AgentManager(service.PeriodicService):
 
             if not self._mgmt_ip:
                 LOG.warn("config_apply_runtime_manifest: "
-                          " timed out waiting for local management ip"
-                          " %s %s %s" %
+                         " timed out waiting for local management ip"
+                         " %s %s %s" %
                          (config_uuid, config_dict, self._ihost_personality))
                 return
 
@@ -1553,7 +1554,6 @@ class AgentManager(service.PeriodicService):
         :returns: none
         """
         try:
-            from controllerconfig import backup_restore
             from controllerconfig.upgrades import \
                 management as upgrades_management
         except ImportError:
@@ -1584,7 +1584,7 @@ class AgentManager(service.PeriodicService):
     def _audit_tpm_device(self, context, host_id):
         """ Audit the tpmdevice status on this host and update. """
         rpcapi = conductor_rpcapi.ConductorAPI(
-                           topic=conductor_rpcapi.MANAGER_TOPIC)
+            topic=conductor_rpcapi.MANAGER_TOPIC)
         tpmconfig = None
         tpmdevice = None
         response_dict = {'is_configured': False}  # guilty until proven innocent
@@ -1657,7 +1657,7 @@ class AgentManager(service.PeriodicService):
             response_dict = {}
             attribute_dict = {}
             rpcapi = conductor_rpcapi.ConductorAPI(
-                            topic=conductor_rpcapi.MANAGER_TOPIC)
+                topic=conductor_rpcapi.MANAGER_TOPIC)
 
             # invoke tpmdevice-setup on this node.
             #
@@ -1671,9 +1671,9 @@ class AgentManager(service.PeriodicService):
                               run_as_root=True)
 
                 attribute_dict['tpm_data'] = \
-                        utils.read_filtered_directory_content(
-                                os.path.dirname(tpm_context['tpm_path']),
-                                "*.bin", "*.tpm")
+                    utils.read_filtered_directory_content(
+                    os.path.dirname(tpm_context['tpm_path']),
+                    "*.bin", "*.tpm")
             except exception.ProcessExecutionError as e:
                 LOG.exception(e)
                 response_dict['is_configured'] = False

@@ -348,9 +348,9 @@ class iinterface(Base):
 
 
 interfaces_to_interfaces = Table("interfaces_to_interfaces", Base.metadata,
-    Column("used_by_id", Integer, ForeignKey("interfaces.id", ondelete='CASCADE'), primary_key=True),
-    Column("uses_id", Integer, ForeignKey("interfaces.id", ondelete='CASCADE'), primary_key=True)
-)
+                                 Column("used_by_id", Integer, ForeignKey("interfaces.id", ondelete='CASCADE'), primary_key=True),
+                                 Column("uses_id", Integer, ForeignKey("interfaces.id", ondelete='CASCADE'), primary_key=True)
+                                 )
 
 
 class Interfaces(Base):
@@ -613,7 +613,7 @@ class ipv(Base):
                                             ondelete='CASCADE'))
 
     forilvgid = Column(Integer, ForeignKey('i_lvg.id',
-                                            ondelete='CASCADE'))
+                                           ondelete='CASCADE'))
 
     host = relationship("ihost", backref="pvs", lazy="joined", join_depth=1)
     lvg = relationship("ilvg", backref="pv", lazy="joined", join_depth=1)
@@ -873,9 +873,9 @@ class StorageCeph(StorageBackend):
                      ForeignKey('storage_tiers.id'))
 
     tier = relationship("StorageTier", lazy="joined", uselist=False,
-                         backref=backref("stor_backend", lazy="joined"),
-                         foreign_keys="[StorageTier.forbackendid]",
-                         cascade="all")
+                        backref=backref("stor_backend", lazy="joined"),
+                        foreign_keys="[StorageTier.forbackendid]",
+                        cascade="all")
 
     __mapper_args__ = {
         'polymorphic_identity': 'ceph',
@@ -1433,8 +1433,8 @@ class Clusters(Base):
     system = relationship("isystem", lazy="joined", join_depth=1)
 
     peers = relationship("Peers", lazy="joined",
-                          backref=backref("cluster", lazy="joined"),
-                          cascade="all, delete-orphan")
+                         backref=backref("cluster", lazy="joined"),
+                         cascade="all, delete-orphan")
 
     tiers = relationship("StorageTier", lazy="joined",
                          backref=backref("cluster", lazy="joined"),
@@ -1453,8 +1453,8 @@ class Peers(Base):
     capabilities = Column(JSONEncodedDict)
 
     hosts = relationship("ihost", lazy="joined",
-                          backref="peer",
-                          cascade="all, delete-orphan")
+                         backref="peer",
+                         cascade="all, delete-orphan")
 
     cluster_id = Column(Integer,
                         ForeignKey('clusters.id',
@@ -1507,7 +1507,7 @@ class LldpTlvs(Base):
 
     id = Column('id', Integer, primary_key=True, nullable=False)
     agent_id = Column('agent_id', Integer, ForeignKey('lldp_agents.id',
-                      ondelete='CASCADE'), nullable=True)
+                                                      ondelete='CASCADE'), nullable=True)
     neighbour_id = Column('neighbour_id', Integer,
                           ForeignKey('lldp_neighbours.id', ondelete='CASCADE'),
                           nullable=True)

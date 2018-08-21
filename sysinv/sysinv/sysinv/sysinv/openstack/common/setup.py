@@ -78,12 +78,12 @@ def parse_requirements(requirements_files=['requirements.txt',
         # -e git://github.com/openstack/nova/master#egg=nova
         if re.match(r'\s*-e\s+', line):
             requirements.append(re.sub(r'\s*-e\s+.*#egg=(.*)$', r'\1',
-                                line))
+                                       line))
         # such as:
         # http://github.com/openstack/nova/zipball/master#egg=nova
         elif re.match(r'\s*https?:', line):
             requirements.append(re.sub(r'\s*https?:.*#egg=(.*)$', r'\1',
-                                line))
+                                       line))
         # -f lines are for index locations, and don't get used here
         elif re.match(r'\s*-f\s+', line):
             pass

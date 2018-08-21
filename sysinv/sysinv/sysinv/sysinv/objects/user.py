@@ -18,17 +18,17 @@ class User(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
-            'root_sig': utils.str_or_none,
-            'passwd_hash': utils.str_or_none,
-            'passwd_expiry_days': utils.int_or_none,
-            'reserved_1': utils.str_or_none,
-            'reserved_2': utils.str_or_none,
-            'reserved_3': utils.str_or_none,
-            'forisystemid': utils.int_or_none,
-            'isystem_uuid': utils.str_or_none,
-             }
+        'id': int,
+        'uuid': utils.str_or_none,
+        'root_sig': utils.str_or_none,
+        'passwd_hash': utils.str_or_none,
+        'passwd_expiry_days': utils.int_or_none,
+        'reserved_1': utils.str_or_none,
+        'reserved_2': utils.str_or_none,
+        'reserved_3': utils.str_or_none,
+        'forisystemid': utils.int_or_none,
+        'isystem_uuid': utils.str_or_none,
+    }
 
     _foreign_fields = {
         'isystem_uuid': 'system:uuid'

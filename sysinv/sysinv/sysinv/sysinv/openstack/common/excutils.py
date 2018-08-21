@@ -48,4 +48,4 @@ def save_and_reraise_exception():
         logging.error(_('Original exception being dropped: %s'),
                       traceback.format_exception(type_, value, tb))
         raise
-    raise type_, value, tb
+    raise [type_, value, tb]

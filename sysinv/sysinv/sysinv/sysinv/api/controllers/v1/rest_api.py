@@ -108,7 +108,7 @@ def rest_api_request(token, method, api_cmd, api_cmd_headers=None,
     #     signal.alarm(timeout)
 
     LOG.info("%s cmd:%s hdr:%s payload:%s" % (method,
-             api_cmd, api_cmd_headers, api_cmd_payload))
+                                              api_cmd, api_cmd_headers, api_cmd_payload))
 
     response = None
     try:

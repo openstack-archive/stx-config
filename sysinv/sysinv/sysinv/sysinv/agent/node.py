@@ -184,9 +184,9 @@ class NodeOperator(object):
                     if socket_id not in sockets:
                         sockets.append(socket_id)
                         attrs = {
-                                'numa_node': socket_id,
-                                'capabilities': {},
-                                 }
+                            'numa_node': socket_id,
+                            'capabilities': {},
+                        }
                         inumas.append(attrs)
                     continue
 
@@ -230,22 +230,22 @@ class NodeOperator(object):
                 if socket_id not in sockets:
                     sockets.append(socket_id)
                     attrs = {
-                             'numa_node': socket_id,
-                             'capabilities': {},
-                            }
+                        'numa_node': socket_id,
+                        'capabilities': {},
+                    }
                     inumas.append(attrs)
                 for core_id in range(n_cores):
                     self.topology[socket_id][core_id] = {}
                     for thread_id in range(n_threads):
                         self.topology[socket_id][core_id][thread_id] = 0
                         attrs = {
-                                 'cpu': cpu,
-                                 'numa_node': socket_id,
-                                 'core': core_id,
-                                 'thread': thread_id,
-                                 'capabilities': {},
+                            'cpu': cpu,
+                            'numa_node': socket_id,
+                            'core': core_id,
+                            'thread': thread_id,
+                            'capabilities': {},
 
-                                }
+                        }
                         icpus.append(attrs)
 
             # Define Thread-Socket-Core order for logical cpu enumeration
@@ -256,19 +256,19 @@ class NodeOperator(object):
                         if socket_id not in sockets:
                             sockets.append(socket_id)
                             attrs = {
-                                    'numa_node': socket_id,
-                                    'capabilities': {},
-                                     }
+                                'numa_node': socket_id,
+                                'capabilities': {},
+                            }
                             inumas.append(attrs)
                         self.topology[socket_id][core_id][thread_id] = cpu
                         attrs = {
-                                 'cpu': cpu,
-                                 'numa_node': socket_id,
-                                 'core': core_id,
-                                 'thread': thread_id,
-                                 'capabilities': {},
+                            'cpu': cpu,
+                            'numa_node': socket_id,
+                            'core': core_id,
+                            'thread': thread_id,
+                            'capabilities': {},
 
-                                }
+                        }
                         icpus.append(attrs)
                         cpu += 1
             self.num_nodes = len(self.topology.keys())
@@ -375,14 +375,14 @@ class NodeOperator(object):
                     if hugepages_role == "vswitch":
                         vswitch_hugepages_nr = VSWITCH_REAL_MEMORY_MB / size
                         hp_attr = {
-                               'vswitch_hugepages_size_mib': size,
-                               'vswitch_hugepages_nr': vswitch_hugepages_nr,
-                               'vswitch_hugepages_avail': 0,
-                               'vm_hugepages_nr_1G':
-                               (nr_hugepages - vswitch_hugepages_nr),
-                               'vm_hugepages_avail_1G': free_hugepages,
-                               'vm_hugepages_use_1G': 'True'
-                                  }
+                            'vswitch_hugepages_size_mib': size,
+                            'vswitch_hugepages_nr': vswitch_hugepages_nr,
+                            'vswitch_hugepages_avail': 0,
+                            'vm_hugepages_nr_1G':
+                            (nr_hugepages - vswitch_hugepages_nr),
+                            'vm_hugepages_avail_1G': free_hugepages,
+                            'vm_hugepages_use_1G': 'True'
+                        }
                     else:
                         if len(subdirs) == 1:
                             hp_attr = self._set_default_vswitch_hugesize()
@@ -393,7 +393,7 @@ class NodeOperator(object):
                             'vm_hugepages_avail_2M': free_hugepages,
                             'vm_hugepages_nr_2M':
                                 (nr_hugepages - vswitch_hugepages_nr)
-                             })
+                        })
 
                     attr.update(hp_attr)
 
@@ -528,7 +528,7 @@ class NodeOperator(object):
                 'memavail_mib': Free_HP_MiB,
                 'hugepages_configured': 'True',
                 'node_memtotal_mib': node_total_kib / 1024,
-                   })
+            })
 
             imemory.append(attr)
 
@@ -583,11 +583,11 @@ class NodeOperator(object):
             Free_MiB /= 1024
             self.total_memory_nodes_MiB.append(Total_MiB)
             attr = {
-                    'numa_node': node,
-                    'memtotal_mib': Total_MiB,
-                    'memavail_mib': Free_MiB,
-                    'hugepages_configured': 'False',
-                   }
+                'numa_node': node,
+                'memtotal_mib': Total_MiB,
+                'memavail_mib': Free_MiB,
+                'hugepages_configured': 'False',
+            }
 
             imemory.append(attr)
 

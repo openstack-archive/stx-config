@@ -50,6 +50,7 @@ class Ipci:
 
 class IpciOperator(object):
     '''Class to encapsulate PCI operations for System Inventory'''
+
     def pci_inics_get(self):
 
         p = subprocess.Popen(["lspci", "-Dm"], stdout=subprocess.PIPE)
@@ -61,8 +62,8 @@ class IpciOperator(object):
 
                 if inic[iclass].startswith('Ethernet controller'):
                     pci_inics.append(Ipci(inic[pciaddr], inic[iclass],
-                        inic[vendor], inic[device], inic[revision],
-                        inic[svendor], inic[sdevice]))
+                                          inic[vendor], inic[device], inic[revision],
+                                          inic[svendor], inic[sdevice]))
 
         p.wait()
 
@@ -89,9 +90,9 @@ pci_inics = my_pci_inics.pci_inics_get()
 
 # post these to database by host, pciaddr
 for i in pci_inics:
-        print ("JKUNG pciaddr=%s, iclass=%s, vendor=%s, device=%s, rev=%s, svendor=%s, sdevice=%s" % (i.pciaddr, i.iclass, i.vendor, i.device, i.revision, i.svendor, i.sdevice))
+    print("JKUNG pciaddr=%s, iclass=%s, vendor=%s, device=%s, rev=%s, svendor=%s, sdevice=%s" % (i.pciaddr, i.iclass, i.vendor, i.device, i.revision, i.svendor, i.sdevice))
 
-        # try:
-        # rpc.db_post_by_host_and_mac()
-        # except:
-        #   try patch if that doesnt work, then continue
+    # try:
+    # rpc.db_post_by_host_and_mac()
+    # except:
+    #   try patch if that doesnt work, then continue

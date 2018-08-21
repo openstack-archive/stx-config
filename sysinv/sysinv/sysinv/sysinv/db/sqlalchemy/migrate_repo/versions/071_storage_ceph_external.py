@@ -23,9 +23,6 @@ def upgrade(migrate_engine):
 
     meta = MetaData()
     meta.bind = migrate_engine
-
-    storage_backend = Table('storage_backend', meta, autoload=True)
-
     # Define and create the storage_external table.
     storage_external = Table(
         'storage_ceph_external',

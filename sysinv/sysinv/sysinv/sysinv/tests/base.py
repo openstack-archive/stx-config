@@ -159,7 +159,7 @@ class TestCase(testtools.TestCase):
         # registry
         objects_base.SysinvObject.indirection_api = None
         self._base_test_obj_backup = copy.copy(
-                objects_base.SysinvObject._obj_classes)
+            objects_base.SysinvObject._obj_classes)
         self.addCleanup(self._restore_obj_registry)
 
         mox_fixture = self.useFixture(moxstubout.MoxStubout())

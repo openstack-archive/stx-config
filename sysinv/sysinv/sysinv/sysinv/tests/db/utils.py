@@ -28,49 +28,49 @@ from sysinv.db import api as db_api
 fake_info = {"foo": "bar"}
 
 ipmi_info = json.dumps(
-            {
-                'ipmi': {
-                    "address": "1.2.3.4",
-                    "username": "admin",
-                    "password": "fake",
-                }
-            })
+    {
+        'ipmi': {
+            "address": "1.2.3.4",
+            "username": "admin",
+            "password": "fake",
+        }
+    })
 
 ssh_info = json.dumps(
-        {
-            'ssh': {
-                "address": "1.2.3.4",
-                "username": "admin",
-                "password": "fake",
-                "port": 22,
-                "virt_type": "vbox",
-                "key_filename": "/not/real/file",
-            }
-        })
+    {
+        'ssh': {
+            "address": "1.2.3.4",
+            "username": "admin",
+            "password": "fake",
+            "port": 22,
+            "virt_type": "vbox",
+            "key_filename": "/not/real/file",
+        }
+    })
 
 pxe_info = json.dumps(
-        {
-            'pxe': {
-                "instance_name": "fake_instance_name",
-                "image_source": "glance://image_uuid",
-                "deploy_kernel": "glance://deploy_kernel_uuid",
-                "deploy_ramdisk": "glance://deploy_ramdisk_uuid",
-                "root_gb": 100,
-            }
-        })
+    {
+        'pxe': {
+            "instance_name": "fake_instance_name",
+            "image_source": "glance://image_uuid",
+            "deploy_kernel": "glance://deploy_kernel_uuid",
+            "deploy_ramdisk": "glance://deploy_ramdisk_uuid",
+            "root_gb": 100,
+        }
+    })
 
 pxe_ssh_info = json.dumps(
-        dict(json.loads(pxe_info), **json.loads(ssh_info)))
+    dict(json.loads(pxe_info), **json.loads(ssh_info)))
 
 pxe_ipmi_info = json.dumps(
-        dict(json.loads(pxe_info), **json.loads(ipmi_info)))
+    dict(json.loads(pxe_info), **json.loads(ipmi_info)))
 
 properties = {
-            "cpu_arch": "x86_64",
-            "cpu_num": "8",
-            "storage": "1024",
-            "memory": "4096",
-        }
+    "cpu_arch": "x86_64",
+    "cpu_num": "8",
+    "storage": "1024",
+    "memory": "4096",
+}
 
 int_uninitialized = 999
 
@@ -103,56 +103,56 @@ def create_test_node(**kw):
 
 def get_test_ihost(**kw):
     inv = {
-            'id': kw.get('id', 123),
-            'forisystemid': kw.get('forisystemid', None),
-            'peer_id': kw.get('peer_id', None),
-            'recordtype': kw.get('recordtype', "standard"),
-            'uuid': kw.get('uuid'),
-            'hostname': kw.get('hostname', 'sysinvhostname'),
-            'invprovision': kw.get('invprovision', 'unprovisioned'),
-            'mgmt_mac': kw.get('mgmt_mac',
-                                         '01:34:67:9A:CD:FE'),
-            'mgmt_ip': kw.get('mgmt_ip',
-                                         '192.168.24.11'),
-            'personality': kw.get('personality', 'controller'),
-            'administrative': kw.get('administrative', 'locked'),
-            'operational': kw.get('operational', 'disabled'),
-            'availability': kw.get('availability', 'offduty'),
-            'serialid': kw.get('serialid', 'sysinv123456'),
-            'bm_ip': kw.get('bm_ip', "128.224.150.193"),
-            'bm_mac': kw.get('bm_mac', "a4:5d:36:fc:a5:6c"),
-            'bm_type': kw.get('bm_type', constants.BM_TYPE_GENERIC),
-            'bm_username': kw.get('bm_username', "ihostbmusername"),
-            'action': kw.get('action', "none"),
-            'task': kw.get('task', None),
-            'capabilities': kw.get('capabilities', {}),
-            'subfunctions': kw.get('subfunctions', "ihostsubfunctions"),
-            'subfunction_oper': kw.get('subfunction_oper', "disabled"),
-            'subfunction_avail': kw.get('subfunction_avail', "not-installed"),
-            # 'reservation': None,
-            'reserved': kw.get('reserved', None),
-            'ihost_action': kw.get('ihost_action', None),
-            'action_state': kw.get('action_state', constants.HAS_REINSTALLED),
-            'mtce_info': kw.get('mtce_info', '0'),
-            'vim_progress_status': kw.get('vim_progress_status', "vimprogressstatus"),
-            'uptime': kw.get('uptime', 0),
-            'config_status': kw.get('config_status', "configstatus"),
-            'config_applied': kw.get('config_applied', "configapplied"),
-            'config_target': kw.get('config_target', "configtarget"),
-            'location': kw.get('location', {}),
-            'boot_device': kw.get('boot_device', 'sda'),
-            'rootfs_device': kw.get('rootfs_device', 'sda'),
-            'install_output': kw.get('install_output', 'text'),
-            'console': kw.get('console', 'ttyS0,115200'),
-            'tboot': kw.get('tboot', ''),
-            'vsc_controllers': kw.get('vsc_controllers', "vsccontrollers"),
-            'ttys_dcd': kw.get('ttys_dcd', None),
-            'updated_at': None,
-            'created_at': None,
-            'install_state': kw.get('install_state', None),
-            'install_state_info': kw.get('install_state_info', None),
-            'iscsi_initiator_name': kw.get('iscsi_initiator_name', None),
-             }
+        'id': kw.get('id', 123),
+        'forisystemid': kw.get('forisystemid', None),
+        'peer_id': kw.get('peer_id', None),
+        'recordtype': kw.get('recordtype', "standard"),
+        'uuid': kw.get('uuid'),
+        'hostname': kw.get('hostname', 'sysinvhostname'),
+        'invprovision': kw.get('invprovision', 'unprovisioned'),
+        'mgmt_mac': kw.get('mgmt_mac',
+                           '01:34:67:9A:CD:FE'),
+        'mgmt_ip': kw.get('mgmt_ip',
+                          '192.168.24.11'),
+        'personality': kw.get('personality', 'controller'),
+        'administrative': kw.get('administrative', 'locked'),
+        'operational': kw.get('operational', 'disabled'),
+        'availability': kw.get('availability', 'offduty'),
+        'serialid': kw.get('serialid', 'sysinv123456'),
+        'bm_ip': kw.get('bm_ip', "128.224.150.193"),
+        'bm_mac': kw.get('bm_mac', "a4:5d:36:fc:a5:6c"),
+        'bm_type': kw.get('bm_type', constants.BM_TYPE_GENERIC),
+        'bm_username': kw.get('bm_username', "ihostbmusername"),
+        'action': kw.get('action', "none"),
+        'task': kw.get('task', None),
+        'capabilities': kw.get('capabilities', {}),
+        'subfunctions': kw.get('subfunctions', "ihostsubfunctions"),
+        'subfunction_oper': kw.get('subfunction_oper', "disabled"),
+        'subfunction_avail': kw.get('subfunction_avail', "not-installed"),
+        # 'reservation': None,
+        'reserved': kw.get('reserved', None),
+        'ihost_action': kw.get('ihost_action', None),
+        'action_state': kw.get('action_state', constants.HAS_REINSTALLED),
+        'mtce_info': kw.get('mtce_info', '0'),
+        'vim_progress_status': kw.get('vim_progress_status', "vimprogressstatus"),
+        'uptime': kw.get('uptime', 0),
+        'config_status': kw.get('config_status', "configstatus"),
+        'config_applied': kw.get('config_applied', "configapplied"),
+        'config_target': kw.get('config_target', "configtarget"),
+        'location': kw.get('location', {}),
+        'boot_device': kw.get('boot_device', 'sda'),
+        'rootfs_device': kw.get('rootfs_device', 'sda'),
+        'install_output': kw.get('install_output', 'text'),
+        'console': kw.get('console', 'ttyS0,115200'),
+        'tboot': kw.get('tboot', ''),
+        'vsc_controllers': kw.get('vsc_controllers', "vsccontrollers"),
+        'ttys_dcd': kw.get('ttys_dcd', None),
+        'updated_at': None,
+        'created_at': None,
+        'install_state': kw.get('install_state', None),
+        'install_state_info': kw.get('install_state_info', None),
+        'iscsi_initiator_name': kw.get('iscsi_initiator_name', None),
+    }
     return inv
 
 
@@ -172,24 +172,24 @@ def create_test_ihost(**kw):
 
 def get_test_isystem(**kw):
     inv = {
-            'id': kw.get('id', 321),
-            'name': kw.get('hostname', 'sysinvisystemname'),
-            'description': kw.get('description', 'isystemdescription'),
-            'capabilities': kw.get('capabilities',
-                                   {"cinder_backend":
-                                        constants.CINDER_BACKEND_LVM,
-                                    "vswitch_type":
-                                        constants.VSWITCH_TYPE_OVS_DPDK,
+        'id': kw.get('id', 321),
+        'name': kw.get('hostname', 'sysinvisystemname'),
+        'description': kw.get('description', 'isystemdescription'),
+        'capabilities': kw.get('capabilities',
+                               {"cinder_backend":
+                                constants.CINDER_BACKEND_LVM,
+                                "vswitch_type":
+                                constants.VSWITCH_TYPE_OVS_DPDK,
                                     "region_config": False,
                                     "sdn_enabled": True,
                                     "shared_services": "[]"}),
-            'contact': kw.get('contact', 'isystemcontact'),
-            'system_type': kw.get('system_type', constants.TIS_STD_BUILD),
-            'system_mode': kw.get('system_mode', constants.SYSTEM_MODE_DUPLEX),
-            'location': kw.get('location', 'isystemlocation'),
-            'services': kw.get('services', 72),
-            'software_version': kw.get('software_version', SW_VERSION)
-           }
+        'contact': kw.get('contact', 'isystemcontact'),
+        'system_type': kw.get('system_type', constants.TIS_STD_BUILD),
+        'system_mode': kw.get('system_mode', constants.SYSTEM_MODE_DUPLEX),
+        'location': kw.get('location', 'isystemlocation'),
+        'services': kw.get('services', 72),
+        'software_version': kw.get('software_version', SW_VERSION)
+    }
     return inv
 
 
@@ -224,15 +224,15 @@ def create_test_load(**kw):
 
 def get_test_address_pool(**kw):
     inv = {
-            'id': kw.get('id'),
-            'network': kw.get('network'),
-            'name': kw.get('name'),
-            'family': kw.get('family', 4),
-            'ranges': kw.get('ranges'),
-            'prefix': kw.get('prefix'),
-            'order': kw.get('order', 'random'),
-            'uuid': kw.get('uuid')
-           }
+        'id': kw.get('id'),
+        'network': kw.get('network'),
+        'name': kw.get('name'),
+        'family': kw.get('family', 4),
+        'ranges': kw.get('ranges'),
+        'prefix': kw.get('prefix'),
+        'order': kw.get('order', 'random'),
+        'uuid': kw.get('uuid')
+    }
     return inv
 
 
@@ -324,34 +324,34 @@ def create_test_network(**kw):
 
 def get_test_network(**kw):
     inv = {
-            'id': kw.get('id'),
-            'uuid': kw.get('uuid'),
-            'type': kw.get('type'),
-            'mtu': kw.get('mtu', 1500),
-            'link_capacity': kw.get('link_capacity'),
-            'dynamic': kw.get('dynamic', True),
-            'vlan_id': kw.get('vlan_id'),
-            'address_pool_id': kw.get('address_pool_id', None)
-           }
+        'id': kw.get('id'),
+        'uuid': kw.get('uuid'),
+        'type': kw.get('type'),
+        'mtu': kw.get('mtu', 1500),
+        'link_capacity': kw.get('link_capacity'),
+        'dynamic': kw.get('dynamic', True),
+        'vlan_id': kw.get('vlan_id'),
+        'address_pool_id': kw.get('address_pool_id', None)
+    }
     return inv
 
 
 def get_test_icpu(**kw):
     inv = {
-            'id': kw.get('id', 1),
-            'uuid': kw.get('uuid'),
-            'cpu': kw.get('cpu', int_uninitialized),
-            'forinodeid': kw.get('forinodeid', int_uninitialized),
-            'core': kw.get('core', int_uninitialized),
-            'thread': kw.get('thread', 0),
-            # 'coProcessors': kw.get('coProcessors', {}),
-            'cpu_family': kw.get('cpu_family', 6),
-            'cpu_model': kw.get('cpu_model', 'Intel(R) Core(TM)'),
-            'allocated_function': kw.get('allocated_function', 'Platform'),
-            'forihostid': kw.get('forihostid', None),  # 321 ?
-            'updated_at': None,
-            'created_at': None,
-             }
+        'id': kw.get('id', 1),
+        'uuid': kw.get('uuid'),
+        'cpu': kw.get('cpu', int_uninitialized),
+        'forinodeid': kw.get('forinodeid', int_uninitialized),
+        'core': kw.get('core', int_uninitialized),
+        'thread': kw.get('thread', 0),
+        # 'coProcessors': kw.get('coProcessors', {}),
+        'cpu_family': kw.get('cpu_family', 6),
+        'cpu_model': kw.get('cpu_model', 'Intel(R) Core(TM)'),
+        'allocated_function': kw.get('allocated_function', 'Platform'),
+        'forihostid': kw.get('forihostid', None),  # 321 ?
+        'updated_at': None,
+        'created_at': None,
+    }
     return inv
 
 
@@ -459,7 +459,7 @@ def get_test_pv(**kw):
         'lvm_vg_name': kw.get('lvm_vg_name'),
         'disk_or_part_uuid': kw.get('disk_or_part_uuid', 2),
         'disk_or_part_device_path': kw.get('disk_or_part_device_path',
-            '/dev/disk/by-path/pci-0000:00:0d.0-ata-3.0'),
+                                           '/dev/disk/by-path/pci-0000:00:0d.0-ata-3.0'),
         'forihostid': kw.get('forihostid', 2),
         'forilvgid': kw.get('forilvgid', 2),
     }

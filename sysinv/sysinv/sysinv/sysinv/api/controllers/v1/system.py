@@ -124,7 +124,7 @@ class System(base.APIBase):
                 translated_string = kernel_args
 
                 for user_string, args_string in \
-                  constants.SYSTEM_SECURITY_FEATURE_SPECTRE_MELTDOWN_OPTS.iteritems():
+                        constants.SYSTEM_SECURITY_FEATURE_SPECTRE_MELTDOWN_OPTS.iteritems():
                     if args_string == kernel_args:
                         translated_string = user_string
                         break
@@ -157,16 +157,16 @@ class System(base.APIBase):
 
         if expand:
             iSystem.ihosts = [link.Link.make_link('self',
-                                        pecan.request.host_url,
-                                        'isystems',
-                                        iSystem.uuid + "/ihosts"),
+                                                  pecan.request.host_url,
+                                                  'isystems',
+                                                  iSystem.uuid + "/ihosts"),
                               link.Link.make_link(
-                                        'bookmark',
-                                        pecan.request.host_url,
-                                        'isystems',
-                                        iSystem.uuid + "/ihosts",
-                                        bookmark=True)
-                              ]
+                'bookmark',
+                pecan.request.host_url,
+                'isystems',
+                iSystem.uuid + "/ihosts",
+                bookmark=True)
+            ]
 
         return iSystem
 
@@ -248,8 +248,8 @@ class SystemController(rest.RestController):
                         constants.SERVICE_PARAM_SECTION_NETWORK_DEFAULT]:
             try:
                 parm_list = pecan.request.dbapi.service_parameter_get_all(
-                                    service=constants.SERVICE_TYPE_NETWORK,
-                                    section=section)
+                    service=constants.SERVICE_TYPE_NETWORK,
+                    section=section)
                 neutron_parameters = neutron_parameters + parm_list
             except NoResultFound:
                 continue
@@ -390,7 +390,7 @@ class SystemController(rest.RestController):
                                                          "modified."))
 
             if (p['path'] == '/system_mode' and p.get('value') !=
-               rpc_isystem.system_mode):
+                    rpc_isystem.system_mode):
                 if rpc_isystem is not None and \
                    rpc_isystem.system_mode is not None:
                     if rpc_isystem.system_type != constants.TIS_AIO_BUILD:
@@ -475,9 +475,9 @@ class SystemController(rest.RestController):
             # At this point dc role cannot be changed after config_controller
             # and config_subcloud
             if rpc_isystem['distributed_cloud_role'] is None and \
-                            distributed_cloud_role in \
-                            [constants.DISTRIBUTED_CLOUD_ROLE_SYSTEMCONTROLLER,
-                             constants.DISTRIBUTED_CLOUD_ROLE_SUBCLOUD]:
+                distributed_cloud_role in \
+                [constants.DISTRIBUTED_CLOUD_ROLE_SYSTEMCONTROLLER,
+                 constants.DISTRIBUTED_CLOUD_ROLE_SUBCLOUD]:
 
                 change_dc_role = True
                 patched_system['distributed_cloud_role'] = distributed_cloud_role

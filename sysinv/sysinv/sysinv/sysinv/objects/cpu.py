@@ -18,22 +18,22 @@ class CPU(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
-            'forihostid': int,
-            'ihost_uuid': utils.str_or_none,
-            'forinodeid': utils.int_or_none,
-            'inode_uuid': utils.str_or_none,
-            'numa_node': utils.int_or_none,
-            'cpu': int,
-            'core': utils.int_or_none,
-            'thread': utils.int_or_none,
-            'cpu_family': utils.str_or_none,
-            'cpu_model': utils.str_or_none,
-            'allocated_function': utils.str_or_none,
-            # 'coprocessors': utils.dict_or_none,
-            'capabilities': utils.dict_or_none,
-             }
+        'id': int,
+        'uuid': utils.str_or_none,
+        'forihostid': int,
+        'ihost_uuid': utils.str_or_none,
+        'forinodeid': utils.int_or_none,
+        'inode_uuid': utils.str_or_none,
+        'numa_node': utils.int_or_none,
+        'cpu': int,
+        'core': utils.int_or_none,
+        'thread': utils.int_or_none,
+        'cpu_family': utils.str_or_none,
+        'cpu_model': utils.str_or_none,
+        'allocated_function': utils.str_or_none,
+        # 'coprocessors': utils.dict_or_none,
+        'capabilities': utils.dict_or_none,
+    }
 
     _foreign_fields = {'ihost_uuid': 'host:uuid',
                        'inode_uuid': 'node:uuid',

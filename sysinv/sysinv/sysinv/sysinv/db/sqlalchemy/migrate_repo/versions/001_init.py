@@ -56,10 +56,10 @@ def upgrade(migrate_engine):
                            name='invPersonalityEnum')
 
     adminEnum = Enum('locked',
-                      'unlocked',
-                      'reserve1',
-                      'reserve2',
-                      name='administrativeEnum')
+                     'unlocked',
+                     'reserve1',
+                     'reserve2',
+                     name='administrativeEnum')
 
     operationalEnum = Enum('disabled',
                            'enabled',

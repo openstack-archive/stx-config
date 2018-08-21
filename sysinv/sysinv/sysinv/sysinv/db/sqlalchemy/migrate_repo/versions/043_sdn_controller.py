@@ -55,7 +55,7 @@ def upgrade(migrate_engine):
         old_serviceEnum.drop(bind=migrate_engine, checkfirst=False)
         serviceEnum.create(bind=migrate_engine, checkfirst=False)
         migrate_engine.execute('ALTER TABLE service_parameter ALTER COLUMN service TYPE "serviceEnum" '
-                   'USING service::text::"serviceEnum"')
+                               'USING service::text::"serviceEnum"')
 
     sdn_controller = Table(
         'sdn_controller',

@@ -60,7 +60,7 @@ class SMServiceGroupController(rest.RestController):
         sm_servicegroup = sm_api.sm_servicegroup_show(uuid)
         if sm_servicegroup is None:
             raise wsme.exc.ClientSideError(_(
-                    "Service group %s could not be found") % uuid)
+                "Service group %s could not be found") % uuid)
         return SMServiceGroup(**sm_servicegroup)
 
     @wsme_pecan.wsexpose(SMServiceGroupCollection)
@@ -74,4 +74,4 @@ class SMServiceGroupController(rest.RestController):
                 return SMServiceGroupCollection.convert(sm_servicegroups)
         LOG.error("Bad response from SM API")
         raise wsme.exc.ClientSideError(_(
-                    "Bad response from SM API"))
+            "Bad response from SM API"))

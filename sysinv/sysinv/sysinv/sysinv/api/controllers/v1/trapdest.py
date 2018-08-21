@@ -122,7 +122,7 @@ class TrapDestController(rest.RestController):
     }
 
     def _get_itrapdest_collection(self, marker, limit, sort_key, sort_dir,
-                                expand=False, resource_url=None):
+                                  expand=False, resource_url=None):
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
         marker_obj = None

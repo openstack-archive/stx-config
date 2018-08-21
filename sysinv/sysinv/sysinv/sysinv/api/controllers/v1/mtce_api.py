@@ -55,7 +55,7 @@ def host_modify(token, address, port, ihost_mtce, timeout, max_retries=1):
 
     LOG.debug("host_modify for %s cmd=%s hdr=%s payload=%s" %
               (ihost_mtce['hostname'],
-              api_cmd, api_cmd_headers, api_cmd_payload))
+               api_cmd, api_cmd_headers, api_cmd_payload))
 
     num_of_try = 0
     response = None
@@ -63,7 +63,7 @@ def host_modify(token, address, port, ihost_mtce, timeout, max_retries=1):
         try:
             num_of_try = num_of_try + 1
             LOG.info("number of calls to rest_api_request=%d (max_retry=%d)" %
-                      (num_of_try, max_retries))
+                     (num_of_try, max_retries))
             response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
                                         json.dumps(api_cmd_payload), timeout)
             if response is None:

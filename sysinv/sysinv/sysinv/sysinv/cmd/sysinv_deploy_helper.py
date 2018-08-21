@@ -95,9 +95,9 @@ def make_partitions(dev, root_mb, swap_mb):
     # raring/view/head:/fdisk/sfdisk.c#L1940
     stdin_command = ('1,%d,83;\n,%d,82;\n0,0;\n0,0;\n' % (root_mb, swap_mb))
     utils.execute('sfdisk', '-uM', dev, process_input=stdin_command,
-            run_as_root=True,
-            attempts=3,
-            check_exit_code=[0])
+                  run_as_root=True,
+                  attempts=3,
+                  check_exit_code=[0])
     # avoid "device is busy"
     time.sleep(3)
 
@@ -163,7 +163,7 @@ def notify(address, port):
 def get_dev(address, port, iqn, lun):
     """Returns a device path for given parameters."""
     dev = "/dev/disk/by-path/ip-%s:%s-iscsi-%s-lun-%s" \
-            % (address, port, iqn, lun)
+        % (address, port, iqn, lun)
     return dev
 
 
@@ -241,27 +241,27 @@ class Worker(threading.Thread):
             try:
                 # Set timeout to check self.stop periodically
                 (node_id, params) = QUEUE.get(block=True,
-                                                    timeout=self.queue_timeout)
+                                              timeout=self.queue_timeout)
             except Queue.Empty:
                 pass
             else:
                 # Requests comes here from BareMetalDeploy.post()
                 LOG.info(_('start deployment for node %(node_id)s, '
                            'params %(params)s') %
-                           {'node_id': node_id, 'params': params})
+                         {'node_id': node_id, 'params': params})
                 context = sysinv_context.get_admin_context()
                 try:
                     db.bm_node_update(context, node_id,
-                          {'task_state': states.DEPLOYING})
+                                      {'task_state': states.DEPLOYING})
                     deploy(**params)
                 except Exception:
                     LOG.error(_('deployment to node %s failed') % node_id)
                     db.bm_node_update(context, node_id,
-                          {'task_state': states.DEPLOYFAIL})
+                                      {'task_state': states.DEPLOYFAIL})
                 else:
                     LOG.info(_('deployment to node %s done') % node_id)
                     db.bm_node_update(context, node_id,
-                          {'task_state': states.DEPLOYDONE})
+                                      {'task_state': states.DEPLOYDONE})
 
 
 class BareMetalDeploy(object):
@@ -323,7 +323,7 @@ class BareMetalDeploy(object):
             self.worker = Worker()
             self.worker.start()
         LOG.info(_("request is queued: node %(node_id)s, params %(params)s") %
-                {'node_id': node_id, 'params': params})
+                 {'node_id': node_id, 'params': params})
         QUEUE.put((node_id, params))
         # Requests go to Worker.run()
         start_response('200 OK', [('Content-type', 'text/plain')])

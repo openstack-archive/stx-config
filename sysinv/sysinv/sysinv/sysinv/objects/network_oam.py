@@ -26,20 +26,20 @@ class OAMNetwork(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
-            'forisystemid': utils.int_or_none,
-            'isystem_uuid': utils.str_or_none,
+        'id': int,
+        'uuid': utils.str_or_none,
+        'forisystemid': utils.int_or_none,
+        'isystem_uuid': utils.str_or_none,
 
-            'oam_subnet': utils.str_or_none,
-            'oam_start_ip': utils.str_or_none,
-            'oam_end_ip': utils.str_or_none,
+        'oam_subnet': utils.str_or_none,
+        'oam_start_ip': utils.str_or_none,
+        'oam_end_ip': utils.str_or_none,
 
-            'oam_c0_ip': utils.str_or_none,
-            'oam_c1_ip': utils.str_or_none,
-            'oam_gateway_ip': utils.str_or_none,
-            'oam_floating_ip': utils.str_or_none,
-             }
+        'oam_c0_ip': utils.str_or_none,
+        'oam_c1_ip': utils.str_or_none,
+        'oam_gateway_ip': utils.str_or_none,
+        'oam_floating_ip': utils.str_or_none,
+    }
 
     # NOTE: names must match those assigned by config_controller
     address_names = {

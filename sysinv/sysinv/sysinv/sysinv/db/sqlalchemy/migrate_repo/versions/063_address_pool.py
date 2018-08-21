@@ -45,7 +45,7 @@ def _update_addresses(addresses_table, interface_table, host_table):
     interfaces = list(interface_table.select().where(
         (interface_table.c.networktype == constants.NETWORK_TYPE_OAM) |
         (interface_table.c.networktype == constants.NETWORK_TYPE_PXEBOOT)).
-                      execute())
+        execute())
     simplex = (system_mode == constants.SYSTEM_MODE_SIMPLEX)
 
     for interface in interfaces:

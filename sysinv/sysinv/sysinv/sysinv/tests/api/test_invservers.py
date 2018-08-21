@@ -48,7 +48,7 @@ class TestPost(base.FunctionalTest):
         # host: recordtype\\"}"}'
         self.skipTest("Skipping to prevent failure notification on Jenkins")
         ndict = dbutils.get_test_ihost(location={'Country': 'Canada',
-                                                    'City': 'Ottawa'})
+                                                 'City': 'Ottawa'})
         self.post_json('/ihosts', ndict)
         result = self.get_json('/ihosts/%s' % ndict['uuid'])
         self.assertEqual(ndict['location'], result['location'])
@@ -92,8 +92,8 @@ class TestDelete(base.FunctionalTest):
         ndict = dbutils.get_test_ihost()
         self.post_json('/ihosts', ndict)
         response = self.delete(
-                        '/ihosts/%s/ports' % ndict['uuid'],
-                        expect_errors=True)
+            '/ihosts/%s/ports' % ndict['uuid'],
+            expect_errors=True)
         self.assertEqual(response.status_int, 403)
 
 
@@ -209,7 +209,7 @@ class TestListServers(base.FunctionalTest):
 
         # Test collection pagination
         data = self.get_json(
-                '/ihosts/%s/ports?limit=1' % ndict['uuid'])
+            '/ihosts/%s/ports?limit=1' % ndict['uuid'])
         self.assertEqual(len(data['ports']), 1)
         self.assertIn('next', data.keys())
 

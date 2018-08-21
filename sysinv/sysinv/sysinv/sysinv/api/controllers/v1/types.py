@@ -245,6 +245,7 @@ class MultiType(wtypes.UserType):
     :param *types: Variable-length list of types.
 
     """
+
     def __init__(self, types):
         self.types = types
 
@@ -263,5 +264,5 @@ class MultiType(wtypes.UserType):
                 return value
         else:
             raise ValueError(
-                     _("Wrong type. Expected '%(type)s', got '%(value)s'")
-                     % {'type': self.types, 'value': type(value)})
+                _("Wrong type. Expected '%(type)s', got '%(value)s'")
+                % {'type': self.types, 'value': type(value)})

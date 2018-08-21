@@ -288,13 +288,13 @@ class EthInterface(Interface):
 
     def getNetworkMap(self):
         return {
-                    'dataNetwork': lambda (node): DataNetwork(node),
-                    'infraNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_INFRA),
-                    'oamNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_OAM),
-                    'mgmtNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_MGMT),
-                    'pciPassthrough': lambda (node): PciPassthrough(node),
-                    'pciSriov': lambda (node): PciSriov(node)
-                 }
+            'dataNetwork': lambda node: DataNetwork(node),
+            'infraNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_INFRA),
+            'oamNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_OAM),
+            'mgmtNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_MGMT),
+            'pciPassthrough': lambda node: PciPassthrough(node),
+            'pciSriov': lambda node: PciSriov(node)
+        }
 
 
 class AeInterface(Interface):
@@ -330,11 +330,11 @@ class AeInterface(Interface):
 
     def getNetworkMap(self):
         return {
-                    'dataNetwork': lambda (node): DataNetwork(node),
-                    'infraNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_INFRA),
-                    'oamNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_OAM),
-                    'mgmtNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_MGMT)
-                 }
+            'dataNetwork': lambda node: DataNetwork(node),
+            'infraNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_INFRA),
+            'oamNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_OAM),
+            'mgmtNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_MGMT)
+        }
 
     def validateWithIfNames(self, allInterfaceNames):
         # raise InvalidProfileData exception if invalid
@@ -345,7 +345,7 @@ class AeInterface(Interface):
         for usesIfName in self.usesIf:
             if usesIfName not in allInterfaceNames:
                 msg = _('Aggregrated ethernet interface (%s) uses a undeclared interface (%s)') % \
-                                         (self.name, usesIfName)
+                    (self.name, usesIfName)
                 raise InvalidProfileData(msg)
         super(AeInterface, self).validate()
 
@@ -365,10 +365,10 @@ class VlanInterface(Interface):
 
     def getNetworkMap(self):
         return {
-                'dataNetwork': lambda (node): DataNetwork(node),
-                'infraNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_INFRA),
-                'oamNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_OAM),
-                'mgmtNetwork': lambda (node): ExternalNetwork(node, constants.NETWORK_TYPE_MGMT)
+            'dataNetwork': lambda node: DataNetwork(node),
+            'infraNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_INFRA),
+            'oamNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_OAM),
+            'mgmtNetwork': lambda node: ExternalNetwork(node, constants.NETWORK_TYPE_MGMT)
         }
 
     @staticmethod
@@ -379,7 +379,7 @@ class VlanInterface(Interface):
         #  raise InvalidProfileData exception if invalid
         if self.usesIfName not in allInterfaceNames:
             msg = _('vlan interface (%s) uses a undeclared interface (%s)') % \
-                                     (self.name, self.usesIfName)
+                (self.name, self.usesIfName)
             raise InvalidProfileData(msg)
 
         isEthIf = self.isEthInterface(self.usesIfName, ethIfMap)

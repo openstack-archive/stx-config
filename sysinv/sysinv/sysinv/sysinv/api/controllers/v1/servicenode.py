@@ -56,7 +56,7 @@ class SMServiceNodeController(rest.RestController):
         sm_servicenode = sm_api.servicenode_show(uuid)
         if sm_servicenode is None:
             raise wsme.exc.ClientSideError(_(
-                    "Service node %s could not be found") % uuid)
+                "Service node %s could not be found") % uuid)
         return SMServiceNode(**sm_servicenode)
 
     @wsme_pecan.wsexpose(SMServiceNodeCollection)
@@ -70,4 +70,4 @@ class SMServiceNodeController(rest.RestController):
                 return SMServiceNodeCollection.convert(sm_servicenodes)
         LOG.error("Bad response from SM API")
         raise wsme.exc.ClientSideError(_(
-                    "Bad response from SM API"))
+            "Bad response from SM API"))

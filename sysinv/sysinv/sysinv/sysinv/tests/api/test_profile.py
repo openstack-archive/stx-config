@@ -313,9 +313,9 @@ class ProfileApplyTestCase(ProfileTestCase):
         list_data = self.get_json('%s' % self._get_path())
         profile_uuid = list_data['iprofiles'][0]['uuid']
         result = self.patch_dict_json('/ihosts/%s' % self.compute.id,
-                                       headers=HEADER,
-                                       action=constants.APPLY_PROFILE_ACTION,
-                                       iprofile_uuid=profile_uuid)
+                                      headers=HEADER,
+                                      action=constants.APPLY_PROFILE_ACTION,
+                                      iprofile_uuid=profile_uuid)
         self.assertEqual(http_client.OK, result.status_int)
 
         hostmem_r = self.get_json(

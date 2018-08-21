@@ -78,14 +78,14 @@ def validate_patch(patch):
         if not isinstance(p, dict) or \
                 any(key for key in ["path", "op"] if key not in p):
             raise wsme.exc.ClientSideError(_("Invalid patch format: %s")
-                                             % str(p))
+                                           % str(p))
 
         path = p["path"]
         op = p["op"]
 
         if op not in ["add", "replace", "remove"]:
             raise wsme.exc.ClientSideError(_("Operation not supported: %s")
-                                             % op)
+                                           % op)
 
         if not path_pattern.match(path):
             raise wsme.exc.ClientSideError(_("Invalid path: %s") % path)
@@ -95,7 +95,7 @@ def validate_patch(patch):
                 raise wsme.exc.ClientSideError(_("Adding an additional "
                                                  "attribute (%s) to the "
                                                  "resource is not allowed")
-                                                 % path)
+                                               % path)
 
 
 def validate_mtu(mtu):
@@ -238,7 +238,7 @@ def is_host_active_controller(host):
 
 def is_host_simplex_controller(host):
     return host['personality'] == constants.CONTROLLER and \
-           os.path.isfile(tsc.PLATFORM_SIMPLEX_FLAG)
+        os.path.isfile(tsc.PLATFORM_SIMPLEX_FLAG)
 
 
 def is_aio_simplex_host_unlocked(host):
@@ -274,15 +274,15 @@ def get_sdn_enabled():
 def get_sdn_l3_mode_enabled():
     try:
         sdn_l3_mode = pecan.request.dbapi.service_parameter_get_one(
-                        service=constants.SERVICE_TYPE_NETWORK,
-                        section=constants.SERVICE_PARAM_SECTION_NETWORK_DEFAULT,
-                        name=constants.
-                        SERVICE_PARAM_NAME_DEFAULT_SERVICE_PLUGINS)
+            service=constants.SERVICE_TYPE_NETWORK,
+            section=constants.SERVICE_PARAM_SECTION_NETWORK_DEFAULT,
+            name=constants.
+            SERVICE_PARAM_NAME_DEFAULT_SERVICE_PLUGINS)
         if not sdn_l3_mode:
             return False
         allowed_vals = constants.SERVICE_PLUGINS_SDN
         return (any(sp in allowed_vals
-                        for sp in sdn_l3_mode.value.split(',')))
+                    for sp in sdn_l3_mode.value.split(',')))
     except exception.SysinvException:
         return False
 
@@ -384,7 +384,7 @@ def is_kubernetes_config(dbapi=None):
 
 def is_aio_duplex_system():
     return get_system_mode() == constants.SYSTEM_MODE_DUPLEX and \
-           SystemHelper.get_product_build() == constants.TIS_AIO_BUILD
+        SystemHelper.get_product_build() == constants.TIS_AIO_BUILD
 
 
 def get_compute_count(dbapi=None):
@@ -477,8 +477,8 @@ class SBApiHelper(object):
                 raise wsme.exc.ClientSideError(msg)
 
             elif (backend_type != constants.SB_TYPE_CEPH_EXTERNAL and
-                      backend_type not in existing_backends_by_type and
-                      backend_name != constants.SB_DEFAULT_NAMES[backend_type]):
+                  backend_type not in existing_backends_by_type and
+                  backend_name != constants.SB_DEFAULT_NAMES[backend_type]):
                 msg = _("The primary %s backend must use the default name: %s."
                         % (backend_type,
                            constants.SB_DEFAULT_NAMES[backend_type]))
@@ -506,7 +506,7 @@ class SBApiHelper(object):
 
         if existing_backend and operation == constants.SB_API_OP_CREATE:
             if (existing_backend.state == constants.SB_STATE_CONFIGURED or
-                  existing_backend.state == constants.SB_STATE_CONFIG_ERR):
+                    existing_backend.state == constants.SB_STATE_CONFIG_ERR):
                 msg = (_("Initial (%s) backend was previously created. Use the "
                          "modify API for further provisioning or supply a unique "
                          "name to add an additional backend.") %
@@ -619,7 +619,7 @@ class SBApiHelper(object):
     def is_primary_ceph_tier(name_string):
         """Check if a tier name string is for the primary ceph tier. """
         if name_string == constants.SB_TIER_DEFAULT_NAMES[
-                    constants.SB_TYPE_CEPH]:
+                constants.SB_TYPE_CEPH]:
             return True
         return False
 

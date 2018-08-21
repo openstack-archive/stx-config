@@ -17,13 +17,13 @@ class Journal(base.SysinvObject):
 
     dbapi = db_api.get_instance()
     fields = {
-              'id': int,
-              'uuid': utils.str_or_none,
-              'device_path': utils.str_or_none,
-              'size_mib': utils.int_or_none,
-              'onistor_uuid': utils.uuid_or_none,
-              'foristorid': int
-             }
+        'id': int,
+        'uuid': utils.str_or_none,
+        'device_path': utils.str_or_none,
+        'size_mib': utils.int_or_none,
+        'onistor_uuid': utils.uuid_or_none,
+        'foristorid': int
+    }
 
     @base.remotable_classmethod
     def get_by_uuid(cls, context, uuid):

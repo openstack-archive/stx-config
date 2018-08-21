@@ -310,7 +310,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def inode_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                       sort_key=None, sort_dir=None):
         """Return a list of cpus.
 
         :param limit: Maximum number of cpus to return.
@@ -323,8 +323,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def inode_get_by_ihost(self, ihost, limit=None,
-                                        marker=None, sort_key=None,
-                                        sort_dir=None):
+                           marker=None, sort_key=None,
+                           sort_dir=None):
         """List all the cpus for a given ihost.
 
         :param ihost: The id or uuid of an ihost.
@@ -861,7 +861,7 @@ class Connection(object):
         """
     @abc.abstractmethod
     def iinterface_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                            sort_key=None, sort_dir=None):
         """Return a list of ports.
 
         :param limit: Maximum number of ports to return.
@@ -948,7 +948,7 @@ class Connection(object):
         """
     @abc.abstractmethod
     def ethernet_interface_get_list(self, limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                                    sort_key=None, sort_dir=None):
         """Return a list of EthernetInterfaces.
 
         :param limit: Maximum number of interfaces to return.
@@ -962,8 +962,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def ethernet_interface_get_by_ihost(self, ihost, limit=None,
-                               marker=None, sort_key=None,
-                               sort_dir=None):
+                                        marker=None, sort_key=None,
+                                        sort_dir=None):
         """List all the Ethernet interfaces for a given ihost.
 
         :param ihost: The id or uuid of an ihost.
@@ -1230,8 +1230,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def partition_get_by_ihost(self, ihost, limit=None,
-                           marker=None, sort_key=None,
-                           sort_dir=None):
+                               marker=None, sort_key=None,
+                               sort_dir=None):
         """List all the partitions for a given ihost.
 
         :param node: The id or uuid of an ihost.
@@ -1458,7 +1458,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def ilvg_get_list(self, limit=None, marker=None,
-                       sort_key=None, sort_dir=None):
+                      sort_key=None, sort_dir=None):
         """Return a list of cpus.
 
         :param limit: Maximum number of ilvgs to return.
@@ -1471,8 +1471,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def ilvg_get_by_ihost(self, ihost, limit=None,
-                           marker=None, sort_key=None,
-                           sort_dir=None):
+                          marker=None, sort_key=None,
+                          sort_dir=None):
         """List all the pvs for a given ihost.
 
         :param ihost: The id or uuid of an ihost.
@@ -1549,7 +1549,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def ipv_get_list(self, limit=None, marker=None,
-                       sort_key=None, sort_dir=None):
+                     sort_key=None, sort_dir=None):
         """Return a list of pvs.
 
         :param limit: Maximum number of ipvs to return.
@@ -1562,8 +1562,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def ipv_get_by_ihost(self, ihost, limit=None,
-                           marker=None, sort_key=None,
-                           sort_dir=None):
+                         marker=None, sort_key=None,
+                         sort_dir=None):
         """List all the pvs for a given ihost.
 
         :param ihost: The id or uuid of an ihost.
@@ -1620,7 +1620,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def itrapdest_get_list(self, limit=None, marker=None,
-                         sort_key=None, sort_dir=None):
+                           sort_key=None, sort_dir=None):
         """Return a list of itrapdest.
         """
 
@@ -2144,7 +2144,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def controller_fs_get_list(self, limit=None, marker=None,
-                                 sort_key=None, sort_dir=None):
+                               sort_key=None, sort_dir=None):
         """Return a list of controller_fss.
 
         :param limit: Maximum number of controller_fss to return.
@@ -2157,8 +2157,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def controller_fs_get_by_isystem(self, isystem_id, limit=None,
-                                      marker=None, sort_key=None,
-                                      sort_dir=None):
+                                     marker=None, sort_key=None,
+                                     sort_dir=None):
         """List all the controller_fss for a given isystem.
 
         :param isystem: The id or uuid of an isystem.
@@ -2219,7 +2219,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def ceph_mon_get_list(self, limit=None, marker=None,
-                             sort_key=None, sort_dir=None):
+                          sort_key=None, sort_dir=None):
         """Return a list of ceph_mon.
 
         :param limit: Maximum number of ceph_mons to return.
@@ -2281,7 +2281,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def storage_external_get_list(self, limit=None, marker=None,
-                              sort_key=None, sort_dir=None):
+                                  sort_key=None, sort_dir=None):
         """Return a list of storage_external.
 
         :param limit: Maximum number of storage_external to return.
@@ -2449,7 +2449,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def storage_ceph_external_get_list(self, limit=None, marker=None,
-                                      sort_key=None, sort_dir=None):
+                                       sort_key=None, sort_dir=None):
         """Return a list of external ceph storage backends.
 
         :param limit: Maximum number of external ceph storage backends to
@@ -2593,7 +2593,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def remotelogging_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                               sort_key=None, sort_dir=None):
         """Return a list of remotelogging.
 
         :param limit: Maximum number of remotelogging to return.
@@ -2606,7 +2606,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def remotelogging_get_by_isystem(self, isystem_id, limit=None, marker=None,
-                            sort_key=None, sort_dir=None):
+                                     sort_key=None, sort_dir=None):
         """List all the remotelogging for a given isystem.
 
         :param isystem: The id or uuid of an isystem.
@@ -2685,7 +2685,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def service_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                         sort_key=None, sort_dir=None):
         """Return a list of service.
 
         :param limit: Maximum number of remotelogging to return.
@@ -2738,7 +2738,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def iinfra_get_list(self, limit=None, marker=None,
-                         sort_key=None, sort_dir=None):
+                        sort_key=None, sort_dir=None):
         """Return a list of iinfra.
 
         :param limit: Maximum number of iinfra to return.
@@ -2804,8 +2804,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def isensor_analog_get_by_isensorgroup(self, sensorgroup,
-                                         limit=None, marker=None,
-                                         sort_key=None, sort_dir=None):
+                                           limit=None, marker=None,
+                                           sort_key=None, sort_dir=None):
         """Return list of analog isensors for the host.
         :param sensorgroup:   id (PK) of the sensorgroup.
         :param limit: Maximum number of isensors to return.
@@ -2819,8 +2819,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def isensor_analog_get_by_host_isensorgroup(self, host, sensorgroup,
-                                              limit=None, marker=None,
-                                              sort_key=None, sort_dir=None):
+                                                limit=None, marker=None,
+                                                sort_key=None, sort_dir=None):
         """Return list of analog isensors for the host.
         :param host:   id (PK) of the host.
         :param limit: Maximum number of isensors to return.
@@ -2898,7 +2898,6 @@ class Connection(object):
     def isensor_discrete_get_by_host(self, host,
                                      limit=None, marker=None,
                                      sort_key=None, sort_dir=None):
-
         """Return list of analog isensors for the host.
         :param host:   id (PK) of the host.
         :param limit: Maximum number of isensors to return.
@@ -2912,9 +2911,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def isensor_discrete_get_by_isensorgroup(self, sensorgroup,
-                                           limit=None, marker=None,
-                                           sort_key=None, sort_dir=None):
-
+                                             limit=None, marker=None,
+                                             sort_key=None, sort_dir=None):
         """Return list of analog isensors for the host.
         :param sensorgroup:   id (PK) of the sensorgroup.
         :param limit: Maximum number of isensors to return.
@@ -2928,8 +2926,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def isensor_discrete_get_by_host_isensorgroup(self, host, sensorgroup,
-                                                limit=None, marker=None,
-                                                sort_key=None, sort_dir=None):
+                                                  limit=None, marker=None,
+                                                  sort_key=None, sort_dir=None):
         """Return list of analog isensors for the host.
         :param host:   id (PK) of the host.
         :param sensorgroup:   id (PK) of the sensorgroup.
@@ -3036,8 +3034,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def isensor_get_by_ihost_sensorgroup(self, ihost, sensorgroup,
-                                       limit=None, marker=None,
-                                       sort_key=None, sort_dir=None):
+                                         limit=None, marker=None,
+                                         sort_key=None, sort_dir=None):
         """Return list of isensors for the host.
         :param ihost:   id (PK) of the host.
         :param sensorgroup:   id (PK) of the sensorgroup.
@@ -3123,8 +3121,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def isensorgroup_get_by_ihost(self, ihost,
-                                limit=None, marker=None,
-                                sort_key=None, sort_dir=None):
+                                  limit=None, marker=None,
+                                  sort_key=None, sort_dir=None):
         """Return list of analog isensors for the host.
         :param ihost:   id (PK) of the host.
         :param limit: Maximum number of isensors to return.
@@ -4194,8 +4192,8 @@ class Connection(object):
 
     @abc.abstractmethod
     def tpmdevice_get_by_host(self, host_id,
-                               limit=None, marker=None,
-                               sort_key=None, sort_dir=None):
+                              limit=None, marker=None,
+                              sort_key=None, sort_dir=None):
         """List all the tpmdevices for a given host_id.
 
         :param host_id: The id or uuid of an ihost.

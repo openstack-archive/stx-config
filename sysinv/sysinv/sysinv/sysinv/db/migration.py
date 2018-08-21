@@ -52,9 +52,9 @@ def get_backend():
 
         cfg.CONF.import_opt('backend', 'oslo_db.options', group='database_migrate')
         _IMPL = utils.LazyPluggable(
-                pivot='backend',
-                config_group='database_migrate',
-                sqlalchemy='sysinv.db.sqlalchemy.migration')
+            pivot='backend',
+            config_group='database_migrate',
+            sqlalchemy='sysinv.db.sqlalchemy.migration')
 
     return _IMPL
 

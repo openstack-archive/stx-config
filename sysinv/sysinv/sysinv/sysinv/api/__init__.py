@@ -19,20 +19,20 @@ from oslo_config import cfg
 
 
 API_SERVICE_OPTS = [
-        cfg.StrOpt('sysinv_api_bind_ip',
-                   default='0.0.0.0',
-                   help='IP for the Sysinv API server to bind to'),
-        cfg.IntOpt('sysinv_api_port',
-                   default=6385,
-                   help='The port for the Sysinv API server'),
-        cfg.StrOpt('sysinv_api_pxeboot_ip',
-                   help='IP for the Sysinv API server to bind to'),
-        cfg.IntOpt('sysinv_api_workers',
-                   help='Number of api workers for the SysInv API'),
-        cfg.IntOpt('api_limit_max',
-                   default=2000,
-                   help='the maximum number of items returned in a single '
-                        'response from a collection resource')
+    cfg.StrOpt('sysinv_api_bind_ip',
+               default='0.0.0.0',
+               help='IP for the Sysinv API server to bind to'),
+    cfg.IntOpt('sysinv_api_port',
+               default=6385,
+               help='The port for the Sysinv API server'),
+    cfg.StrOpt('sysinv_api_pxeboot_ip',
+               help='IP for the Sysinv API server to bind to'),
+    cfg.IntOpt('sysinv_api_workers',
+               help='Number of api workers for the SysInv API'),
+    cfg.IntOpt('api_limit_max',
+               default=2000,
+               help='the maximum number of items returned in a single '
+               'response from a collection resource')
 ]
 
 CONF = cfg.CONF

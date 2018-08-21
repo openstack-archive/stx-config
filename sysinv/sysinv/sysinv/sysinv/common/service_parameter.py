@@ -365,11 +365,11 @@ def _validate_pci_alias(name, value):
             alias_dict = dict(x.split('=') for x in alias.split(','))
         except ValueError:
             raise wsme.exc.ClientSideError(_(
-                    "Invalid PCI alias. Must be a string of <key>=<value>, pairs."))
+                "Invalid PCI alias. Must be a string of <key>=<value>, pairs."))
 
         if "name" not in alias_dict:
             raise wsme.exc.ClientSideError(_(
-                    "PCI alias must specify a name"))
+                "PCI alias must specify a name"))
 
         for existing in existing_aliases:
             # Allow user to modify an existing name
@@ -385,11 +385,11 @@ def _validate_pci_alias(name, value):
 
         if alias_dict.get("name") in disallowed_names:
             raise wsme.exc.ClientSideError(_(
-                    "Invalid PCI alias name. Name cannot be one of %r") % disallowed_names)
+                "Invalid PCI alias name. Name cannot be one of %r") % disallowed_names)
 
         if not name_regex.match(alias_dict.get("name")):
             raise wsme.exc.ClientSideError(_(
-                    "Invalid PCI alias name. Only alphanumeric characters and '-' are allowed"))
+                "Invalid PCI alias name. Only alphanumeric characters and '-' are allowed"))
 
         for k, v in six.iteritems(alias_dict):
             if k not in allowed:
@@ -489,7 +489,7 @@ def _emc_vnx_save_address_from_param(address_param_name, network_type, pool):
             msg = _("Unable to apply service parameters. "
                     "Unable to save address '%s' ('%s') into "
                     "pool '%s'" % (address_param_name, ip_param.value,
-                        pool['name']))
+                                   pool['name']))
             raise wsme.exc.ClientSideError(msg)
 
 

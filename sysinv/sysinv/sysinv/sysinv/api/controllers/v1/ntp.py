@@ -197,9 +197,9 @@ def _check_ntp_data(op, ntp):
 
     if len(intp_ntpservers_list) > MAX_S:
         raise wsme.exc.ClientSideError(_(
-                   "Maximum NTP servers supported: %s but provided: %s. "
-                   "Please configure a valid list of NTP servers."
-                   % (MAX_S, len(intp_ntpservers_list))))
+            "Maximum NTP servers supported: %s but provided: %s. "
+            "Please configure a valid list of NTP servers."
+            % (MAX_S, len(intp_ntpservers_list))))
 
     ntp_ntpservers = ",".join(intp_ntpservers_list)
 
@@ -226,7 +226,7 @@ class NTPController(rest.RestController):
 
         if self._from_isystems and not isystem_uuid:
             raise exception.InvalidParameterValue(_(
-                  "System id not specified."))
+                "System id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -238,10 +238,10 @@ class NTPController(rest.RestController):
 
         if isystem_uuid:
             ntps = pecan.request.dbapi.intp_get_by_isystem(
-                                                    isystem_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                isystem_uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         else:
             ntps = pecan.request.dbapi.intp_get_list(limit, marker_obj,
                                                      sort_key=sort_key,
@@ -260,7 +260,7 @@ class NTPController(rest.RestController):
         """Retrieve a list of ntps. Only one per system"""
 
         return self._get_ntps_collection(isystem_uuid, marker, limit,
-                                          sort_key, sort_dir)
+                                         sort_key, sort_dir)
 
     @wsme_pecan.wsexpose(intpCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)

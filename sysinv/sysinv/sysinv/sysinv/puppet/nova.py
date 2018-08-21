@@ -34,7 +34,7 @@ SCHEDULER_FILTERS_COMMON = [
     'ServerGroupAntiAffinityFilter',
     'PciPassthroughFilter',
     'DiskFilter',
-#    'AggregateProviderNetworkFilter',
+    #    'AggregateProviderNetworkFilter',
 ]
 
 SCHEDULER_FILTERS_STANDARD = [
@@ -59,14 +59,14 @@ DEFAULT_NOVA_PCI_ALIAS = [
 ]
 
 SERVICE_PARAM_NOVA_PCI_ALIAS = [
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU,
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU_PF,
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU_VF,
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_DH895XCC_PF,
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_DH895XCC_VF,
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_C62X_PF,
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_C62X_VF,
-                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_USER]
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU,
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU_PF,
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU_VF,
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_DH895XCC_PF,
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_DH895XCC_VF,
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_C62X_PF,
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_C62X_VF,
+    constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_USER]
 
 
 class NovaPuppet(openstack.OpenstackBasePuppet):

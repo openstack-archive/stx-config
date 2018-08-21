@@ -97,7 +97,7 @@ class InstallVenv(object):
             print('Creating venv...', end=' ')
             if no_site_packages:
                 self.run_command(['virtualenv', '-q', '--no-site-packages',
-                                 self.venv])
+                                  self.venv])
             else:
                 self.run_command(['virtualenv', '-q', self.venv])
             print('done.')
@@ -107,7 +107,7 @@ class InstallVenv(object):
 
     def pip_install(self, *args):
         self.run_command(['tools/with_venv.sh',
-                         'pip', 'install', '--upgrade'] + list(args),
+                          'pip', 'install', '--upgrade'] + list(args),
                          redirect_output=False)
 
     def install_dependencies(self):
@@ -138,7 +138,7 @@ class Distro(InstallVenv):
 
     def check_cmd(self, cmd):
         return bool(self.run_command(['which', cmd],
-                    check_exit_code=False).strip())
+                                     check_exit_code=False).strip())
 
     def install_virtualenv(self):
         if self.check_cmd('virtualenv'):

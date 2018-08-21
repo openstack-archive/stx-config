@@ -352,28 +352,28 @@ class Profile(base.APIBase):
                                ]
 
             iProfile.ilvgs = [link.Link.make_link('self',
-                                                   pecan.request.host_url,
-                                                   'iprofile',
-                                                   iProfile.uuid + "/ilvgs"),
-                               link.Link.make_link(
-                                   'bookmark',
-                                   pecan.request.host_url,
-                                   'iprofile',
-                                   iProfile.uuid + "/ilvgs",
-                                   bookmark=True)
-                              ]
+                                                  pecan.request.host_url,
+                                                  'iprofile',
+                                                  iProfile.uuid + "/ilvgs"),
+                              link.Link.make_link(
+                'bookmark',
+                pecan.request.host_url,
+                'iprofile',
+                iProfile.uuid + "/ilvgs",
+                bookmark=True)
+            ]
 
             iProfile.ipvs = [link.Link.make_link('self',
-                                                   pecan.request.host_url,
-                                                   'iprofile',
-                                                   iProfile.uuid + "/ipvs"),
-                               link.Link.make_link(
-                                   'bookmark',
-                                   pecan.request.host_url,
-                                   'iprofile',
-                                   iProfile.uuid + "/ipvs",
-                                   bookmark=True)
-                             ]
+                                                 pecan.request.host_url,
+                                                 'iprofile',
+                                                 iProfile.uuid + "/ipvs"),
+                             link.Link.make_link(
+                'bookmark',
+                pecan.request.host_url,
+                'iprofile',
+                iProfile.uuid + "/ipvs",
+                bookmark=True)
+            ]
 
             iProfile.idisks = [link.Link.make_link('self',
                                                    pecan.request.host_url,
@@ -888,8 +888,8 @@ class ProfileController(rest.RestController):
             # entries in the {storage, cpu, interface, etc} tables
             if from_ihost.invprovision != constants.PROVISIONED:
                 raise wsme.exc.ClientSideError(_("Cannot create profile %s "
-                    "until host %s is unlocked for the first time." %
-                    (profile_dict['hostname'], from_ihost.hostname)))
+                                                 "until host %s is unlocked for the first time." %
+                                                 (profile_dict['hostname'], from_ihost.hostname)))
 
             profile_dict['subfunctions'] = from_ihost.subfunctions
 
@@ -901,25 +901,25 @@ class ProfileController(rest.RestController):
                         #  combo has no ceph
                         profiletype = constants.PROFILE_TYPE_LOCAL_STORAGE
                         LOG.info("No ceph backend for stor profile, assuming "
-                            "%s" % profiletype)
+                                 "%s" % profiletype)
                     elif constants.CONTROLLER in from_ihost.subfunctions:
                         raise wsme.exc.ClientSideError(_("Storage profiles "
-                            "not applicable for %s with subfunctions %s." %
-                            (from_ihost.hostname, from_ihost.subfunctions)))
+                                                         "not applicable for %s with subfunctions %s." %
+                                                         (from_ihost.hostname, from_ihost.subfunctions)))
                     elif constants.STORAGE in from_ihost.subfunctions:
                         if not StorageBackendConfig.has_backend_configured(
                             pecan.request.dbapi,
                             constants.CINDER_BACKEND_CEPH
                         ):
                             raise wsme.exc.ClientSideError(_("Storage profiles "
-                                "not applicable for %s with subfunctions %s "
-                                "and non Ceph backend." %
-                                (from_ihost.hostname, from_ihost.subfunctions)))
+                                                             "not applicable for %s with subfunctions %s "
+                                                             "and non Ceph backend." %
+                                                             (from_ihost.hostname, from_ihost.subfunctions)))
                     else:
                         raise wsme.exc.ClientSideError(_("Storage profiles "
-                            "not applicable for %s with unsupported "
-                            "subfunctions %s." %
-                            (from_ihost.hostname, from_ihost.subfunctions)))
+                                                         "not applicable for %s with unsupported "
+                                                         "subfunctions %s." %
+                                                         (from_ihost.hostname, from_ihost.subfunctions)))
 
             # Create profile
             LOG.debug("iprofileihost is: %s " % profile_dict)
@@ -1124,7 +1124,7 @@ class ProfileController(rest.RestController):
                         results.append({'result': "Warning",
                                         'type': object.display,
                                         'msg': _('warning: %s %s already exists and is not imported.') %
-                                                (object.display, profile_name),
+                                        (object.display, profile_name),
                                         'detail': None})
         return results
 
@@ -1176,7 +1176,7 @@ def _create_cpu_profile(profile_name, profile_node):
                 p_idx = int(processor_node.get('index'))
                 if p_idx >= number_of_cpu:
                     raise profile_utils.InvalidProfileData('Invalid processor index %d. '
-                                                            'Valid range is 0 to %d (numberOfProcessor - 1)' %
+                                                           'Valid range is 0 to %d (numberOfProcessor - 1)' %
                                                            (p_idx, number_of_cpu - 1))
                 cores_node = processor_node.get('numberOfCores')
                 cores = int(cores_node)
@@ -1305,7 +1305,7 @@ def _create_if_profile(profile_name, profile_node):
             detail_msg = _('Eth port name will be used for port matching')
         else:
             raise profile_utils.InvalidProfileData(_('pciAddress must be provided for each Eth port.'
-                                                      'Name for each Eth port can be provided as alternative.'))
+                                                     'Name for each Eth port can be provided as alternative.'))
 
         for aeIf in aeInterfaces:
             aeIfMap[aeIf.name] = aeIf
@@ -1507,7 +1507,7 @@ def _create_mem_profile(profile_name, profile_node):
             if p_idx >= number_of_cpu:
                 msg = _('Invalid processor index {0}. '
                         'Valid range is 0 to {1} (numberOfProcessor - 1)')\
-                        .format(p_idx, number_of_cpu - 1)
+                    .format(p_idx, number_of_cpu - 1)
                 raise profile_utils.InvalidProfileData(msg)
 
             if p_idx in processor_indexes:
@@ -1609,7 +1609,7 @@ def _create_storage_profile(profile_name, profile_node):
         if dev_func not in supportedFuncs:
             return "Error", _('error: Storage profile %s is invalid') % \
                    profile_name, \
-                    _('volumeFunc (%s) is not supported.') % dev_func
+                _('volumeFunc (%s) is not supported.') % dev_func
         if dev_path not in dev_paths:
             dev_paths.append(dev_paths)
         else:
@@ -1758,7 +1758,7 @@ def _create_localstorage_profile(profile_name, profile_node):
 
     prohibitedFuncs = ['osd']  # prohibited volumeFunc must be appended here
     ilvgs_local = [ilvg for ilvg in all_ilvg_nodes if
-                  ilvg.get('lvm_vg_name') == constants.LVG_NOVA_LOCAL]
+                   ilvg.get('lvm_vg_name') == constants.LVG_NOVA_LOCAL]
 
     if not disks:
         return ("Error", _('error: Local Storage profile %s is invalid') %
@@ -1772,9 +1772,9 @@ def _create_localstorage_profile(profile_name, profile_node):
         nova_local_nodes_len = len(ilvgs_local)
         if nova_local_nodes_len > 1:
             return ("Error", _('error: Local Storage profile %s is invalid') %
-                profile_name, _('Currently only one nova-local lvg '
-                                'is allowed per host.  Defined %s in %s.' %
-                                (nova_local_nodes_len, profile_name)))
+                    profile_name, _('Currently only one nova-local lvg '
+                                    'is allowed per host.  Defined %s in %s.' %
+                                    (nova_local_nodes_len, profile_name)))
 
     for disk in disks:
         dev_path = disk.get('path')
@@ -1784,11 +1784,11 @@ def _create_localstorage_profile(profile_name, profile_node):
 
         if dev_func and dev_func in prohibitedFuncs:
             return ("Error", _('error: Local Storage profile %s is invalid') %
-                profile_name, _('dev_func %s is not required.') % dev_func)
+                    profile_name, _('dev_func %s is not required.') % dev_func)
 
         if not dev_path:
             return ("Error", _('error: Local Storage profile %s is invalid') %
-                profile_name, _('path is empty.'))
+                    profile_name, _('path is empty.'))
 
         if dev_path not in dev_paths:
             dev_paths.append(dev_path)
@@ -1801,7 +1801,7 @@ def _create_localstorage_profile(profile_name, profile_node):
     except dbException.DBDuplicateEntry as e:
         LOG.exception(e)
         return ("Warning", _('warning: Local Storage profile %s already '
-                'exists and is not imported.') % profile_name, None)
+                             'exists and is not imported.') % profile_name, None)
     except exception as e:
         LOG.exception(e)
         return ("Error", _('error: importing Local Storage profile %s '
@@ -1817,10 +1817,10 @@ def _create_localstorage_profile(profile_name, profile_node):
                 int(ilvg.get(constants.LVG_NOVA_PARAM_INST_LV_SZ_GIB)) * 1024
             if not instances_lv_size_mib:
                 return ("Error", _('error: importing Local Storage profile %s '
-                        'failed.') %
+                                   'failed.') %
                         profile_name, "instances_lv_size_mib required.")
             capabilities_dict = {constants.LVG_NOVA_PARAM_BACKING:
-                                     constants.LVG_NOVA_BACKING_LVM,
+                                 constants.LVG_NOVA_BACKING_LVM,
                                  constants.LVG_NOVA_PARAM_INST_LV_SZ:
                                      int(instances_lv_size_mib),
                                  constants.LVG_NOVA_PARAM_DISK_OPS:
@@ -1835,7 +1835,7 @@ def _create_localstorage_profile(profile_name, profile_node):
                         % ilvg.get(constants.LVG_NOVA_PARAM_INST_LV_SZ_GIB))
 
             capabilities_dict = {constants.LVG_NOVA_PARAM_BACKING:
-                                     constants.LVG_NOVA_BACKING_IMAGE,
+                                 constants.LVG_NOVA_BACKING_IMAGE,
                                  constants.LVG_NOVA_PARAM_DISK_OPS:
                                      int(concurrent_disk_operations)}
         elif instance_backing == constants.LVG_NOVA_BACKING_REMOTE:
@@ -1848,7 +1848,7 @@ def _create_localstorage_profile(profile_name, profile_node):
                         % ilvg.get(constants.LVG_NOVA_PARAM_INST_LV_SZ_GIB))
 
             capabilities_dict = {constants.LVG_NOVA_PARAM_BACKING:
-                                     constants.LVG_NOVA_BACKING_REMOTE,
+                                 constants.LVG_NOVA_BACKING_REMOTE,
                                  constants.LVG_NOVA_PARAM_DISK_OPS:
                                      int(concurrent_disk_operations)}
         else:
@@ -2167,8 +2167,8 @@ def _create_partition_profile(partition, iprofile_id):
     disk_profile = None
     if profile_disks:
         disk_profile = next((d for d in profile_disks
-                            if (d.device_path == disk.device_path or
-                                d.device_node == disk.device_node)),
+                             if (d.device_path == disk.device_path or
+                                 d.device_node == disk.device_node)),
                             None)
 
     if disk_profile is None:
@@ -2240,9 +2240,9 @@ def localstorageprofile_copy_data(host, profile):
 
     if not idisks or not ilvgs or not ipvs:
         raise wsme.exc.ClientSideError(_("Storage profile cannot be "
-            "created if there are no disks associated to logical volume "
-            "groups or physical volumes.  Check %s storage configuration "
-            "then try again." % host['hostname']))
+                                         "created if there are no disks associated to logical volume "
+                                         "groups or physical volumes.  Check %s storage configuration "
+                                         "then try again." % host['hostname']))
 
     # Keep track of partitions used by PVs.
     used_partitions = []
@@ -2332,7 +2332,7 @@ def memoryprofile_copy_data(host, profile):
     # check if the node is provisioned
     if host.invprovision != constants.PROVISIONED:
         raise wsme.exc.ClientSideError(_("Could not create memory "
-                "profile until host %s is unlocked for the first time." %
+                                         "profile until host %s is unlocked for the first time." %
                                          host.hostname))
 
     # Copy hugepage information from host
@@ -2899,7 +2899,7 @@ def _create_stor(host, profile, diskPairs, function, tier_map,  # input
                 except Exception as e:
                     LOG.exception(e)
                     raise wsme.exc.ClientSideError(_(
-                            "Failed to create storage function. %s") % str(e))
+                        "Failed to create storage function. %s") % str(e))
 
                 # Save pairs for later use
                 if pstor.function == constants.STOR_FUNCTION_JOURNAL:
@@ -2979,9 +2979,9 @@ def check_localstorageprofile_applicable(host, profile):
     subfunctions = host.subfunctions
     if constants.COMPUTE not in subfunctions:
         raise wsme.exc.ClientSideError(_("%s with subfunctions: %s "
-            "profile %s: Local storage profiles are applicable only to "
-            "hosts with 'compute' subfunction." %
-            (host.hostname, host.subfunctions, profile.hostname)))
+                                         "profile %s: Local storage profiles are applicable only to "
+                                         "hosts with 'compute' subfunction." %
+                                         (host.hostname, host.subfunctions, profile.hostname)))
 
     if not profile.disks:
         raise wsme.exc.ClientSideError(_("Profile (%s) has no disks" %
@@ -3060,7 +3060,7 @@ def localstorageprofile_apply_to_host(host, profile):
             mydisk = pecan.request.dbapi.idisk_get(disk.uuid)
             if mydisk.foripvid:
                 LOG.warn("mydisk %s foripvid %s" %
-                   (mydisk.uuid, mydisk.foripvid))
+                         (mydisk.uuid, mydisk.foripvid))
             # except Exception as e:
             #     LOG.exception(e)
             #     raise wsme.exc.ClientSideError(_("Failed to unlink physical "
@@ -3137,7 +3137,7 @@ def localstorageprofile_apply_to_host(host, profile):
             # 'lvm_pv_name', from Agent: not in profile
 
             pvdict = (dict((k, v) for k, v in pipv.as_dict().iteritems()
-                      if k in pvfields and v))
+                           if k in pvfields and v))
             pvdict['forihostid'] = host_id
             pvdict['disk_or_part_uuid'] = disk_or_part_uuid
             pvdict['forilvgid'] = newlvg.id

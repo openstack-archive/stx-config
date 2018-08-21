@@ -41,8 +41,8 @@ class sensorgroupTestCase(base.FunctionalTest):
         }
         sensor = self.post_json('/isensors', sensorVals, headers={'User-Agent': 'hwmon'})
         self.patch_dict_json('/isensors/%s/' % sensor.json['uuid'],
-                            headers={'User-Agent': 'hwmon'},
-                            sensorgroup_uuid=sensorgroup.json['uuid'])
+                             headers={'User-Agent': 'hwmon'},
+                             sensorgroup_uuid=sensorgroup.json['uuid'])
 
         # Assert sensorgroup/sensor created properly in DB
         self.assertEqual('defaultSensorGroupName',  # Expected

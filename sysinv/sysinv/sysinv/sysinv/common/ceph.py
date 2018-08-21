@@ -522,7 +522,7 @@ class CephApiOperator(object):
             if (osd_tree[i]['name'] == hostname):
                 for j in range(1, children_num + 1):
                     if (osd_tree[i + j]['type'] == constants.STOR_FUNCTION_OSD and
-                       osd_tree[i + j]['status'] == "up"):
+                            osd_tree[i + j]['status'] == "up"):
                         # at least one osd is not down
                         return False
                 # all osds are up
@@ -642,7 +642,7 @@ class CephApiOperator(object):
             # osd to host lookups for the single call to host_osd_status().
             host_name = self.osd_host_lookup(osd_id)
             if (host_name is not None and
-               host_name == hostname):
+                    host_name == hostname):
                 # mark the selected storage node with HEALTH_BLOCK
                 # we can't lock any storage node marked with HEALTH_BLOCK
                 return constants.CEPH_HEALTH_BLOCK
@@ -666,9 +666,9 @@ class CephApiOperator(object):
                 locking = (host_action.startswith(constants.LOCK_ACTION) or
                            host_action.startswith(constants.FORCE_LOCK_ACTION))
                 if (capabilities['stor_function'] == constants.STOR_FUNCTION_MONITOR and
-                   ihost['administrative'] == constants.ADMIN_UNLOCKED and
-                   ihost['operational'] == constants.OPERATIONAL_ENABLED and
-                   not locking):
+                    ihost['administrative'] == constants.ADMIN_UNLOCKED and
+                    ihost['operational'] == constants.OPERATIONAL_ENABLED and
+                        not locking):
                     num_inv_monitors += 1
                     inventory_monitor_names.append(ihost['hostname'])
 

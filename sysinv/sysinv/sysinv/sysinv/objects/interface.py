@@ -87,36 +87,36 @@ class Interface(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
-            'forihostid': utils.int_or_none,
-            'ihost_uuid': utils.str_or_none,
+        'id': int,
+        'uuid': utils.str_or_none,
+        'forihostid': utils.int_or_none,
+        'ihost_uuid': utils.str_or_none,
 
-            'ifname': utils.str_or_none,
-            'iftype': utils.str_or_none,
-            'imac': utils.str_or_none,
-            'imtu': utils.int_or_none,
-            'networktype': utils.str_or_none,
-            'aemode': utils.str_or_none,
-            'schedpolicy': utils.str_or_none,
-            'txhashpolicy': utils.str_or_none,
-            'providernetworks': utils.str_or_none,
-            'providernetworksdict': utils.dict_or_none,
+        'ifname': utils.str_or_none,
+        'iftype': utils.str_or_none,
+        'imac': utils.str_or_none,
+        'imtu': utils.int_or_none,
+        'networktype': utils.str_or_none,
+        'aemode': utils.str_or_none,
+        'schedpolicy': utils.str_or_none,
+        'txhashpolicy': utils.str_or_none,
+        'providernetworks': utils.str_or_none,
+        'providernetworksdict': utils.dict_or_none,
 
-            'ifcapabilities': utils.dict_or_none,
+        'ifcapabilities': utils.dict_or_none,
 
-            'vlan_id': utils.int_or_none,
-            'vlan_type': utils.str_or_none,
+        'vlan_id': utils.int_or_none,
+        'vlan_type': utils.str_or_none,
 
-            'uses': utils.list_of_strings_or_none,
-            'used_by': utils.list_of_strings_or_none,
+        'uses': utils.list_of_strings_or_none,
+        'used_by': utils.list_of_strings_or_none,
 
-            'ipv4_mode': utils.ipv4_mode_or_none,
-            'ipv6_mode': utils.ipv6_mode_or_none,
-            'ipv4_pool': utils.uuid_or_none,
-            'ipv6_pool': utils.uuid_or_none,
-            'sriov_numvfs': utils.int_or_none
-             }
+        'ipv4_mode': utils.ipv4_mode_or_none,
+        'ipv6_mode': utils.ipv6_mode_or_none,
+        'ipv4_pool': utils.uuid_or_none,
+        'ipv6_pool': utils.uuid_or_none,
+        'sriov_numvfs': utils.int_or_none
+    }
 
     _foreign_fields = {'uses': _get_interface_name_list,
                        'used_by': _get_interface_name_list,

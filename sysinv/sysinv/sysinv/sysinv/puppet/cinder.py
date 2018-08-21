@@ -603,13 +603,13 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
                 return url
         if version == 'cinder_public_uri_v1':
             return self._format_public_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V1)
+                                                path=self.SERVICE_PATH_V1)
         elif version == 'cinder_public_uri_v2':
             return self._format_public_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V2)
+                                                path=self.SERVICE_PATH_V2)
         elif version == 'cinder_public_uri_v3':
             return self._format_public_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V3)
+                                                path=self.SERVICE_PATH_V3)
         else:
             return None
 
@@ -620,13 +620,13 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
                 return url
         if version == 'cinder_internal_uri_v1':
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V1)
+                                                 path=self.SERVICE_PATH_V1)
         elif version == 'cinder_internal_uri_v2':
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V2)
+                                                 path=self.SERVICE_PATH_V2)
         elif version == 'cinder_internal_uri_v3':
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V3)
+                                                 path=self.SERVICE_PATH_V3)
         else:
             return None
 
@@ -637,13 +637,13 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
                 return url
         if version == 'cinder_admin_uri_v1':
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V1)
+                                                 path=self.SERVICE_PATH_V1)
         elif version == 'cinder_admin_uri_v2':
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V2)
+                                                 path=self.SERVICE_PATH_V2)
         elif version == 'cinder_admin_uri_v3':
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V3)
+                                                 path=self.SERVICE_PATH_V3)
         else:
             return None
 
@@ -651,30 +651,30 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
     def get_proxy_public_url(self, version):
         if version == 'v2':
             return self._format_private_endpoint(self.PROXY_SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V2)
+                                                 path=self.SERVICE_PATH_V2)
         elif version == 'v3':
             return self._format_private_endpoint(self.PROXY_SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V3)
+                                                 path=self.SERVICE_PATH_V3)
         else:
             return None
 
     def get_proxy_internal_url(self, version):
         if version == 'v2':
             return self._format_private_endpoint(self.PROXY_SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V2)
+                                                 path=self.SERVICE_PATH_V2)
         elif version == 'v3':
             return self._format_private_endpoint(self.PROXY_SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V3)
+                                                 path=self.SERVICE_PATH_V3)
         else:
             return None
 
     def get_proxy_admin_url(self, version):
         if version == 'v2':
             return self._format_private_endpoint(self.PROXY_SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V2)
+                                                 path=self.SERVICE_PATH_V2)
         elif version == 'v3':
             return self._format_private_endpoint(self.PROXY_SERVICE_PORT,
-                                            path=self.SERVICE_PATH_V3)
+                                                 path=self.SERVICE_PATH_V3)
         else:
             return None
 

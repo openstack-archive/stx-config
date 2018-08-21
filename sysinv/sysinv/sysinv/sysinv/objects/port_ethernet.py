@@ -16,13 +16,13 @@ from sysinv.objects import port
 class EthernetPort(port.Port):
 
     fields = dict({
-            'mac': utils.str_or_none,
-            'mtu': utils.int_or_none,
-            'speed': utils.int_or_none,
-            'link_mode': utils.str_or_none,
-            'duplex': utils.int_or_none,
-            'autoneg': utils.str_or_none,
-            'bootp': utils.str_or_none},
+        'mac': utils.str_or_none,
+        'mtu': utils.int_or_none,
+        'speed': utils.int_or_none,
+        'link_mode': utils.str_or_none,
+        'duplex': utils.int_or_none,
+        'autoneg': utils.str_or_none,
+        'bootp': utils.str_or_none},
         **port.Port.fields)
 
     @base.remotable_classmethod

@@ -235,7 +235,7 @@ def add_inode_filter_by_ihost(query, value):
     # elif uuidutils.is_uuid_like(value):
     else:
         query = query.join(models.ihost,
-                models.inode.forihostid == models.ihost.id)
+                           models.inode.forihostid == models.ihost.id)
         return query.filter(models.ihost.uuid == value)
 
 
@@ -283,7 +283,7 @@ def add_icpu_filter_by_inode(query, inodeid):
         return query.filter_by(forinodeid=inodeid)
     else:
         query = query.join(models.inode,
-                models.icpu.forinodeid == models.inode.id)
+                           models.icpu.forinodeid == models.inode.id)
         return query.filter(models.inode.uuid == inodeid)
 
 
@@ -318,7 +318,7 @@ def add_imemory_filter_by_inode(query, inodeid):
         return query.filter_by(forinodeid=inodeid)
     else:
         query = query.join(models.inode,
-                models.imemory.forinodeid == models.inode.id)
+                           models.imemory.forinodeid == models.inode.id)
         return query.filter(models.inode.uuid == inodeid)
 
 
@@ -400,7 +400,7 @@ def add_interface_filter_by_ihost(query, value):
         return query.filter_by(forihostid=value)
     else:
         query = query.join(models.ihost,
-                models.Interfaces.forihostid == models.ihost.id)
+                           models.Interfaces.forihostid == models.ihost.id)
         return query.filter(models.ihost.uuid == value)
 
 
@@ -558,7 +558,7 @@ def add_istor_filter_by_ihost(query, value):
         return query.filter_by(forihostid=value)
     else:
         query = query.join(models.ihost,
-                models.istor.forihostid == models.ihost.id)
+                           models.istor.forihostid == models.ihost.id)
         return query.filter(models.ihost.uuid == value)
 
 
@@ -576,7 +576,7 @@ def add_journal_filter_by_foristor(query, value):
         return query.filter_by(foristorid=value)
     else:
         query = query.join(models.istor,
-                models.journal.foristorid == models.istor.id)
+                           models.journal.foristorid == models.istor.id)
         return query.filter(models.istor.id == value)
 
 
@@ -585,7 +585,7 @@ def add_istor_filter_by_inode(query, inodeid):
         return query.filter_by(forinodeid=inodeid)
     else:
         query = query.join(models.inode,
-                models.istor.forinodeid == models.inode.id)
+                           models.istor.forinodeid == models.inode.id)
         return query.filter(models.inode.uuid == inodeid)
 
 
@@ -651,13 +651,13 @@ def add_idisk_filter_by_ihost(query, value):
         return query.filter_by(forihostid=value)
     else:
         query = query.join(models.ihost,
-                models.idisk.forihostid == models.ihost.id)
+                           models.idisk.forihostid == models.ihost.id)
         return query.filter(models.ihost.uuid == value)
 
 
 def add_idisk_filter_by_istor(query, istorid):
     query = query.join(models.istor,
-            models.idisk.foristorid == models.istor.id)
+                       models.idisk.foristorid == models.istor.id)
     return query.filter(models.istor.uuid == istorid)
 
 
@@ -948,7 +948,7 @@ def add_sensor_filter_by_sensorgroup(query, sensorgroupid):
         return query.filter(models.SensorGroups.uuid == sensorgroupid)
 
     LOG.warn("sensor_filter_by_sensorgroup: "
-              "No match for supplied filter id (%s)" % str(sensorgroupid))
+             "No match for supplied filter id (%s)" % str(sensorgroupid))
 
 
 def add_sensor_filter_by_ihost_sensorgroup(query, hostid, sensorgroupid):
@@ -1082,6 +1082,7 @@ def add_lldp_tlv_filter_by_agent(query, agentid):
                            models.LldpTlvs.agent_id == models.LldpAgents.id)
         return query.filter(models.LldpAgents.uuid == agentid)
 
+
 class Connection(api.Connection):
     """SqlAlchemy connection."""
 
@@ -1139,8 +1140,8 @@ class Connection(api.Connection):
     @objects.objectify(objects.system)
     def isystem_get_by_systemname(self, systemname):
         result = model_query(models.isystem, read_deleted="no").\
-                             filter_by(name=systemname).\
-                             first()
+            filter_by(name=systemname).\
+            first()
 
         if not result:
             raise exception.NodeNotFound(node=systemname)
@@ -1567,12 +1568,12 @@ class Connection(api.Connection):
             if uuidutils.is_uuid_like(cpu_id):
                 model_query(models.icpu, read_deleted="no",
                             session=session).\
-                            filter_by(uuid=cpu_id).\
-                            delete()
+                    filter_by(uuid=cpu_id).\
+                    delete()
             else:
                 model_query(models.icpu, read_deleted="no").\
-                            filter_by(id=cpu_id).\
-                            delete()
+                    filter_by(id=cpu_id).\
+                    delete()
 
     def _memory_get(self, memory_id, forihostid=None):
         query = model_query(models.imemory)
@@ -1628,14 +1629,14 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.memory)
     def imemory_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                         sort_key=None, sort_dir=None):
         return _paginate_query(models.imemory, limit, marker,
                                sort_key, sort_dir)
 
     @objects.objectify(objects.memory)
     def imemory_get_by_ihost(self, ihost,
-                          limit=None, marker=None,
-                          sort_key=None, sort_dir=None):
+                             limit=None, marker=None,
+                             sort_key=None, sort_dir=None):
 
         query = model_query(models.imemory)
         query = add_imemory_filter_by_ihost(query, ihost)
@@ -1686,13 +1687,13 @@ class Connection(api.Connection):
             if uuidutils.is_uuid_like(memory_id):
                 model_query(models.imemory, read_deleted="no",
                             session=session).\
-                            filter_by(uuid=memory_id).\
-                            delete()
+                    filter_by(uuid=memory_id).\
+                    delete()
             else:
                 model_query(models.imemory, read_deleted="no",
                             session=session).\
-                            filter_by(id=memory_id).\
-                            delete()
+                    filter_by(id=memory_id).\
+                    delete()
 
     @objects.objectify(objects.pci_device)
     def pci_device_create(self, hostid, values):
@@ -1750,7 +1751,7 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.pci_device)
     def pci_device_get_list(self, limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                            sort_key=None, sort_dir=None):
         return _paginate_query(models.PciDevice, limit, marker,
                                sort_key, sort_dir)
 
@@ -2040,7 +2041,7 @@ class Connection(api.Connection):
                                 models.ihost.id == models.Interfaces.forihostid))
             query = query.options(contains_eager(interfaces.host))
             query, field = add_filter_by_many_identities(
-                            query, models.ihost, [forihostid])
+                query, models.ihost, [forihostid])
         return query.all()
 
     def _iinterface_get(self, iinterface_id, ihost=None, network=None):
@@ -2069,7 +2070,7 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.interface)
     def iinterface_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                            sort_key=None, sort_dir=None):
 
         entity = with_polymorphic(models.Interfaces, '*')
         query = model_query(entity)
@@ -2101,23 +2102,23 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.interface)
     def _iinterface_get_by_ihost(self, ihost, session=None,
-                                limit=None, marker=None,
-                                sort_key=None, sort_dir=None):
+                                 limit=None, marker=None,
+                                 sort_key=None, sort_dir=None):
         interfaces = with_polymorphic(models.Interfaces, '*')
         query = model_query(interfaces, session=session)
         query = (query.join(models.ihost,
                             models.ihost.id == models.Interfaces.forihostid))
         query = query.options(contains_eager(interfaces.host))
         query, field = add_filter_by_many_identities(
-                            query, models.ihost, [ihost])
+            query, models.ihost, [ihost])
 
         return _paginate_query(models.Interfaces, limit, marker,
                                sort_key, sort_dir, query)
 
     @objects.objectify(objects.interface)
     def iinterface_get_by_network(self, network,
-                                limit=None, marker=None,
-                                sort_key=None, sort_dir=None):
+                                  limit=None, marker=None,
+                                  sort_key=None, sort_dir=None):
         entity = with_polymorphic(models.Interfaces, '*')
         query = model_query(entity)
         query = query.filter_by(networktype=network)
@@ -2244,12 +2245,12 @@ class Connection(api.Connection):
                 err="No entry found for interface %s" % interface_id)
         except MultipleResultsFound:
             raise exception.InvalidParameterValue(
-                    err="Multiple entries found for interface %s" % interface_id)
+                err="Multiple entries found for interface %s" % interface_id)
 
         return result
 
     def _interface_get_list(self, cls, limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                            sort_key=None, sort_dir=None):
         return _paginate_query(cls, limit, marker, sort_key, sort_dir)
 
     def _interface_get_by_ihost_port(self, cls, ihost, port,
@@ -2262,8 +2263,8 @@ class Connection(api.Connection):
         return _paginate_query(cls, limit, marker, sort_key, sort_dir, query)
 
     def _interface_get_by_ihost(self, cls, ihost,
-                               limit=None, marker=None,
-                               sort_key=None, sort_dir=None):
+                                limit=None, marker=None,
+                                sort_key=None, sort_dir=None):
         query = model_query(cls)
         query = add_interface_filter_by_ihost(query, ihost)
         return _paginate_query(cls, limit, marker, sort_key, sort_dir, query)
@@ -2359,14 +2360,14 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.ethernet_interface)
     def ethernet_interface_get_list(self, limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                                    sort_key=None, sort_dir=None):
         return self._interface_get_list(models.EthernetInterfaces, limit, marker,
                                         sort_key, sort_dir)
 
     @objects.objectify(objects.ethernet_interface)
     def ethernet_interface_get_by_ihost(self, ihost,
-                               limit=None, marker=None,
-                               sort_key=None, sort_dir=None):
+                                        limit=None, marker=None,
+                                        sort_key=None, sort_dir=None):
         return self._interface_get_by_ihost(models.EthernetInterfaces, ihost, limit,
                                             marker, sort_key, sort_dir)
 
@@ -2393,14 +2394,14 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.ae_interface)
     def ae_interface_get_list(self, limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                              sort_key=None, sort_dir=None):
         return self._interface_get_list(models.AeInterfaces, limit, marker,
                                         sort_key, sort_dir)
 
     @objects.objectify(objects.ae_interface)
     def ae_interface_get_by_ihost(self, ihost,
-                               limit=None, marker=None,
-                               sort_key=None, sort_dir=None):
+                                  limit=None, marker=None,
+                                  sort_key=None, sort_dir=None):
         return self._interface_get_by_ihost(models.AeInterfaces, ihost, limit,
                                             marker, sort_key, sort_dir)
 
@@ -2426,14 +2427,14 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.vlan_interface)
     def vlan_interface_get_list(self, limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                                sort_key=None, sort_dir=None):
         return self._interface_get_list(models.VlanInterfaces, limit, marker,
                                         sort_key, sort_dir)
 
     @objects.objectify(objects.vlan_interface)
     def vlan_interface_get_by_ihost(self, ihost,
-                               limit=None, marker=None,
-                               sort_key=None, sort_dir=None):
+                                    limit=None, marker=None,
+                                    sort_key=None, sort_dir=None):
         return self._interface_get_by_ihost(models.VlanInterfaces, ihost, limit,
                                             marker, sort_key, sort_dir)
 
@@ -2535,14 +2536,14 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.disk)
     def idisk_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                       sort_key=None, sort_dir=None):
         return _paginate_query(models.idisk, limit, marker,
                                sort_key, sort_dir)
 
     @objects.objectify(objects.disk)
     def idisk_get_by_ihost(self, ihost,
-                          limit=None, marker=None,
-                          sort_key=None, sort_dir=None):
+                           limit=None, marker=None,
+                           sort_key=None, sort_dir=None):
 
         query = model_query(models.idisk)
         query = add_idisk_filter_by_ihost(query, ihost)
@@ -2601,8 +2602,8 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.disk)
     def idisk_get_by_device_wwn(self, device_wwn,
-                               limit=None, marker=None,
-                               sort_key=None, sort_dir=None):
+                                limit=None, marker=None,
+                                sort_key=None, sort_dir=None):
 
         query = model_query(models.idisk)
         query = add_idisk_filter_by_device_wwn(query, device_wwn)
@@ -2641,13 +2642,13 @@ class Connection(api.Connection):
             if uuidutils.is_uuid_like(disk_id):
                 model_query(models.idisk, read_deleted="no",
                             session=session).\
-                            filter_by(uuid=disk_id).\
-                            delete()
+                    filter_by(uuid=disk_id).\
+                    delete()
             else:
                 model_query(models.idisk, read_deleted="no",
                             session=session).\
-                            filter_by(id=disk_id).\
-                            delete()
+                    filter_by(id=disk_id).\
+                    delete()
 
     def _partition_get(self, partition_id, forihostid=None):
         query = model_query(models.partition)
@@ -2679,8 +2680,8 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.partition)
     def partition_get_by_ihost(self, ihost,
-                           limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                               limit=None, marker=None,
+                               sort_key=None, sort_dir=None):
 
         query = model_query(models.partition)
         query = add_partition_filter_by_ihost(query, ihost)
@@ -2831,7 +2832,7 @@ class Connection(api.Connection):
             # Update DB
             journal_path = journal_disk.device_path
             updates = {'device_path': journal_path + "-part" +
-                                      str(partition_index)}
+                       str(partition_index)}
             self.journal_update(journal.id, updates)
             partition_index += 1
             # Update output
@@ -2969,7 +2970,7 @@ class Connection(api.Connection):
                     # If the journal becomes collocated, assign second
                     # partition.
                     journal_vals['device_path'] = new_onidisk.device_path + \
-                                                  "-part" + "2"
+                        "-part" + "2"
 
                 del values[key]
 
@@ -2982,8 +2983,8 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.storage)
     def istor_get_by_ihost_function(self, ihost, function,
-                           limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                                    limit=None, marker=None,
+                                    sort_key=None, sort_dir=None):
 
         query = model_query(models.istor)
         query = add_istor_filter_by_ihost(query, ihost)
@@ -3841,7 +3842,7 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.storage_tier)
     def storage_tier_get_list(self, limit=None, marker=None,
-                          sort_key=None, sort_dir=None):
+                              sort_key=None, sort_dir=None):
         query = model_query(models.StorageTier)
         return _paginate_query(models.StorageTier, limit, marker,
                                sort_key, sort_dir, query)
@@ -4002,7 +4003,7 @@ class Connection(api.Connection):
             query = model_query(entity)
             try:
                 result = _paginate_query(models.StorageBackend, limit, marker,
-                                     sort_key, sort_dir, query)
+                                         sort_key, sort_dir, query)
             except exception.SysinvException:
                 result = []
 
@@ -4129,7 +4130,7 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.storage_external)
     def storage_external_get_list(self, limit=None, marker=None,
-                              sort_key=None, sort_dir=None):
+                                  sort_key=None, sort_dir=None):
         return self._storage_backend_get_list(models.StorageExternal, limit, marker,
                                               sort_key, sort_dir)
 
@@ -4427,7 +4428,7 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.service)
     def service_get_list(self, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                         sort_key=None, sort_dir=None):
 
         query = model_query(models.Services)
 
@@ -5146,12 +5147,12 @@ class Connection(api.Connection):
             # Delete port which should cascade to delete SensorsAnalog
             if uuidutils.is_uuid_like(sensorid):
                 model_query(models.Sensors, read_deleted="no").\
-                            filter_by(uuid=sensorid).\
-                            delete()
+                    filter_by(uuid=sensorid).\
+                    delete()
             else:
                 model_query(models.Sensors, read_deleted="no").\
-                            filter_by(id=sensorid).\
-                            delete()
+                    filter_by(id=sensorid).\
+                    delete()
 
     @objects.objectify(objects.sensor_analog)
     def isensor_analog_create(self, hostid, values):
@@ -5306,12 +5307,12 @@ class Connection(api.Connection):
             # Delete port which should cascade to delete SensorsDiscrete
             if uuidutils.is_uuid_like(sensorid):
                 model_query(models.Sensors, read_deleted="no").\
-                            filter_by(uuid=sensorid).\
-                            delete()
+                    filter_by(uuid=sensorid).\
+                    delete()
             else:
                 model_query(models.Sensors, read_deleted="no").\
-                            filter_by(id=sensorid).\
-                            delete()
+                    filter_by(id=sensorid).\
+                    delete()
 
     @objects.objectify(objects.sensor_discrete)
     def isensor_discrete_create(self, hostid, values):
@@ -5375,7 +5376,7 @@ class Connection(api.Connection):
                 err="No entry found for interface %s" % sensor_id)
         except MultipleResultsFound:
             raise exception.InvalidParameterValue(
-                    err="Multiple entries found for interface %s" % sensor_id)
+                err="Multiple entries found for interface %s" % sensor_id)
 
         return result
 
@@ -5563,8 +5564,8 @@ class Connection(api.Connection):
                 err="No entry found for sensorgroup %s" % sensorgroup_id)
         except MultipleResultsFound:
             raise exception.InvalidParameterValue(
-                    err="Multiple entries found for sensorgroup %s" %
-                        sensorgroup_id)
+                err="Multiple entries found for sensorgroup %s" %
+                sensorgroup_id)
 
         return result
 
@@ -5922,7 +5923,7 @@ class Connection(api.Connection):
             result = query.one()
         except NoResultFound:
             raise exception.InvalidParameterValue(
-                    err="No software upgrade entry found for %s" % id)
+                err="No software upgrade entry found for %s" % id)
 
         return result
 
@@ -6036,7 +6037,7 @@ class Connection(api.Connection):
             result = query.one()
         except NoResultFound:
             raise exception.InvalidParameterValue(
-                    err="No host upgrade entry found for %s" % id)
+                err="No host upgrade entry found for %s" % id)
 
         return result
 
@@ -6411,10 +6412,10 @@ class Connection(api.Connection):
             return query.one()
         except NoResultFound:
             raise exception.InvalidParameterValue(
-                    err="No entry found for agent on port %s" % port)
+                err="No entry found for agent on port %s" % port)
         except MultipleResultsFound:
-                raise exception.InvalidParameterValue(
-                    err="Multiple entries found for agent on port %s" % port)
+            raise exception.InvalidParameterValue(
+                err="Multiple entries found for agent on port %s" % port)
 
     @objects.objectify(objects.lldp_agent)
     def lldp_agent_update(self, uuid, values):
@@ -6762,8 +6763,8 @@ class Connection(api.Connection):
     @objects.objectify(objects.lldp_tlv)
     def lldp_tlv_update(self, values, agentid=None, neighbourid=None):
         if not agentid and not neighbourid:
-                raise exception.InvalidParameterValue(
-                    err="agent id and neighbour id not specified")
+            raise exception.InvalidParameterValue(
+                err="agent id and neighbour id not specified")
 
         with _session_for_write():
             query = model_query(models.LldpTlvs, read_deleted="no")
@@ -7094,7 +7095,7 @@ class Connection(api.Connection):
 
     @objects.objectify(objects.certificate)
     def certificate_get_list(self, limit=None, marker=None,
-                           sort_key=None, sort_dir=None):
+                             sort_key=None, sort_dir=None):
         query = model_query(models.certificate)
 
         return _paginate_query(models.certificate, limit, marker,

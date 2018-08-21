@@ -97,21 +97,21 @@ MANAGER_TOPIC = 'sysinv.conductor_manager'
 LOG = log.getLogger(__name__)
 
 conductor_opts = [
-       cfg.StrOpt('api_url',
-                  default=None,
-                  help=('Url of SysInv API service. If not set SysInv can '
-                        'get current value from Keystone service catalog.')),
-       cfg.IntOpt('audit_interval',
-                  default=60,
-                  help='Interval to run conductor audit'),
-       cfg.IntOpt('osd_remove_retry_count',
-                  default=11,
-                  help=('Maximum number of retries in case Ceph OSD remove '
-                        'requests fail because OSD is still up.')),
-       cfg.IntOpt('osd_remove_retry_interval',
-                  default=5,
-                  help='Interval in seconds between retries to remove Ceph OSD.'),
-                  ]
+    cfg.StrOpt('api_url',
+               default=None,
+               help=('Url of SysInv API service. If not set SysInv can '
+                     'get current value from Keystone service catalog.')),
+    cfg.IntOpt('audit_interval',
+               default=60,
+               help='Interval to run conductor audit'),
+    cfg.IntOpt('osd_remove_retry_count',
+               default=11,
+               help=('Maximum number of retries in case Ceph OSD remove '
+                     'requests fail because OSD is still up.')),
+    cfg.IntOpt('osd_remove_retry_interval',
+               default=5,
+               help='Interval in seconds between retries to remove Ceph OSD.'),
+]
 
 CONF = cfg.CONF
 CONF.register_opts(conductor_opts, 'conductor')
@@ -132,7 +132,7 @@ CONFIG_CONTROLLER_FINI_FLAG = os.path.join(tsc.VOLATILE_PATH,
 CONFIG_FAIL_FLAG = os.path.join(tsc.VOLATILE_PATH, ".config_fail")
 
 # configuration UUID reboot required flag (bit)
-CONFIG_REBOOT_REQUIRED = (1 << 127L)
+CONFIG_REBOOT_REQUIRED = (1 << 127)
 
 LOCK_NAME_UPDATE_CONFIG = 'update_config_'
 
@@ -508,8 +508,8 @@ class ConductorManager(service.PeriodicService):
             found = False
             for p_db in parms:
                 if (p_new['service'] == p_db.service and
-                            p_new['section'] == p_db.section and
-                            p_new['name'] == p_db.name):
+                    p_new['section'] == p_db.section and
+                        p_new['name'] == p_db.name):
                     found = True
                     break
             if not found:
@@ -531,7 +531,7 @@ class ConductorManager(service.PeriodicService):
                     break
             if not found:
                 self.dbapi.service_create({'name': s_new,
-                                          'enabled': False})
+                                           'enabled': False})
 
     def _lookup_static_ip_address(self, name, networktype):
         """"Find a statically configured address based on name and network
@@ -559,7 +559,7 @@ class ConductorManager(service.PeriodicService):
         elif ipersonality and ipersonality == constants.STORAGE:
             # only storage-0 and storage-1 have static (later storage-2)
             if (ihostname[:len(constants.STORAGE_0_HOSTNAME)] in
-               [constants.STORAGE_0_HOSTNAME, constants.STORAGE_1_HOSTNAME]):
+                    [constants.STORAGE_0_HOSTNAME, constants.STORAGE_1_HOSTNAME]):
                 using_static = True
 
         return using_static
@@ -601,7 +601,7 @@ class ConductorManager(service.PeriodicService):
            other controller. Real MAC address from PXE request
            is updated in the DB."""
         controller_hosts =\
-                self.dbapi.ihost_get_by_personality(constants.CONTROLLER)
+            self.dbapi.ihost_get_by_personality(constants.CONTROLLER)
         for host in controller_hosts:
             if (constants.CLONE_ISO_MAC in host.mgmt_mac and
                     host.personality == constants.CONTROLLER and
@@ -618,9 +618,9 @@ class ConductorManager(service.PeriodicService):
                     ihost_mtc['operation'] = 'modify'
                     ihost_mtc = cutils.removekeys_nonmtce(ihost_mtc)
                     mtce_api.host_modify(
-                             self._api_token, self._mtc_address,
-                             self._mtc_port, ihost_mtc,
-                             constants.MTC_DEFAULT_TIMEOUT_IN_SECS)
+                        self._api_token, self._mtc_address,
+                        self._mtc_port, ihost_mtc,
+                        constants.MTC_DEFAULT_TIMEOUT_IN_SECS)
                 return host
         return None
 
@@ -645,8 +645,8 @@ class ConductorManager(service.PeriodicService):
             mac = cutils.validate_and_normalize_mac(mac)
             ihost = self.dbapi.ihost_get_by_mgmt_mac(mac)
             LOG.info("Not creating ihost for mac: %s because it "
-                      "already exists with uuid: %s" % (values['mgmt_mac'],
-                                                        ihost['uuid']))
+                     "already exists with uuid: %s" % (values['mgmt_mac'],
+                                                       ihost['uuid']))
             mgmt_ip = values.get('mgmt_ip') or ""
 
             if mgmt_ip and not ihost.mgmt_ip:
@@ -654,7 +654,7 @@ class ConductorManager(service.PeriodicService):
                          (ihost.uuid, mgmt_ip))
                 mgmt_update_required = True
             elif mgmt_ip and ihost.mgmt_ip and \
-               (ihost.mgmt_ip.strip() != mgmt_ip.strip()):
+                    (ihost.mgmt_ip.strip() != mgmt_ip.strip()):
                 # Changing the management IP on an already configured
                 # host should not occur nor be allowed.
                 LOG.error("DANGER %s create_ihost mgmt_ip dnsmasq change "
@@ -671,9 +671,9 @@ class ConductorManager(service.PeriodicService):
                     LOG.info("%s create_ihost update mtce %s " %
                              (ihost.hostname, ihost_mtc))
                     mtce_api.host_modify(
-                             self._api_token, self._mtc_address, self._mtc_port,
-                             ihost_mtc,
-                             constants.MTC_DEFAULT_TIMEOUT_IN_SECS)
+                        self._api_token, self._mtc_address, self._mtc_port,
+                        ihost_mtc,
+                        constants.MTC_DEFAULT_TIMEOUT_IN_SECS)
 
             return ihost
         except exception.NodeNotFound:
@@ -735,7 +735,7 @@ class ConductorManager(service.PeriodicService):
         return ihost_obj
 
     def _dnsmasq_host_entry_to_string(self, ip_addr, hostname,
-                                     mac_addr=None, cid=None):
+                                      mac_addr=None, cid=None):
         if IPNetwork(ip_addr).version == constants.IPV6_FAMILY:
             ip_addr = "[%s]" % ip_addr
         if cid:
@@ -995,7 +995,7 @@ class ConductorManager(service.PeriodicService):
                                   constants.SYSTEM_SECURITY_PROFILE_EXTENDED]:
                 LOG.error("Security Profile (%s) not a valid selection. "
                           "Defaulting to: %s" % (secprofile,
-                           constants.SYSTEM_SECURITY_PROFILE_STANDARD))
+                                                 constants.SYSTEM_SECURITY_PROFILE_STANDARD))
                 secprofile = constants.SYSTEM_SECURITY_PROFILE_STANDARD
             install_opts += ['-s', secprofile]
 
@@ -1194,10 +1194,10 @@ class ConductorManager(service.PeriodicService):
             params += [cid]
         if IPAddress(ip_address).version == 6:
             params = ["--ip", ip_address,
-                "--iface", interface,
-                "--server-id", self.get_dhcp_server_duid(),
-                "--client-id", cid,
-                "--iaid", str(cutils.get_dhcp_client_iaid(mac_address))]
+                      "--iface", interface,
+                      "--server-id", self.get_dhcp_server_duid(),
+                      "--client-id", cid,
+                      "--iaid", str(cutils.get_dhcp_client_iaid(mac_address))]
             LOG.warning("Invoking dhcp_release6 for {}".format(params))
             subprocess.call(["dhcp_release6"] + params)
         else:
@@ -1575,13 +1575,13 @@ class ConductorManager(service.PeriodicService):
         else:
             raise exception.SysinvException(_(
                 "Invalid method call: unsupported personality: %s") %
-                                            host.personality)
+                host.personality)
 
         if do_compute_apply:
             # Apply the manifests immediately
             puppet_common.puppet_apply_manifest(host.mgmt_ip,
-                                                       constants.COMPUTE,
-                                                       do_reboot=True)
+                                                constants.COMPUTE,
+                                                do_reboot=True)
 
         return host
 
@@ -1634,15 +1634,15 @@ class ConductorManager(service.PeriodicService):
                 if used_by_if:
                     LOG.debug("clone_mac_update: Found used_by_if: {} {} --> {} [{}]"
                               .format(used_by_if['ifname'],
-                                used_by_if['imac'],
-                                newmac, label))
+                                      used_by_if['imac'],
+                                      newmac, label))
                     if label in used_by_if['imac']:
                         updates = {'imac': newmac}
                         self.dbapi.iinterface_update(used_by_if['uuid'], updates)
                         LOG.info("clone_mac_update: MAC updated: {} {} --> {} [{}]"
                                  .format(used_by_if['ifname'],
-                                    used_by_if['imac'],
-                                    newmac, label))
+                                         used_by_if['imac'],
+                                         newmac, label))
                 # look for dependent interfaces of this one.
                 self._update_dependent_interfaces(used_by_if, ihost, phy_intf,
                                                   newmac, depth + 1)
@@ -1667,7 +1667,7 @@ class ConductorManager(service.PeriodicService):
                 LOG.warn("Missing interface [{},{}] on the cloned host"
                          .format(interface['ifname'], interface['id']))
                 raise exception.SysinvException(_(
-                        "Missing interface on the cloned host"))
+                    "Missing interface on the cloned host"))
 
     def iport_update_by_ihost(self, context,
                               ihost_uuid, inic_dict_array):
@@ -1774,18 +1774,18 @@ class ConductorManager(service.PeriodicService):
                         updates = {'imac': inic['mac']}
                         self.dbapi.iinterface_update(interface['uuid'], updates)
                         LOG.info("clone_mac_update: updated if mac {} {} --> {}"
-                            .format(ifname, interface['imac'], inic['mac']))
+                                 .format(ifname, interface['imac'], inic['mac']))
                         ports = self.dbapi.ethernet_port_get_by_interface(
-                                                              interface['uuid'])
+                            interface['uuid'])
                         for p in ports:
                             # Update the corresponding ports too
                             LOG.debug("clone_mac_update: port={} mac={} for intf: {}"
-                                .format(p['id'], p['mac'], interface['uuid']))
+                                      .format(p['id'], p['mac'], interface['uuid']))
                             if constants.CLONE_ISO_MAC in p['mac']:
                                 updates = {'mac': inic['mac']}
                                 self.dbapi.ethernet_port_update(p['id'], updates)
                                 LOG.info("clone_mac_update: updated port: {} {}-->{}"
-                                    .format(p['id'], p['mac'], inic['mac']))
+                                         .format(p['id'], p['mac'], inic['mac']))
                         # See if there are dependent interfaces.
                         # If yes, update them too.
                         self._update_dependent_interfaces(interface, ihost,
@@ -1818,8 +1818,8 @@ class ConductorManager(service.PeriodicService):
                         LOG.debug("Attempting to create new interface %s" %
                                   interface_dict)
                         new_interface = self.dbapi.iinterface_create(
-                                          ihost['id'],
-                                          interface_dict)
+                            ihost['id'],
+                            interface_dict)
                         # append to port attributes as well
                         inic_dict.update(
                             {'interface_id': new_interface['id'],
@@ -2007,7 +2007,7 @@ class ConductorManager(service.PeriodicService):
                                                        agentid=agent_id)
             except Exception as e:
                 LOG.exception("Error during bulk TLV update for agent %s: %s",
-                    agent_id, str(e))
+                              agent_id, str(e))
                 raise
         if tlv_create_list:
             try:
@@ -2015,7 +2015,7 @@ class ConductorManager(service.PeriodicService):
                                                 agentid=agent_id)
             except Exception as e:
                 LOG.exception("Error during bulk TLV create for agent %s: %s",
-                    agent_id, str(e))
+                              agent_id, str(e))
                 raise
 
     def lldp_neighbour_tlv_update(self, tlv_dict, neighbour):
@@ -2201,7 +2201,7 @@ class ConductorManager(service.PeriodicService):
         stale = [d for d in db_neighbours if (d['msap']) not in reported]
         for neighbour in stale:
             db_neighbour = self.dbapi.lldp_neighbour_destroy(
-                            neighbour['uuid'])
+                neighbour['uuid'])
 
         for neighbour in neighbour_dict_array:
             port_found = None
@@ -2433,7 +2433,7 @@ class ConductorManager(service.PeriodicService):
         return 0
 
     def _get_default_shared_cpu_count(self, ihost, node,
-                                       cpu_count, hyperthreading):
+                                      cpu_count, hyperthreading):
         """Return the initial number of reserved logical cores for shared
         use.  This can be overridden later by the end user."""
         return 0
@@ -2740,7 +2740,7 @@ class ConductorManager(service.PeriodicService):
                 if not imems:
                     # Set the amount of memory reserved for platform use.
                     mem_dict.update(self._get_platform_reserved_memory(
-                            ihost, i['numa_node']))
+                        ihost, i['numa_node']))
                     self.dbapi.imemory_create(forihostid, mem_dict)
                 else:
                     for imem in imems:
@@ -2752,11 +2752,11 @@ class ConductorManager(service.PeriodicService):
                             mem_dict['memtotal_mib'] += vm_4K_mib
                             mem_dict['memavail_mib'] += vm_4K_mib
                         self.dbapi.imemory_update(imem['uuid'],
-                                                         mem_dict)
+                                                  mem_dict)
             except Exception:
                 # Set the amount of memory reserved for platform use.
                 mem_dict.update(self._get_platform_reserved_memory(
-                        ihost, i['numa_node']))
+                    ihost, i['numa_node']))
                 self.dbapi.imemory_create(forihostid, mem_dict)
                 pass
 
@@ -2929,7 +2929,7 @@ class ConductorManager(service.PeriodicService):
                 found = False
                 for idisk in idisks:
                     LOG.debug("[DiskEnum] for - current idisk: %s - %s -%s" %
-                             (idisk.uuid, idisk.device_node, idisk.device_id))
+                              (idisk.uuid, idisk.device_node, idisk.device_id))
 
                     if is_same_disk(i, idisk):
                         found = True
@@ -2972,8 +2972,8 @@ class ConductorManager(service.PeriodicService):
 
                         LOG.debug("[DiskEnum] found disk: %s - %s - %s - %s -"
                                   "%s" % (idisk.uuid, idisk.device_node,
-                                   idisk.device_id, idisk.capabilities,
-                                   disk_dict['capabilities']))
+                                          idisk.device_id, idisk.capabilities,
+                                          disk_dict['capabilities']))
 
                         # disk = self.dbapi.idisk_update(idisk['uuid'],
                         #                                disk_dict)
@@ -3202,7 +3202,7 @@ class ConductorManager(service.PeriodicService):
         pv_cgts_vg = next((pv for pv in pvs if pv.lvm_pv_name == pv4_name), None)
         if not pv_cgts_vg:
             raise exception.SysinvException(_("ERROR: No %s PV for Volume Group %s on host %s") %
-                (pv4_name, constants.LVG_CGTS_VG, host.hostname))
+                                            (pv4_name, constants.LVG_CGTS_VG, host.hostname))
 
         partitions = self.dbapi.partition_get_by_ihost(host.id)
         partition4 = next((p for p in partitions if p.device_node == pv4_name), None)
@@ -3419,7 +3419,7 @@ class ConductorManager(service.PeriodicService):
         """Update existing partition information based on information received
            from the agent."""
         LOG.debug("PART ipartition_update_by_ihost %s ihost_uuid "
-                 "ipart_dict_array: %s" % (ihost_uuid, str(ipart_dict_array)))
+                  "ipart_dict_array: %s" % (ihost_uuid, str(ipart_dict_array)))
 
         # Get host.
         ihost_uuid.strip()
@@ -3449,7 +3449,7 @@ class ConductorManager(service.PeriodicService):
 
             # Obtain the disk the partition is on.
             part_disk = next((d for d in db_disks
-                             if d.device_path in db_part.device_path), None)
+                              if d.device_path in db_part.device_path), None)
 
             if not part_disk:
                 # Should not happen as we only store partitions associated
@@ -3719,7 +3719,7 @@ class ConductorManager(service.PeriodicService):
                             self.dbapi.ipv_update(ipv['uuid'], pv_dict)
                         except Exception:
                             LOG.exception("Update ipv for changed partition "
-                                           "details failed.")
+                                          "details failed.")
 
                     if (ipv['pv_state'] == constants.PROVISIONED and
                         partition.status not in
@@ -3735,7 +3735,7 @@ class ConductorManager(service.PeriodicService):
 
                 # Save the physical PV associated with cinder volumes for use later
                 if ipv['lvm_vg_name'] == constants.LVG_CINDER_VOLUMES:
-                        cinder_pv_id = ipv['id']
+                    cinder_pv_id = ipv['id']
 
         # Some of the PVs may have been updated, so get them again.
         ipvs = self.dbapi.ipv_get_by_ihost(ihost_uuid)
@@ -4126,7 +4126,7 @@ class ConductorManager(service.PeriodicService):
         if (iscsi_initiator_name and
                 ihost.iscsi_initiator_name is None):
             LOG.info("%s updating iscsi initiator=%s" %
-                        (ihost.hostname, iscsi_initiator_name))
+                     (ihost.hostname, iscsi_initiator_name))
             val['iscsi_initiator_name'] = iscsi_initiator_name
 
         if val:
@@ -4197,20 +4197,20 @@ class ConductorManager(service.PeriodicService):
                               "cinder_device=%s" %
                               (idisk.device_path, cinder_device))
                     if ((idisk.device_path and
-                        idisk.device_path == cinder_device) or
+                         idisk.device_path == cinder_device) or
                         (idisk.device_node and
-                           idisk.device_node == cinder_device)):
+                         idisk.device_node == cinder_device)):
                         idisk_capabilities = idisk.capabilities
                         idisk_dict = {'device_function': 'cinder_device'}
                         idisk_capabilities.update(idisk_dict)
 
                         idisk_val = {'capabilities': idisk_capabilities}
                         LOG.info("SYS_I MATCH host %s device_node %s cinder_device %s idisk.uuid %s val %s" %
-                             (ihost.hostname,
-                              idisk.device_node,
-                              cinder_device,
-                              idisk.uuid,
-                              idisk_val))
+                                 (ihost.hostname,
+                                  idisk.device_node,
+                                  cinder_device,
+                                  idisk.uuid,
+                                  idisk_val))
 
                         self.dbapi.idisk_update(idisk.uuid, idisk_val)
 
@@ -4252,7 +4252,7 @@ class ConductorManager(service.PeriodicService):
         self._openstack.update_nova_local_aggregates(ihost_uuid)
 
     def subfunctions_update_by_ihost(self, context,
-                                ihost_uuid, subfunctions):
+                                     ihost_uuid, subfunctions):
         """Update subfunctions for a host.
 
         This method allows records for subfunctions to be updated.
@@ -4386,7 +4386,7 @@ class ConductorManager(service.PeriodicService):
                 standby_host = controller_host
 
         if (active_host and active_host.config_target and
-           active_host.config_applied == active_host.config_target):
+                active_host.config_applied == active_host.config_target):
             # active controller has applied target, apply pending config
 
             if not os.path.isfile(CONFIG_CONTROLLER_ACTIVATE_FLAG):
@@ -4406,8 +4406,8 @@ class ConductorManager(service.PeriodicService):
             if standby_host and standby_host.config_target:
                 standby_config_target_flipped = self._config_flip_reboot_required(standby_host.config_target)
             if not standby_host or (standby_host and
-               (standby_host.config_applied == standby_host.config_target or
-               standby_host.config_applied == standby_config_target_flipped)):
+                                    (standby_host.config_applied == standby_host.config_target or
+                                     standby_host.config_applied == standby_config_target_flipped)):
 
                 LOG.info("_controller_config_active_apply about to resize the filesystem")
 
@@ -4439,8 +4439,8 @@ class ConductorManager(service.PeriodicService):
                 # apply filesystem config changes if all controllers at target
                 # Ignore the reboot required bit
                 if not standby_host or (standby_host and
-                   (standby_host.config_applied == standby_host.config_target or
-                   standby_host.config_applied == standby_config_target_flipped)):
+                                        (standby_host.config_applied == standby_host.config_target or
+                                         standby_host.config_applied == standby_config_target_flipped)):
 
                     LOG.info(
                         "_controller_config_active_apply about to resize the filesystem")
@@ -4472,10 +4472,10 @@ class ConductorManager(service.PeriodicService):
 
                 task_str = ihost.task or ""
                 if (('--' in ihost_action_str and
-                      ihost_action_str.startswith(
-                           constants.FORCE_LOCK_ACTION)) or
-                      ('----------' in ihost_action_str and
-                      ihost_action_str.startswith(constants.LOCK_ACTION))):
+                     ihost_action_str.startswith(
+                         constants.FORCE_LOCK_ACTION)) or
+                    ('----------' in ihost_action_str and
+                     ihost_action_str.startswith(constants.LOCK_ACTION))):
 
                     ihost_mtc = ihost.as_dict()
                     keepkeys = ['ihost_action', 'vim_progress_status']
@@ -4500,7 +4500,7 @@ class ConductorManager(service.PeriodicService):
                         ihost_action_str += "-"
 
                     if (task_str.startswith(constants.FORCE_LOCKING) or
-                       task_str.startswith(constants.LOCKING)):
+                            task_str.startswith(constants.LOCKING)):
                         val = {'task': "",
                                'ihost_action': ihost_action_str,
                                'vim_progress_status': ""}
@@ -4510,7 +4510,7 @@ class ConductorManager(service.PeriodicService):
                 else:
                     ihost_action_str += "-"
                     if (task_str.startswith(constants.FORCE_LOCKING) or
-                       task_str.startswith(constants.LOCKING)):
+                            task_str.startswith(constants.LOCKING)):
                         task_str += "-"
                         val = {'task': task_str,
                                'ihost_action': ihost_action_str}
@@ -4521,14 +4521,14 @@ class ConductorManager(service.PeriodicService):
         else:  # Administrative locked already
             task_str = ihost.task or ""
             if (task_str.startswith(constants.FORCE_LOCKING) or
-               task_str.startswith(constants.LOCKING)):
+                    task_str.startswith(constants.LOCKING)):
                 val = {'task': ""}
                 self.dbapi.ihost_update(ihost.uuid, val)
 
         vim_progress_status_str = ihost.get('vim_progress_status') or ""
         if (vim_progress_status_str and
-           (vim_progress_status_str != constants.VIM_SERVICES_ENABLED) and
-           (vim_progress_status_str != constants.VIM_SERVICES_DISABLED)):
+            (vim_progress_status_str != constants.VIM_SERVICES_ENABLED) and
+                (vim_progress_status_str != constants.VIM_SERVICES_DISABLED)):
             if ('..' in vim_progress_status_str):
                 LOG.info("Audit clearing vim_progress_status=%s" %
                          vim_progress_status_str)
@@ -4730,14 +4730,14 @@ class ConductorManager(service.PeriodicService):
 
         try:
             param = self.dbapi.service_parameter_get_one(constants.SERVICE_TYPE_CINDER,
-                constants.SERVICE_PARAM_SECTION_CINDER_HPE3PAR, 'enabled')
+                                                         constants.SERVICE_PARAM_SECTION_CINDER_HPE3PAR, 'enabled')
             hpe3par_enabled = param.value.lower() == 'true'
         except exception.NotFound:
             hpe3par_enabled = False
 
         try:
             param = self.dbapi.service_parameter_get_one(constants.SERVICE_TYPE_CINDER,
-                constants.SERVICE_PARAM_SECTION_CINDER_HPELEFTHAND, 'enabled')
+                                                         constants.SERVICE_PARAM_SECTION_CINDER_HPELEFTHAND, 'enabled')
             hpelefthand_enabled = param.value.lower() == 'true'
         except exception.NotFound:
             hpelefthand_enabled = False
@@ -4758,7 +4758,7 @@ class ConductorManager(service.PeriodicService):
             return
 
         if (not (active_host and active_host.config_target and
-                active_host.config_applied == active_host.config_target)):
+                 active_host.config_applied == active_host.config_target)):
             return
 
         #
@@ -4942,8 +4942,8 @@ class ConductorManager(service.PeriodicService):
     def get_ceph_cluster_df_stats(self, context):
         """Get the usage information for the ceph pools."""
         if not StorageBackendConfig.has_backend_configured(
-               self.dbapi,
-               constants.CINDER_BACKEND_CEPH):
+                self.dbapi,
+                constants.CINDER_BACKEND_CEPH):
             return
 
         if not self._ceph.get_ceph_cluster_info_availability():
@@ -4991,7 +4991,7 @@ class ConductorManager(service.PeriodicService):
             LOG.error("OSD already assigned: %s", str(istor_obj['osdid']))
             raise exception.SysinvException(_(
                 "Invalid method call: osdid already assigned: %s") %
-                    str(istor_obj['osdid']))
+                str(istor_obj['osdid']))
 
         # Create the OSD
         response, body = self._ceph.osd_create(istor_obj['uuid'], body='json')
@@ -5101,7 +5101,7 @@ class ConductorManager(service.PeriodicService):
         if (response.status_code == httplib.BAD_REQUEST and
             isinstance(body, dict) and
             body.get('status', '').endswith(
-                    "({})".format(-errno.EBUSY))):
+                "({})".format(-errno.EBUSY))):
             LOG.info("Retry OSD remove")
             return True
         else:
@@ -5123,7 +5123,7 @@ class ConductorManager(service.PeriodicService):
         try:
             with open(os.devnull, "w") as fnull:
                 subprocess.check_call(["mv", "/etc/pmon.d/ceph.conf",
-                                      "/etc/pmond.ceph.conf.bak"],
+                                       "/etc/pmond.ceph.conf.bak"],
                                       stdout=fnull, stderr=fnull)
 
                 subprocess.check_call(["systemctl", "restart", "pmon"],
@@ -5265,7 +5265,6 @@ class ConductorManager(service.PeriodicService):
                               reinstall_required=False,
                               reboot_required=True,
                               filesystem_list=None):
-
         """Update the storage configuration"""
         if update_storage:
             personalities = [constants.CONTROLLER, constants.STORAGE]
@@ -5577,8 +5576,8 @@ class ConductorManager(service.PeriodicService):
                 ilvgs = self.dbapi.ilvg_get_by_ihost(host['uuid'])
                 for lvg in ilvgs:
                     if (lvg['lvm_vg_name'] == constants.LVG_NOVA_LOCAL and
-                          lvg['capabilities'].get(constants.LVG_NOVA_PARAM_BACKING) ==
-                          backing_type):
+                        lvg['capabilities'].get(constants.LVG_NOVA_PARAM_BACKING) ==
+                            backing_type):
                         hosts_uuid.append(host['uuid'])
         return hosts_uuid
 
@@ -5708,8 +5707,8 @@ class ConductorManager(service.PeriodicService):
         }
 
         self.dbapi.storage_ceph_update(sb_uuid,
-            {'state': constants.SB_STATE_CONFIGURING,
-             'task': str({h.hostname: constants.SB_TASK_APPLY_MANIFESTS for h in valid_ctrls})})
+                                       {'state': constants.SB_STATE_CONFIGURING,
+                                        'task': str({h.hostname: constants.SB_TASK_APPLY_MANIFESTS for h in valid_ctrls})})
 
         self._config_apply_runtime_manifest(context, config_uuid, config_dict)
 
@@ -6650,11 +6649,11 @@ class ConductorManager(service.PeriodicService):
             etcd_lv_size = constants.ETCD_STOR_SIZE
 
             data_etcd = {
-                    'name': constants.FILESYSTEM_NAME_ETCD,
-                    'size': etcd_lv_size,
-                    'logical_volume': constants.FILESYSTEM_LV_DICT[
-                        constants.FILESYSTEM_NAME_ETCD],
-                    'replicated': True,
+                'name': constants.FILESYSTEM_NAME_ETCD,
+                'size': etcd_lv_size,
+                'logical_volume': constants.FILESYSTEM_LV_DICT[
+                    constants.FILESYSTEM_NAME_ETCD],
+                'replicated': True,
             }
             LOG.info("Creating FS:%s:%s %d" % (
                 data_etcd['name'], data_etcd['logical_volume'], data_etcd['size']))
@@ -6993,7 +6992,7 @@ class ConductorManager(service.PeriodicService):
         self._config_update_hosts(context, [constants.COMPUTE], reboot=True)
 
         config_uuid = self._config_update_hosts(context,
-                                               [constants.CONTROLLER])
+                                                [constants.CONTROLLER])
         config_dict = {
             "personalities": [constants.CONTROLLER],
             "classes": ['openstack::neutron::server::runtime'],
@@ -7280,7 +7279,7 @@ class ConductorManager(service.PeriodicService):
                     while(loop_timeout <= 5):
                         if (not pgsql_resized and
                             (not standby_host or (standby_host and
-                             constants.DRBD_PGSQL in self._drbd_fs_sync()))):
+                                                  constants.DRBD_PGSQL in self._drbd_fs_sync()))):
                             # database_gib /var/lib/postgresql
                             progress = "resize2fs drbd0"
                             cmd = ["resize2fs", "/dev/drbd0"]
@@ -7290,7 +7289,7 @@ class ConductorManager(service.PeriodicService):
 
                         if (not cgcs_resized and
                             (not standby_host or (standby_host and
-                             constants.DRBD_CGCS in self._drbd_fs_sync()))):
+                                                  constants.DRBD_CGCS in self._drbd_fs_sync()))):
                             # cgcs_gib /opt/cgcs
                             progress = "resize2fs drbd3"
                             cmd = ["resize2fs", "/dev/drbd3"]
@@ -7300,7 +7299,7 @@ class ConductorManager(service.PeriodicService):
 
                         if (not extension_resized and
                             (not standby_host or (standby_host and
-                             constants.DRBD_EXTENSION in self._drbd_fs_sync()))):
+                                                  constants.DRBD_EXTENSION in self._drbd_fs_sync()))):
                             # extension_gib /opt/extension
                             progress = "resize2fs drbd5"
                             cmd = ["resize2fs", "/dev/drbd5"]
@@ -7311,7 +7310,7 @@ class ConductorManager(service.PeriodicService):
                         if constants.DRBD_PATCH_VAULT in drbd_fs_updated:
                             if (not patch_resized and
                                 (not standby_host or (standby_host and
-                                 constants.DRBD_PATCH_VAULT in self._drbd_fs_sync()))):
+                                                      constants.DRBD_PATCH_VAULT in self._drbd_fs_sync()))):
                                 # patch_gib /opt/patch-vault
                                 progress = "resize2fs drbd6"
                                 cmd = ["resize2fs", "/dev/drbd6"]
@@ -7322,7 +7321,7 @@ class ConductorManager(service.PeriodicService):
                         if constants.DRBD_ETCD in drbd_fs_updated:
                             if (not etcd_resized and
                                 (not standby_host or (standby_host and
-                                 constants.DRBD_ETCD in self._drbd_fs_sync()))):
+                                                      constants.DRBD_ETCD in self._drbd_fs_sync()))):
                                 # patch_gib /opt/etcd
                                 progress = "resize2fs drbd7"
                                 cmd = ["resize2fs", "/dev/drbd7"]
@@ -7333,7 +7332,7 @@ class ConductorManager(service.PeriodicService):
                         if constants.DRBD_DOCKER_DISTRIBUTION in drbd_fs_updated:
                             if (not dockerdistribution_resized and
                                 (not standby_host or (standby_host and
-                                 constants.DRBD_DOCKER_DISTRIBUTION in self._drbd_fs_sync()))):
+                                                      constants.DRBD_DOCKER_DISTRIBUTION in self._drbd_fs_sync()))):
                                 # patch_gib /var/lib/docker-distribution
                                 progress = "resize2fs drbd8"
                                 cmd = ["resize2fs", "/dev/drbd8"]
@@ -7509,7 +7508,7 @@ class ConductorManager(service.PeriodicService):
                 for controller_fs in controller_fs_list:
                     if controller_fs['replicated']:
                         if (controller_fs.get('state') ==
-                           constants.CONTROLLER_FS_RESIZING_IN_PROGRESS):
+                                constants.CONTROLLER_FS_RESIZING_IN_PROGRESS):
                             LOG.info("%s: drbd resize config pending. "
                                      "manifests up to date: "
                                      "target %s, applied %s " %
@@ -7545,7 +7544,7 @@ class ConductorManager(service.PeriodicService):
 
         if reason is not None:
             reason_text = ("%s has been 'discovered' on the network. (%s)" %
-                (hostid, reason))
+                           (hostid, reason))
         else:
             reason_text = ("%s has been 'discovered'." % hostid)
 
@@ -7589,7 +7588,7 @@ class ConductorManager(service.PeriodicService):
                 entity_instance_id=entity_instance_id,
                 severity=fm_constants.FM_ALARM_SEVERITY_MAJOR,
                 reason_text=(_("%s Configuration is out-of-date.") %
-                               ihost_obj.hostname),
+                             ihost_obj.hostname),
                 alarm_type=fm_constants.FM_ALARM_TYPE_7,  # operational
                 probable_cause=fm_constants.ALARM_PROBABLE_CAUSE_75,
                 proposed_repair_action=_(
@@ -7603,7 +7602,7 @@ class ConductorManager(service.PeriodicService):
                 ihost_obj.config_status = status
                 save_required = True
             elif (status != ihost_obj.config_status and
-               status == constants.CONFIG_STATUS_REINSTALL):
+                  status == constants.CONFIG_STATUS_REINSTALL):
                 ihost_obj.config_status = status
                 save_required = True
 
@@ -7807,7 +7806,6 @@ class ConductorManager(service.PeriodicService):
                             context,
                             config_uuid,
                             config_dict):
-
         """Apply the file on all hosts affected by supplied personalities.
 
         :param context: request context.
@@ -7837,7 +7835,6 @@ class ConductorManager(service.PeriodicService):
                                        config_dict,
                                        host_uuids=None,
                                        force=False):
-
         """Apply manifests on all hosts affected by the supplied personalities.
            If host_uuid is set, only update hiera data for that host
         """
@@ -7913,7 +7910,7 @@ class ConductorManager(service.PeriodicService):
         """
 
         LOG.debug("Calling mgmt ip set for ihost %s, ip %s" % (ihost_uuid,
-            mgmt_ip))
+                                                               mgmt_ip))
 
         # Check for and remove existing addrs on mgmt subnet & host
         ihost = self.dbapi.ihost_get(ihost_uuid)
@@ -7975,7 +7972,7 @@ class ConductorManager(service.PeriodicService):
         """
 
         LOG.debug("Calling infra ip set for ihost %s, ip %s" % (ihost_uuid,
-            infra_ip))
+                                                                infra_ip))
 
         # Check for and remove existing addrs on infra subnet & host
         ihost = self.dbapi.ihost_get(ihost_uuid)
@@ -8153,7 +8150,7 @@ class ConductorManager(service.PeriodicService):
             if (ntype == constants.NETWORK_TYPE_INFRA or
                     ntype == constants.NETWORK_TYPE_MGMT):
                 if interface['iftype'] == 'vlan' or \
-                                interface['iftype'] == 'ae':
+                        interface['iftype'] == 'ae':
                     for uses_if in interface['uses']:
                         for i in interface_list:
                             if i['ifname'] == str(uses_if):
@@ -8167,9 +8164,9 @@ class ConductorManager(service.PeriodicService):
                                             if a['ifname'] == str(uses) and \
                                                     a['iftype'] == 'ethernet':
                                                 info_list = self._add_port_to_list(
-                                                                    a['id'],
-                                                                    ntype,
-                                                                    info_list)
+                                                    a['id'],
+                                                    ntype,
+                                                    info_list)
                 elif interface['iftype'] == 'ethernet':
                     info_list = self._add_port_to_list(interface['id'],
                                                        ntype,
@@ -8735,7 +8732,7 @@ class ConductorManager(service.PeriodicService):
                     pass
 
         if state in [constants.UPGRADE_ABORTING,
-                constants.UPGRADE_ABORTING_ROLLBACK]:
+                     constants.UPGRADE_ABORTING_ROLLBACK]:
             if upgrade.state != constants.UPGRADE_ABORT_COMPLETING:
                 raise exception.SysinvException(
                     _("Unable to complete upgrade-abort: Upgrade not in %s "
@@ -8747,7 +8744,7 @@ class ConductorManager(service.PeriodicService):
 
             if (tsc.system_type == constants.SYSTEM_MODE_DUPLEX and
                     tsc.system_type == constants.TIS_AIO_BUILD and
-                        state == constants.UPGRADE_ABORTING_ROLLBACK):
+                    state == constants.UPGRADE_ABORTING_ROLLBACK):
 
                 # For AIO Case, VM goes into no state when Controller-0 becomes active
                 # after swact. nova clean up will fail the instance and restart
@@ -9156,7 +9153,7 @@ class ConductorManager(service.PeriodicService):
         if partition_size:
             # We also need to add the size of the partition table.
             partition_size = int(partition_size) +\
-                                 constants.PARTITION_TABLE_SIZE
+                constants.PARTITION_TABLE_SIZE
 
             # Convert bytes to GiB and round to be sure.
             partition_size = int(round(
@@ -9382,8 +9379,8 @@ class ConductorManager(service.PeriodicService):
                 tpmdevice = self.get_tpmdevice_by_host(context, host_uuid)
                 # apply config manifest for tpm create/update
                 if (tpmdevice and
-                            tpmdevice['state'] ==
-                            constants.TPMCONFIG_APPLYING):
+                    tpmdevice['state'] ==
+                        constants.TPMCONFIG_APPLYING):
                     self.update_tpm_config_manifests(context)
                 # update the system configuration state
                 self._set_tpm_config_state(tpm_host, response_dict)
@@ -9652,7 +9649,7 @@ class ConductorManager(service.PeriodicService):
 
         try:
             subprocess.check_output(["cp", license_file,
-                os.path.join(tsc.CONFIG_PATH, constants.LICENSE_FILE)])
+                                     os.path.join(tsc.CONFIG_PATH, constants.LICENSE_FILE)])
         except subprocess.CalledProcessError as e:
             LOG.error("Fail to install license to redundant "
                       "storage, output: %s" % e.output)
@@ -9662,7 +9659,7 @@ class ConductorManager(service.PeriodicService):
 
         hostname = subprocess.check_output(["hostname"]).rstrip()
         validHostnames = [constants.CONTROLLER_0_HOSTNAME,
-                            constants.CONTROLLER_1_HOSTNAME]
+                          constants.CONTROLLER_1_HOSTNAME]
         if hostname == 'localhost':
             raise exception.SysinvException(_(
                 "ERROR: Host undefined. Unable to install license"))
@@ -9761,7 +9758,7 @@ class ConductorManager(service.PeriodicService):
         temp_pem_file = constants.SSL_PEM_FILE + '.temp'
         with os.fdopen(os.open(temp_pem_file, os.O_CREAT | os.O_WRONLY,
                                constants.CONFIG_FILE_PERMISSION_ROOT_READ_ONLY),
-                               'w') as f:
+                       'w') as f:
             f.write(pem_contents)
 
         if passphrase:
@@ -9785,7 +9782,7 @@ class ConductorManager(service.PeriodicService):
                         backend=default_backend())
                 except Exception as e:
                     raise exception.SysinvException(_("Error decrypting PEM "
-                        "file: %s" % e))
+                                                      "file: %s" % e))
                 key_file.seek(0)
             # extract the certificate from the pem file
             cert = x509.load_pem_x509_certificate(key_file.read(),
@@ -9795,7 +9792,7 @@ class ConductorManager(service.PeriodicService):
         if private_mode:
             if not isinstance(private_key, rsa.RSAPrivateKey):
                 raise exception.SysinvException(_("Only RSA encryption based "
-                    "Private Keys are supported."))
+                                                  "Private Keys are supported."))
 
             private_bytes = private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
@@ -9897,7 +9894,7 @@ class ConductorManager(service.PeriodicService):
             with os.fdopen(os.open(constants.SSL_PEM_FILE_SHARED,
                                    os.O_CREAT | os.O_WRONLY,
                                    constants.CONFIG_FILE_PERMISSION_ROOT_READ_ONLY),
-                                   'wb') as f:
+                           'wb') as f:
                 f.write(file_content)
 
             self._remove_certificate_file(mode, certificate_file)
@@ -9918,7 +9915,7 @@ class ConductorManager(service.PeriodicService):
             with os.fdopen(os.open(constants.SSL_PEM_FILE_SHARED,
                                    os.O_CREAT | os.O_WRONLY,
                                    constants.CONFIG_FILE_PERMISSION_ROOT_READ_ONLY),
-                                   'wb') as f:
+                           'wb') as f:
                 f.write(file_content)
 
             if tpm:
@@ -9952,7 +9949,7 @@ class ConductorManager(service.PeriodicService):
             with os.fdopen(os.open(constants.SSL_CERT_CA_FILE_SHARED,
                                    os.O_CREAT | os.O_WRONLY,
                                    constants.CONFIG_FILE_PERMISSION_DEFAULT),
-                                   'wb') as f:
+                           'wb') as f:
                 f.write(file_content)
 
             config_uuid = self._config_update_hosts(context, personalities)
@@ -10035,7 +10032,7 @@ class ConductorManager(service.PeriodicService):
         with os.fdopen(os.open(constants.SSL_PEM_FILE_SHARED,
                                os.O_CREAT | os.O_WRONLY,
                                constants.CONFIG_FILE_PERMISSION_ROOT_READ_ONLY),
-                               'wb') as f:
+                       'wb') as f:
             f.write(file_content)
 
         return signature

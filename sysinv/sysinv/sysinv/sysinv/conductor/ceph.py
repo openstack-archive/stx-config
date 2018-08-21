@@ -660,7 +660,7 @@ class CephOperator(object):
         elif pool_name.find(constants.CEPH_POOL_EPHEMERAL_NAME) != -1:
             quota_gib_value = ephemeral_pool_gib
         elif pool_name.find(constants.CEPH_POOL_OBJECT_GATEWAY_NAME_JEWEL) != -1 or \
-                 pool_name.find(constants.CEPH_POOL_OBJECT_GATEWAY_NAME_HAMMER) != -1:
+                pool_name.find(constants.CEPH_POOL_OBJECT_GATEWAY_NAME_HAMMER) != -1:
             quota_gib_value = object_pool_gib
         else:
             quota_gib_value = 0
@@ -1129,7 +1129,7 @@ class CephOperator(object):
             osds_adjust = (replication - storage_gap) * stors_number
             osds += osds_adjust
             LOG.debug("OSD - number of storage hosts is not a multiple of replication factor, "
-                     "adjusting osds by %d to osds=%d" % (osds_adjust, osds))
+                      "adjusting osds by %d to osds=%d" % (osds_adjust, osds))
 
         data_pt = None
 

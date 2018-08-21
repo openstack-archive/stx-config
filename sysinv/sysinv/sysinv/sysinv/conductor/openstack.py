@@ -345,7 +345,7 @@ class OpenStackOperator(object):
                                   ihost_uuid))
         except Exception:
             LOG.error("AGG-AS ilvg_get_by_ihost failed "
-                          "for %s." % ihost_uuid)
+                      "for %s." % ihost_uuid)
             raise
 
         LOG.debug("AGG-AS ihost (%s) %s in a local storage configuration." %
@@ -503,7 +503,7 @@ class OpenStackOperator(object):
                 #    cs.aggregates.create(args.name, args.availability_zone)
                 try:
                     aggregate = self._get_novaclient().aggregates.create(i,
-                                                       availability_zone)
+                                                                         availability_zone)
                     aggregates.append(aggregate)
                     LOG.debug("AGG6 aggregate= %s. aggregates= %s" % (aggregate,
                                                                       aggregates))
@@ -529,7 +529,7 @@ class OpenStackOperator(object):
                     if aggregate_name_prefix + metadata[key] == aggregate.name:
                         LOG.debug("AGG8 aggregate metadata = %s." % metadata)
                         aggregate = self._get_novaclient().aggregates.set_metadata(
-                                                       aggregate.id, metadata)
+                            aggregate.id, metadata)
                 except Exception:
                     LOG.error("AGG8 EXCEPTION aggregate")
                     pass
@@ -554,7 +554,7 @@ class OpenStackOperator(object):
                     else:
                         try:
                             metadata = self._get_novaclient().aggregates.add_host(
-                                                              i.id, ihost.hostname)
+                                i.id, ihost.hostname)
                         except Exception:
                             LOG.warn("AGG10 EXCEPTION aggregate id = %s ihost= %s."
                                      % (i.id, ihost.hostname))
@@ -703,7 +703,7 @@ class OpenStackOperator(object):
             for s in service_list:
                 if s.name.find(constants.SERVICE_TYPE_CINDER) != -1:
                     endpoint_list += self._get_keystoneclient().endpoints.list(
-                                     service=s, region=region1_name)
+                        service=s, region=region1_name)
         except Exception:
             LOG.error("Failed to get keystone endpoints for cinder.")
         return endpoint_list
@@ -827,7 +827,7 @@ class OpenStackOperator(object):
         auth_ref = self._get_keystoneclient().auth_ref
         if auth_ref is None:
             raise exception.SysinvException(_("Unable to get auth ref "
-                                            "from keystone client"))
+                                              "from keystone client"))
         auth_token = auth_ref.service_catalog.get_token()
         endpoint = (auth_ref.service_catalog.
                     get_endpoints(service_type='platform',

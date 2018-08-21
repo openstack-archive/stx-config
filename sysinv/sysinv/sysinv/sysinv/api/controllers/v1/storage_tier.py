@@ -79,7 +79,7 @@ class StorageTier(base.APIBase):
     "Storage tier status"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "Storage tier meta data"
 
     forbackendid = int
@@ -222,7 +222,7 @@ class StorageTierController(rest.RestController):
     @wsme_pecan.wsexpose(StorageTierCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)
     def detail(self, tier_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of storage tiers with detail."""
 
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -383,17 +383,17 @@ def _pre_patch_checks(tier_obj, patch_obj):
                     _("Storage Tier %s cannot be renamed. It is %s") %
                     (tier_obj.name, constants.SB_TIER_STATUS_IN_USE))
         elif p['path'] == '/capabilities':
-                raise wsme.exc.ClientSideError(
-                    _("The capabilities of storage tier %s cannot be "
-                      "changed.") % tier_obj.name)
+            raise wsme.exc.ClientSideError(
+                _("The capabilities of storage tier %s cannot be "
+                  "changed.") % tier_obj.name)
         elif p['path'] == '/backend_uuid':
-                raise wsme.exc.ClientSideError(
-                    _("The storage_backend associated with storage tier %s "
-                      "cannot be changed.") % tier_obj.name)
+            raise wsme.exc.ClientSideError(
+                _("The storage_backend associated with storage tier %s "
+                  "cannot be changed.") % tier_obj.name)
         elif p['path'] == '/cluster_uuid':
-                raise wsme.exc.ClientSideError(
-                    _("The storage_backend associated with storage tier %s "
-                      "cannot be changed.") % tier_obj.name)
+            raise wsme.exc.ClientSideError(
+                _("The storage_backend associated with storage tier %s "
+                  "cannot be changed.") % tier_obj.name)
 
 
 def _check(op, tier):

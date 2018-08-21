@@ -382,11 +382,11 @@ def _check_controller_state():
                     alarm_explanation = "Check alarms with the following IDs: %s" % str(degrade_alarms)
                 raise wsme.exc.ClientSideError(
                     _("This operation requires controllers to be %s, %s, %s. "
-                    "Current status is %s, %s, %s. %s." %
-                    (constants.ADMIN_UNLOCKED, constants.OPERATIONAL_ENABLED,
-                    constants.AVAILABILITY_AVAILABLE,
-                    chost.administrative, chost.operational,
-                    chost.availability, alarm_explanation)))
+                      "Current status is %s, %s, %s. %s." %
+                      (constants.ADMIN_UNLOCKED, constants.OPERATIONAL_ENABLED,
+                       constants.AVAILABILITY_AVAILABLE,
+                       chost.administrative, chost.operational,
+                       chost.availability, alarm_explanation)))
 
     return True
 
@@ -426,7 +426,7 @@ def _get_controller_fs_limit(device_path_ctrl0, device_path_ctrl1):
             ilvgs = pecan.request.dbapi.ilvg_get_by_ihost(chost.uuid)
             for ilvg in ilvgs:
                 if (ilvg.lvm_vg_name == constants.LVG_CGTS_VG and
-                   ilvg.lvm_vg_size and ilvg.lvm_vg_total_pe):
+                        ilvg.lvm_vg_size and ilvg.lvm_vg_total_pe):
                     cgtsvg0_free_mib = (int(ilvg.lvm_vg_size) *
                                         int(ilvg.lvm_vg_free_pe) / int(
                         ilvg.lvm_vg_total_pe)) / (1024 * 1024)
@@ -446,7 +446,7 @@ def _get_controller_fs_limit(device_path_ctrl0, device_path_ctrl1):
             ilvgs = pecan.request.dbapi.ilvg_get_by_ihost(chost.uuid)
             for ilvg in ilvgs:
                 if (ilvg.lvm_vg_name == constants.LVG_CGTS_VG and
-                   ilvg.lvm_vg_size and ilvg.lvm_vg_total_pe):
+                        ilvg.lvm_vg_size and ilvg.lvm_vg_total_pe):
                     cgtsvg1_free_mib = (int(ilvg.lvm_vg_size) *
                                         int(ilvg.lvm_vg_free_pe) / int(
                         ilvg.lvm_vg_total_pe)) / (1024 * 1024)
@@ -861,7 +861,7 @@ class ControllerFsController(rest.RestController):
                     if p_obj['value'] == fs['name']:
                         try:
                             controller_fs_list_new += [ControllerFs(
-                                      **jsonpatch.apply_patch(fs.as_dict(), p_obj_list))]
+                                **jsonpatch.apply_patch(fs.as_dict(), p_obj_list))]
                             replaced = True
                             break
                         except utils.JSONPATCH_EXCEPTIONS as e:
@@ -872,9 +872,9 @@ class ControllerFsController(rest.RestController):
                 controller_fs_list_new += [fs]
 
         cgtsvg_growth_gib = _check_controller_multi_fs_data(
-                               pecan.request.context,
-                               controller_fs_list_new,
-                               modified_fs)
+            pecan.request.context,
+            controller_fs_list_new,
+            modified_fs)
 
         if _check_controller_state():
             _check_controller_multi_fs(controller_fs_list_new,
@@ -889,11 +889,11 @@ class ControllerFsController(rest.RestController):
         try:
             # perform rpc to conductor to perform config apply
             pecan.request.rpcapi.update_storage_config(
-                    pecan.request.context,
-                    update_storage=False,
-                    reinstall_required=reinstall_required,
-                    reboot_required=reboot_required,
-                    filesystem_list=modified_fs
+                pecan.request.context,
+                update_storage=False,
+                reinstall_required=reinstall_required,
+                reboot_required=reboot_required,
+                filesystem_list=modified_fs
             )
 
         except Exception as e:

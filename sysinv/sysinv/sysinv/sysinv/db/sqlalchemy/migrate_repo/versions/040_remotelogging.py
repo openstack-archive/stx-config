@@ -40,9 +40,9 @@ def _populate_remotelogging_table(migrate_engine, meta, remotelogging, i_system)
 def upgrade(migrate_engine):
 
     logTransportEnum = Enum('udp',
-                      'tcp',
-                      'tls',
-                      name='logTransportEnum')
+                            'tcp',
+                            'tls',
+                            name='logTransportEnum')
 
     meta = MetaData()
     meta.bind = migrate_engine
@@ -74,7 +74,7 @@ def upgrade(migrate_engine):
     remotelogging.create()
     # Populate the new remotelogging table with the initial data
     _populate_remotelogging_table(migrate_engine, meta, remotelogging,
-        i_system)
+                                  i_system)
 
 
 def downgrade(migrate_engine):

@@ -734,8 +734,8 @@ class ServiceParameterController(rest.RestController):
                     msg = _("Unable to apply service parameters. "
                             "Missing service parameter '%s' for service '%s' "
                             "in section '%s'." % (name,
-                                constants.SERVICE_TYPE_CINDER,
-                                constants.SERVICE_PARAM_SECTION_CINDER_EMC_VNX))
+                                                  constants.SERVICE_TYPE_CINDER,
+                                                  constants.SERVICE_PARAM_SECTION_CINDER_EMC_VNX))
                     raise wsme.exc.ClientSideError(msg)
         else:
             if not pecan.request.rpcapi.validate_emc_removal(
@@ -821,7 +821,7 @@ class ServiceParameterController(rest.RestController):
                 except exception.AddressPoolNotFound:
                     msg = _("Unable to apply service parameters. "
                             "Network '%s' has no address pool associated" %
-                                control_network_param.value)
+                            control_network_param.value)
                     raise wsme.exc.ClientSideError(msg)
 
             # Data IP, we need to assign an IP address out of 'data_network'
@@ -869,13 +869,13 @@ class ServiceParameterController(rest.RestController):
                     msg = _("Unable to apply service parameters. "
                             "The address pool '%s' in Data EMC network '%s' "
                             "is full" % (data_network_db.pool_uuid,
-                                data_network_param.value))
+                                         data_network_param.value))
                     raise wsme.exc.ClientSideError(msg)
                 except exception.AddressNotFound:
                     msg = _("Unable to apply service parameters. "
                             "Cannot add generated '%s' address into "
                             "pool '%s'" % (service_parameter.CINDER_EMC_VNX_DATA_SAN_IP,
-                                data_network_db.pool_uuid))
+                                           data_network_db.pool_uuid))
                     raise wsme.exc.ClientSideError(msg)
                 except exception.ServiceParameterAlreadyExists:
                     # If can not add assigned data san ip address into
@@ -987,7 +987,6 @@ class ServiceParameterController(rest.RestController):
 
     @staticmethod
     def _hpe3par_reserve_ip_addresses():
-
         """
         We need to keep the address information between service_parameter
         db and addresses db in-sync so that sysinv won't assign the IP
@@ -1243,8 +1242,8 @@ class ServiceParameterController(rest.RestController):
                     msg = _("Unable to apply service parameters. "
                             "Missing service parameter '%s' for service '%s' "
                             "in section '%s'." % (name,
-                                constants.SERVICE_TYPE_CINDER,
-                                constants.SERVICE_PARAM_SECTION_CINDER_HPE3PAR))
+                                                  constants.SERVICE_TYPE_CINDER,
+                                                  constants.SERVICE_PARAM_SECTION_CINDER_HPE3PAR))
                     raise wsme.exc.ClientSideError(msg)
         else:
             if not pecan.request.rpcapi.validate_hpe3par_removal(
@@ -1279,8 +1278,8 @@ class ServiceParameterController(rest.RestController):
                     msg = _("Unable to apply service parameters. "
                             "Missing service parameter '%s' for service '%s' "
                             "in section '%s'." % (name,
-                                constants.SERVICE_TYPE_CINDER,
-                                constants.SERVICE_PARAM_SECTION_CINDER_HPELEFTHAND))
+                                                  constants.SERVICE_TYPE_CINDER,
+                                                  constants.SERVICE_PARAM_SECTION_CINDER_HPELEFTHAND))
                     raise wsme.exc.ClientSideError(msg)
         else:
             if not pecan.request.rpcapi.validate_hpelefthand_removal(

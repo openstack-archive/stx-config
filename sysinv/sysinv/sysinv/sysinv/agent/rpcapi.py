@@ -78,7 +78,7 @@ class AgentAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
         # to change systemname on all nodes ... standby controller and compute nodes
         LOG.debug("AgentApi.configure_isystemname: fanout_cast: sending systemname to agent")
         retval = self.fanout_cast(context, self.make_msg('configure_isystemname',
-                           systemname=systemname))
+                                                         systemname=systemname))
 
         return retval
 
@@ -103,9 +103,9 @@ class AgentAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
 
         # fanout / broadcast message to all inventory agents
         retval = self.fanout_cast(context, self.make_msg(
-                           'iconfig_update_file',
-                           iconfig_uuid=iconfig_uuid,
-                           iconfig_dict=iconfig_dict))
+            'iconfig_update_file',
+            iconfig_uuid=iconfig_uuid,
+            iconfig_dict=iconfig_dict))
 
         return retval
 

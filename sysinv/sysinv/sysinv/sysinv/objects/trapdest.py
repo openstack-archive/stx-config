@@ -25,7 +25,7 @@ class TrapDest(base.SysinvObject):
         'port': utils.int_or_none,
         'type': utils.str_or_none,
         'transport': utils.str_or_none,
-         }
+    }
 
     @base.remotable_classmethod
     def get_by_uuid(cls, context, uuid):

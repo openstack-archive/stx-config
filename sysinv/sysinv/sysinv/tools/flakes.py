@@ -20,14 +20,13 @@
 
  Synced in from openstack-common
 """
-
-__all__ = ['main']
-
 import __builtin__ as builtins
 import sys
 
 import pyflakes.api
 from pyflakes import checker
+
+__all__ = ['main']
 
 
 def main():

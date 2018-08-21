@@ -23,7 +23,7 @@ class Community(base.SysinvObject):
         'community': utils.str_or_none,
         'view': utils.str_or_none,
         'access': utils.str_or_none,
-             }
+    }
 
     @base.remotable_classmethod
     def get_by_uuid(cls, context, uuid):

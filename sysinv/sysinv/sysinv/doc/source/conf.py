@@ -17,7 +17,7 @@
 #
 
 # -- General configuration ----------------------------------------------------
-
+from sysinv import version as sysinv_version
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
@@ -47,7 +47,6 @@ copyright = u'OpenStack Foundation'
 # built documents.
 #
 # The short X.Y version.
-from sysinv import version as sysinv_version
 # The full version, including alpha/beta/rc tags.
 release = sysinv_version.version_string_with_vcs()
 # The short X.Y version.

@@ -90,7 +90,7 @@ class Disk(base.APIBase):
     "link or duplex mode for this idisk"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "This disk's meta data"
 
     forihostid = int
@@ -134,11 +134,11 @@ class Disk(base.APIBase):
         disk = Disk(**rpc_disk.as_dict())
         if not expand:
             disk.unset_fields_except(['uuid', 'device_node', 'device_num',
-                               'device_type', 'device_id', 'device_path',
-                               'device_wwn', 'size_mib', 'available_mib',
-                               'rpm', 'serial_id', 'forihostid', 'foristorid',
-                               'foripvid', 'ihost_uuid', 'istor_uuid', 'ipv_uuid',
-                               'capabilities', 'created_at', 'updated_at'])
+                                      'device_type', 'device_id', 'device_path',
+                                      'device_wwn', 'size_mib', 'available_mib',
+                                      'rpm', 'serial_id', 'forihostid', 'foristorid',
+                                      'foripvid', 'ihost_uuid', 'istor_uuid', 'ipv_uuid',
+                                      'capabilities', 'created_at', 'updated_at'])
 
         # never expose the id attribute
         disk.forihostid = wtypes.Unset
@@ -182,8 +182,8 @@ class DiskCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = DiskCollection()
         collection.idisks = [Disk.convert_with_links(
-                                      p, expand)
-                             for p in rpc_disks]
+            p, expand)
+            for p in rpc_disks]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -213,11 +213,11 @@ class DiskController(rest.RestController):
 
         if self._from_ihosts and not i_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         if self._from_istor and not i_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Interface id not specified."))
+                "Interface id not specified."))
 
         if self._from_ipv and not i_uuid:
             raise exception.InvalidParameterValue(_(
@@ -229,22 +229,22 @@ class DiskController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.disk.get_by_uuid(
-                                        pecan.request.context,
-                                        marker)
+                pecan.request.context,
+                marker)
 
         if self._from_ihosts:
             disks = pecan.request.dbapi.idisk_get_by_ihost(
-                                                    i_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                i_uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         elif self._from_istor:
             disks = pecan.request.dbapi.idisk_get_by_istor(
-                                                    i_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                i_uuid,
+                limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         elif self._from_ipv:
             disks = pecan.request.dbapi.idisk_get_by_ipv(
                 i_uuid,
@@ -255,52 +255,52 @@ class DiskController(rest.RestController):
         else:
             if i_uuid and not istor_uuid and not ipv_uuid:
                 disks = pecan.request.dbapi.idisk_get_by_ihost(
-                                                    i_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid, limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             elif i_uuid and istor_uuid:   # Need ihost_uuid ?
                 disks = pecan.request.dbapi.idisk_get_by_ihost_istor(
-                                                    i_uuid,
-                                                    istor_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid,
+                    istor_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             elif istor_uuid:   # Need ihost_uuid ?
                 disks = pecan.request.dbapi.idisk_get_by_ihost_istor(
-                                                    i_uuid,  # None
-                                                    istor_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid,  # None
+                    istor_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             elif i_uuid and ipv_uuid:   # Need ihost_uuid ?
                 disks = pecan.request.dbapi.idisk_get_by_ihost_ipv(
-                                                    i_uuid,
-                                                    ipv_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid,
+                    ipv_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             elif ipv_uuid:   # Need ihost_uuid ?
                 disks = pecan.request.dbapi.idisk_get_by_ihost_ipv(
-                                                    i_uuid,  # None
-                                                    ipv_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid,  # None
+                    ipv_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             else:
                 disks = pecan.request.dbapi.idisk_get_list(
-                                                    limit, marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    limit, marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
         return DiskCollection.convert_with_links(disks, limit,
                                                  url=resource_url,
@@ -320,7 +320,7 @@ class DiskController(rest.RestController):
     @wsme_pecan.wsexpose(DiskCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)
     def detail(self, i_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of disks with detail."""
         # NOTE(lucasagomes): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -339,7 +339,7 @@ class DiskController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_disk = objects.disk.get_by_uuid(
-                                        pecan.request.context, disk_uuid)
+            pecan.request.context, disk_uuid)
         return Disk.convert_with_links(rpc_disk)
 
     @cutils.synchronized(LOCK_NAME)

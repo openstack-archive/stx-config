@@ -254,9 +254,9 @@ class BaseMigrationTestCase(test_utils.BaseTestCase):
                 (user, password, database, host) = \
                     get_db_connection_info(conn_pieces)
                 sql = ("drop database if exists %(database)s; "
-                        "create database %(database)s;") % {'database': database}
+                       "create database %(database)s;") % {'database': database}
                 cmd = ("mysql -u \"%(user)s\" -p\"%(password)s\" -h %(host)s "
-                        "-e \"%(sql)s\"") % {'user': user, 'password': password,
+                       "-e \"%(sql)s\"") % {'user': user, 'password': password,
                                             'host': host, 'sql': sql}
 
                 self.execute_cmd(cmd)
@@ -512,7 +512,7 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
 
         self.MIGRATE_FILE = sysinv.db.sqlalchemy.migrate_repo.__file__
         self.REPOSITORY = repository.Repository(
-                        os.path.abspath(os.path.dirname(self.MIGRATE_FILE)))
+            os.path.abspath(os.path.dirname(self.MIGRATE_FILE)))
 
     def setUp(self):
         super(TestMigrations, self).setUp()
@@ -522,7 +522,7 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         self.INIT_VERSION = self.migration.INIT_VERSION
         if self.migration_api is None:
             temp = __import__('sysinv.db.sqlalchemy.migration',
-                                globals(), locals(), ['versioning_api'], -1)
+                              globals(), locals(), ['versioning_api'], -1)
             self.migration_api = temp.versioning_api
 
     def column_exists(self, engine, table_name, column):
@@ -537,11 +537,11 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
 
     def assertColumnNotExists(self, engine, table_name, column):
         self.assertFalse(self.column_exists(engine, table_name, column),
-                        'Column %s.%s should not exist' % (table_name, column))
+                         'Column %s.%s should not exist' % (table_name, column))
 
     def assertTableNotExists(self, engine, table):
         self.assertRaises(sqlalchemy.exc.NoSuchTableError,
-                            db_utils.get_table, engine, table)
+                          db_utils.get_table, engine, table)
 
     def _test_sqlite_opportunistically(self):
         if not _have_sqlite(self.USER, self.PASSWD, self.DATABASE):
@@ -563,7 +563,7 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         # add this to the global lists to make reset work with it, it's removed
         # automatically in tearDown so no need to clean it up here.
         connect_string = _get_connect_string("mysql", self.USER, self.PASSWD,
-                                            self.DATABASE)
+                                             self.DATABASE)
         (user, password, database, host) = \
             get_db_connection_info(urlparse.urlparse(connect_string))
         engine = sqlalchemy.create_engine(connect_string)
@@ -598,7 +598,7 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         # add this to the global lists to make reset work with it, it's removed
         # automatically in tearDown so no need to clean it up here.
         connect_string = _get_connect_string("postgres", self.USER,
-                                            self.PASSWD, self.DATABASE)
+                                             self.PASSWD, self.DATABASE)
         engine = sqlalchemy.create_engine(connect_string)
         (user, password, database, host) = \
             get_db_connection_info(urlparse.urlparse(connect_string))
@@ -612,15 +612,15 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
     def test_walk_versions(self):
         for engine in self.engines.values():
             if 'sqlite' in str(engine) and _have_sqlite(self.USER,
-            self.PASSWD, self.DATABASE):
+                                                        self.PASSWD, self.DATABASE):
                 self._walk_versions(engine, snake_walk=False,
                                     downgrade=False)
             elif 'postgres' in str(engine) and _have_postgresql(self.USER,
-            self.PASSWD, self.DATABASE):
+                                                                self.PASSWD, self.DATABASE):
                 self._walk_versions(engine, snake_walk=False,
                                     downgrade=False)
             elif 'mysql' in str(engine) and _have_mysql(self.USER,
-            self.PASSWD, self.DATABASE):
+                                                        self.PASSWD, self.DATABASE):
                 self._walk_versions(engine, snake_walk=False,
                                     downgrade=False)
 
@@ -708,7 +708,7 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         }
         for col, coltype in servers_col.items():
             self.assertTrue(isinstance(servers.c[col].type,
-                            getattr(sqlalchemy.types, coltype)),
+                                       getattr(sqlalchemy.types, coltype)),
                             "migrate to col %s of type  %s of server %s"
                             % (col, getattr(sqlalchemy.types, coltype),
                                servers.c[col].type))
@@ -939,7 +939,7 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         }
         for col, coltype in servers_col.items():
             self.assertTrue(isinstance(servers.c[col].type,
-                            getattr(sqlalchemy.types, coltype)),
+                                       getattr(sqlalchemy.types, coltype)),
                             "migrate to col %s of type  %s of server %s"
                             % (col, getattr(sqlalchemy.types, coltype),
                                servers.c[col].type))
@@ -1803,7 +1803,7 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         }
         for col, coltype in servers_col.items():
             self.assertTrue(isinstance(servers.c[col].type,
-                            getattr(sqlalchemy.types, coltype)),
+                                       getattr(sqlalchemy.types, coltype)),
                             "migrate to col %s of type  %s of server %s"
                             % (col, getattr(sqlalchemy.types, coltype),
                                servers.c[col].type))
@@ -1872,4 +1872,4 @@ class TestMigrations(BaseMigrationTestCase, WalkVersionsMixin):
         }
         for col, coltype in ntps_col.items():
             self.assertTrue(isinstance(ntps.c[col].type,
-                            getattr(sqlalchemy.types, coltype)))
+                                       getattr(sqlalchemy.types, coltype)))

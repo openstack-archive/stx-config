@@ -13,7 +13,6 @@ import os
 import tempfile
 import yaml
 
-from oslo_utils import importutils
 from stevedore import extension
 
 from sysinv.common import constants
@@ -61,6 +60,7 @@ LOG = logging.getLogger(__name__)
 
 def puppet_context(func):
     """Decorate to initialize the local threading context"""
+
     def _wrapper(self, *args, **kwargs):
         thread_context = eventlet.greenthread.getcurrent()
         setattr(thread_context, '_puppet_context', dict())

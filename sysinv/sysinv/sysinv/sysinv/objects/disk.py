@@ -18,29 +18,29 @@ class Disk(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
+        'id': int,
+        'uuid': utils.str_or_none,
 
-            'device_node': utils.str_or_none,
-            'device_num': utils.int_or_none,
-            'device_id': utils.str_or_none,
-            'device_path': utils.str_or_none,
-            'device_wwn': utils.str_or_none,
-            'device_type': utils.str_or_none,
-            'size_mib': utils.int_or_none,
-            'available_mib': utils.int_or_none,
-            'serial_id': utils.str_or_none,
+        'device_node': utils.str_or_none,
+        'device_num': utils.int_or_none,
+        'device_id': utils.str_or_none,
+        'device_path': utils.str_or_none,
+        'device_wwn': utils.str_or_none,
+        'device_type': utils.str_or_none,
+        'size_mib': utils.int_or_none,
+        'available_mib': utils.int_or_none,
+        'serial_id': utils.str_or_none,
 
-            'capabilities': utils.dict_or_none,
+        'capabilities': utils.dict_or_none,
 
-            'forihostid': int,
-            'ihost_uuid': utils.str_or_none,
-            'foristorid': utils.int_or_none,
-            'istor_uuid': utils.str_or_none,
-            'foripvid': utils.int_or_none,
-            'ipv_uuid': utils.str_or_none,
-            'rpm': utils.str_or_none,
-             }
+        'forihostid': int,
+        'ihost_uuid': utils.str_or_none,
+        'foristorid': utils.int_or_none,
+        'istor_uuid': utils.str_or_none,
+        'foripvid': utils.int_or_none,
+        'ipv_uuid': utils.str_or_none,
+        'rpm': utils.str_or_none,
+    }
 
     _foreign_fields = {'ihost_uuid': 'host:uuid',
                        'istor_uuid': 'stor:uuid',

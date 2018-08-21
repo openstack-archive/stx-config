@@ -50,6 +50,7 @@ class RingExchange(mm.Exchange):
     __init__ takes optional ring dictionary argument, otherwise
     loads the ringfile from CONF.mathcmaker_ringfile.
     """
+
     def __init__(self, ring=None):
         super(RingExchange, self).__init__()
 
@@ -72,6 +73,7 @@ class RingExchange(mm.Exchange):
 
 class RoundRobinRingExchange(RingExchange):
     """A Topic Exchange based on a hashmap."""
+
     def __init__(self, ring=None):
         super(RoundRobinRingExchange, self).__init__(ring)
 
@@ -88,6 +90,7 @@ class RoundRobinRingExchange(RingExchange):
 
 class FanoutRingExchange(RingExchange):
     """Fanout Exchange based on a hashmap."""
+
     def __init__(self, ring=None):
         super(FanoutRingExchange, self).__init__(ring)
 
@@ -107,6 +110,7 @@ class MatchMakerRing(mm.MatchMakerBase):
     """
     Match Maker where hosts are loaded from a static hashmap.
     """
+
     def __init__(self, ring=None):
         super(MatchMakerRing, self).__init__()
         self.add_binding(mm.FanoutBinding(), FanoutRingExchange(ring))

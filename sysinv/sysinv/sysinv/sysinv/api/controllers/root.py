@@ -64,11 +64,11 @@ class Root(base.APIBase):
         root = Root()
         root.name = "Titanium SysInv API"
         root.description = ("Titanium Cloud System API allows for the "
-             "management of physical servers.  This includes inventory "
-             "collection and configuration of hosts, ports, interfaces, CPUs, disk, "
-             "memory, and system configuration.  The API also supports "
-             "alarms and fault collection for the cloud itself as well "
-             "as the configuration of the cloud's SNMP interface. "
+                            "management of physical servers.  This includes inventory "
+                            "collection and configuration of hosts, ports, interfaces, CPUs, disk, "
+                            "memory, and system configuration.  The API also supports "
+                            "alarms and fault collection for the cloud itself as well "
+                            "as the configuration of the cloud's SNMP interface. "
                             )
         root.versions = [Version.convert('v1')]
         root.default_version = Version.convert('v1')

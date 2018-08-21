@@ -193,7 +193,7 @@ class GlancePuppet(openstack.OpenstackBasePuppet):
 
         if rbd_store_pool and rbd_store_ceph_conf:
             config.update({'openstack::glance::params::rbd_store_pool':
-                               rbd_store_pool,
+                           rbd_store_pool,
                            'openstack::glance::params::rbd_store_ceph_conf':
                                rbd_store_ceph_conf, })
 
@@ -227,13 +227,13 @@ class GlancePuppet(openstack.OpenstackBasePuppet):
 
     def to_configure_user(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return False
         return True
 
     def to_configure_user_role(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return False
         return True
 
@@ -260,28 +260,28 @@ class GlancePuppet(openstack.OpenstackBasePuppet):
 
     def get_public_url(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return self._get_public_url_from_service_config(self.SERVICE_NAME)
         else:
             return self._format_public_endpoint(self.SERVICE_PORT)
 
     def get_internal_url(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return self._get_internal_url_from_service_config(self.SERVICE_NAME)
         else:
             address = self._format_url_address(self._get_glance_address())
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                             address=address)
+                                                 address=address)
 
     def get_admin_url(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return self._get_admin_url_from_service_config(self.SERVICE_NAME)
         else:
             address = self._format_url_address(self._get_glance_address())
             return self._format_private_endpoint(self.SERVICE_PORT,
-                                             address=address)
+                                                 address=address)
 
     def _get_glance_address(self):
         # Obtain NFS infrastructure address if configured, otherwise fallback

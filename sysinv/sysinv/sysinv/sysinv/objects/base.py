@@ -107,6 +107,7 @@ def remotable_classmethod(fn):
 # "orphaned" and remotable methods cannot be called.
 def remotable(fn):
     """Decorator for remotable object methods."""
+
     def wrapper(self, *args, **kwargs):
         ctxt = self._context
         try:
@@ -183,7 +184,7 @@ class SysinvObject(object):
     fields = {
         'created_at': obj_utils.datetime_or_str_or_none,
         'updated_at': obj_utils.datetime_or_str_or_none,
-              }
+    }
     obj_extra_fields = []
     _foreign_fields = {}
     _optional_fields = []
@@ -442,8 +443,8 @@ class SysinvObject(object):
 
     def as_dict(self):
         return dict((k, getattr(self, k))
-                for k in self.fields
-                if hasattr(self, k))
+                    for k in self.fields
+                    if hasattr(self, k))
 
     @classmethod
     def get_defaults(cls):
@@ -485,7 +486,7 @@ class ObjectListBase(object):
     """
     fields = {
         'objects': list,
-              }
+    }
 
     def __iter__(self):
         """List iterator interface."""

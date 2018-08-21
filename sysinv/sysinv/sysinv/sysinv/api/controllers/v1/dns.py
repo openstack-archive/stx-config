@@ -170,9 +170,9 @@ def _check_dns_data(dns):
                     break
 
                 raise wsme.exc.ClientSideError(_(
-                           "Invalid DNS nameserver target address %s "
-                           "Please configure a valid DNS "
-                           "address.") % (nameservers))
+                    "Invalid DNS nameserver target address %s "
+                    "Please configure a valid DNS "
+                    "address.") % (nameservers))
 
     if len(idns_nameservers_list) == 0 or idns_nameservers_list == [""]:
         if ntp_list:
@@ -194,9 +194,9 @@ def _check_dns_data(dns):
 
     if len(idns_nameservers_list) > MAX_S:
         raise wsme.exc.ClientSideError(_(
-                   "Maximum DNS nameservers supported: %s but provided: %s. "
-                   "Please configure a valid list of DNS nameservers."
-                   % (MAX_S, len(idns_nameservers_list))))
+            "Maximum DNS nameservers supported: %s but provided: %s. "
+            "Please configure a valid list of DNS nameservers."
+            % (MAX_S, len(idns_nameservers_list))))
 
     dns_nameservers = ",".join(idns_nameservers_list)
 
@@ -223,7 +223,7 @@ class DNSController(rest.RestController):
 
         if self._from_isystems and not isystem_uuid:
             raise exception.InvalidParameterValue(_(
-                  "System id not specified."))
+                "System id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -235,10 +235,10 @@ class DNSController(rest.RestController):
 
         if isystem_uuid:
             dnss = pecan.request.dbapi.idns_get_by_isystem(
-                                                    isystem_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                isystem_uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         else:
             dnss = pecan.request.dbapi.idns_get_list(limit, marker_obj,
                                                      sort_key=sort_key,
@@ -257,7 +257,7 @@ class DNSController(rest.RestController):
         """Retrieve a list of dnss. Only one per system"""
 
         return self._get_dnss_collection(isystem_uuid, marker, limit,
-                                          sort_key, sort_dir)
+                                         sort_key, sort_dir)
 
     @wsme_pecan.wsexpose(DNSCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)

@@ -163,7 +163,7 @@ class StorageExternalCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = StorageExternalCollection()
         collection.storage_external = \
-                                 [StorageExternal.convert_with_links(p, expand)
+            [StorageExternal.convert_with_links(p, expand)
              for p in rpc_storage_external]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
@@ -180,7 +180,7 @@ class StorageExternalController(rest.RestController):
     }
 
     def _get_storage_external_collection(self, marker, limit, sort_key, sort_dir,
-                                     expand=False, resource_url=None):
+                                         expand=False, resource_url=None):
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -192,11 +192,11 @@ class StorageExternalController(rest.RestController):
                 marker)
 
         external_storage_backends = \
-                                pecan.request.dbapi.storage_external_get_list(
-                                    limit,
-                                    marker_obj,
-                                    sort_key=sort_key,
-                                    sort_dir=sort_dir)
+            pecan.request.dbapi.storage_external_get_list(
+                limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
 
         return StorageExternalCollection \
             .convert_with_links(external_storage_backends,
@@ -212,7 +212,7 @@ class StorageExternalController(rest.RestController):
         """Retrieve a list of external storage backends."""
 
         return self._get_storage_external_collection(marker, limit, sort_key,
-                                                 sort_dir)
+                                                     sort_dir)
 
     @wsme_pecan.wsexpose(StorageExternal, types.uuid)
     def get_one(self, storage_external_uuid):
@@ -339,7 +339,7 @@ def _check_backend_external(req, storage_external, confirmed=False):
         for k in HIERA_DATA[svc]:
             if not capabilities.get(k, None):
                 raise wsme.exc.ClientSideError("Missing required %s service "
-                                                   "parameter: %s" % (svc, k))
+                                               "parameter: %s" % (svc, k))
 
     # Update based on any discovered values
     storage_external['capabilities'] = capabilities
@@ -525,8 +525,8 @@ def _patch(storexternal_uuid, patch):
 
     try:
         pecan.request.dbapi.storage_external_update(
-                rpc_storexternal.uuid,
-                {'state': constants.SB_STATE_CONFIGURING})
+            rpc_storexternal.uuid,
+            {'state': constants.SB_STATE_CONFIGURING})
 
         rpc_storexternal.save()
 
@@ -560,8 +560,8 @@ def _delete(sb_uuid):
 
     # Run the backend specific semantic checks
     _check_backend_external(constants.SB_API_OP_DELETE,
-                        storage_external_obj.as_dict(),
-                        True)
+                            storage_external_obj.as_dict(),
+                            True)
 
     # Enable the backend changes:
     _apply_backend_changes(constants.SB_API_OP_DELETE, storage_external_obj)

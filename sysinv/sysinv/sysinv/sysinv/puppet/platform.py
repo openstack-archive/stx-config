@@ -208,7 +208,7 @@ class PlatformPuppet(base.BasePuppet):
                     % sw_version)
 
             config.update({
-                  'nova::upgrade_level_compute': nova_level
+                'nova::upgrade_level_compute': nova_level
             })
 
         return config
@@ -539,7 +539,7 @@ class PlatformPuppet(base.BasePuppet):
             # change the CPU list to ranges
             rcu_nocbs_ranges = ""
             for key, group in itertools.groupby(enumerate(rcu_nocbs),
-                                                lambda (x, y): y - x):
+                                                lambda x, y: y - x):
                 group = list(group)
                 rcu_nocbs_ranges += "%s-%s," % (group[0][1], group[-1][1])
             rcu_nocbs_ranges = rcu_nocbs_ranges.rstrip(',')
@@ -552,7 +552,7 @@ class PlatformPuppet(base.BasePuppet):
             # change the CPU list to ranges
             non_vswitch_cpus_ranges = ""
             for key, group in itertools.groupby(enumerate(non_vswitch_cpus),
-                                                lambda (x, y): y - x):
+                                                lambda x, y: y - x):
                 group = list(group)
                 non_vswitch_cpus_ranges += "\"%s-%s\"," % (group[0][1], group[-1][1])
 

@@ -18,16 +18,16 @@ class StorageBackend(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-              'id': int,
-              'uuid': utils.uuid_or_none,
-              'backend': utils.str_or_none,
-              'name': utils.str_or_none,
-              'state': utils.str_or_none,
-              'task': utils.str_or_none,
-              'services': utils.str_or_none,
-              'capabilities': utils.dict_or_none,
-              'forisystemid': utils.int_or_none,
-              'isystem_uuid': utils.str_or_none,
+        'id': int,
+        'uuid': utils.uuid_or_none,
+        'backend': utils.str_or_none,
+        'name': utils.str_or_none,
+        'state': utils.str_or_none,
+        'task': utils.str_or_none,
+        'services': utils.str_or_none,
+        'capabilities': utils.dict_or_none,
+        'forisystemid': utils.int_or_none,
+        'isystem_uuid': utils.str_or_none,
     }
 
     _foreign_fields = {

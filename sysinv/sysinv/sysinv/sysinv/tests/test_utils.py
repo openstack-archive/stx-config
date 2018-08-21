@@ -69,7 +69,7 @@ class BareMetalUtilsTestCase(base.TestCase):
     def test_create_link_EEXIST(self):
         self.mox.StubOutWithMock(os, "symlink")
         os.symlink("/fake/source", "/fake/link").AndRaise(
-                OSError(errno.EEXIST))
+            OSError(errno.EEXIST))
 
         self.mox.ReplayAll()
         utils.create_link_without_raise("/fake/source", "/fake/link")
@@ -218,7 +218,7 @@ class GenericUtilsTestCase(base.TestCase):
             self.reload_called = True
 
         data = utils.read_cached_file("/this/is/a/fake", cache_data,
-                                                reload_func=test_reload)
+                                      reload_func=test_reload)
         self.assertEqual(data, fake_contents)
         self.assertTrue(self.reload_called)
 
@@ -252,9 +252,9 @@ class GenericUtilsTestCase(base.TestCase):
     def test_is_valid_ipv6(self):
         self.assertTrue(utils.is_valid_ipv6("::1"))
         self.assertTrue(utils.is_valid_ipv6(
-                            "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254"))
+            "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254"))
         self.assertTrue(utils.is_valid_ipv6(
-                                    "0000:0000:0000:0000:0000:0000:0000:0001"))
+            "0000:0000:0000:0000:0000:0000:0000:0001"))
         self.assertFalse(utils.is_valid_ipv6("foo"))
         self.assertFalse(utils.is_valid_ipv6("127.0.0.1"))
         self.assertFalse(utils.is_valid_ipv6(""))
@@ -263,23 +263,23 @@ class GenericUtilsTestCase(base.TestCase):
     def test_is_valid_ipv6_cidr(self):
         self.assertTrue(utils.is_valid_ipv6_cidr("2600::/64"))
         self.assertTrue(utils.is_valid_ipv6_cidr(
-                "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254/48"))
+            "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254/48"))
         self.assertTrue(utils.is_valid_ipv6_cidr(
-                "0000:0000:0000:0000:0000:0000:0000:0001/32"))
+            "0000:0000:0000:0000:0000:0000:0000:0001/32"))
         self.assertTrue(utils.is_valid_ipv6_cidr(
-                "0000:0000:0000:0000:0000:0000:0000:0001"))
+            "0000:0000:0000:0000:0000:0000:0000:0001"))
         self.assertFalse(utils.is_valid_ipv6_cidr("foo"))
         self.assertFalse(utils.is_valid_ipv6_cidr("127.0.0.1"))
 
     def test_get_shortened_ipv6(self):
         self.assertEquals("abcd:ef01:2345:6789:abcd:ef01:c0a8:fefe",
-                            utils.get_shortened_ipv6(
-                                "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254"))
+                          utils.get_shortened_ipv6(
+                              "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254"))
         self.assertEquals("::1", utils.get_shortened_ipv6(
-                                    "0000:0000:0000:0000:0000:0000:0000:0001"))
+            "0000:0000:0000:0000:0000:0000:0000:0001"))
         self.assertEquals("caca::caca:0:babe:201:102",
                           utils.get_shortened_ipv6(
-                                    "caca:0000:0000:caca:0000:babe:0201:0102"))
+                              "caca:0000:0000:caca:0000:babe:0201:0102"))
         self.assertRaises(netaddr.AddrFormatError, utils.get_shortened_ipv6,
                           "127.0.0.1")
         self.assertRaises(netaddr.AddrFormatError, utils.get_shortened_ipv6,
@@ -287,9 +287,9 @@ class GenericUtilsTestCase(base.TestCase):
 
     def test_get_shortened_ipv6_cidr(self):
         self.assertEquals("2600::/64", utils.get_shortened_ipv6_cidr(
-                "2600:0000:0000:0000:0000:0000:0000:0000/64"))
+            "2600:0000:0000:0000:0000:0000:0000:0000/64"))
         self.assertEquals("2600::/64", utils.get_shortened_ipv6_cidr(
-                "2600::1/64"))
+            "2600::1/64"))
         self.assertRaises(netaddr.AddrFormatError,
                           utils.get_shortened_ipv6_cidr,
                           "127.0.0.1")

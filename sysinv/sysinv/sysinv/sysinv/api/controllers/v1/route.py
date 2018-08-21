@@ -210,7 +210,7 @@ class RouteCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = RouteCollection()
         collection.routes = [Route.convert_with_links(a, expand)
-                                for a in rpc_routes]
+                             for a in rpc_routes]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 

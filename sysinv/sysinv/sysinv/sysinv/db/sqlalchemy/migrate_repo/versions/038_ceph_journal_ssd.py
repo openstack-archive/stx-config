@@ -71,23 +71,23 @@ def upgrade(migrate_engine):
     i_idisk = Table('i_idisk', meta, autoload=True)
     i_istor = Table('i_istor', meta, autoload=True)
     journal = Table(
-                      'journal',
-                      meta,
-                      Column('created_at', DateTime),
-                      Column('updated_at', DateTime),
-                      Column('deleted_at', DateTime),
-                      Column('id', Integer, primary_key=True, nullable=False),
-                      Column('uuid', String(36), unique=True),
-                      Column('device_node', String(255)),
-                      Column('size_mib', Integer),
-                      Column('onistor_uuid', String(36)),
-                      Column('foristorid', Integer,
-                             ForeignKey(i_istor.c.id, ondelete='CASCADE'),
-                             unique=True),
+        'journal',
+        meta,
+        Column('created_at', DateTime),
+        Column('updated_at', DateTime),
+        Column('deleted_at', DateTime),
+        Column('id', Integer, primary_key=True, nullable=False),
+        Column('uuid', String(36), unique=True),
+        Column('device_node', String(255)),
+        Column('size_mib', Integer),
+        Column('onistor_uuid', String(36)),
+        Column('foristorid', Integer,
+               ForeignKey(i_istor.c.id, ondelete='CASCADE'),
+               unique=True),
 
-                      mysql_engine=ENGINE,
-                      mysql_charset=CHARSET,
-                     )
+        mysql_engine=ENGINE,
+        mysql_charset=CHARSET,
+    )
 
     try:
         journal.create()

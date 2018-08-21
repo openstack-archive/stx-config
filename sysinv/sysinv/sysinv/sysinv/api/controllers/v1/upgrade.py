@@ -137,8 +137,8 @@ class UpgradeController(rest.RestController):
                 pecan.request.context, marker)
 
         upgrades = pecan.request.dbapi.software_upgrade_get_list(
-                limit=limit, marker=marker_obj,
-                sort_key=sort_key, sort_dir=sort_dir)
+            limit=limit, marker=marker_obj,
+            sort_key=sort_key, sort_dir=sort_dir)
 
         return UpgradeCollection.convert_with_links(
             upgrades, limit, url=resource_url, expand=expand,
@@ -227,7 +227,7 @@ class UpgradeController(rest.RestController):
                 "upgrade-start rejected: Unable to set VIM upgrade state"))
 
         success, output = pecan.request.rpcapi.get_system_health(
-                pecan.request.context, force=force, upgrade=True)
+            pecan.request.context, force=force, upgrade=True)
 
         if not success:
             LOG.info("Health audit failure during upgrade start. Health "

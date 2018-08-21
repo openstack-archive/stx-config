@@ -67,7 +67,7 @@ class AddressPoolPatchType(types.JsonPatchType):
     def mandatory_attrs():
         """These attributes cannot be removed."""
         result = (super(AddressPoolPatchType, AddressPoolPatchType).
-                mandatory_attrs())
+                  mandatory_attrs())
         result.append(['/name', '/network', '/prefix', '/order', '/ranges'])
         return result
 
@@ -277,8 +277,8 @@ class AddressPoolController(rest.RestController):
                 pecan.request.context, marker)
 
         addrpools = pecan.request.dbapi.address_pools_get_all(
-                limit=limit, marker=marker_obj,
-                sort_key=sort_key, sort_dir=sort_dir)
+            limit=limit, marker=marker_obj,
+            sort_key=sort_key, sort_dir=sort_dir)
 
         return AddressPoolCollection.convert_with_links(
             addrpools, limit, url=resource_url, expand=expand,
@@ -302,7 +302,7 @@ class AddressPoolController(rest.RestController):
         start_address = netaddr.IPAddress(start)
         end_address = netaddr.IPAddress(end)
         if (start_address.version != end_address.version or
-              start_address.version != network.version):
+                start_address.version != network.version):
             raise exception.AddressPoolRangeVersionMismatch()
         if start_address not in network:
             raise exception.AddressPoolRangeValueNotInNetwork(

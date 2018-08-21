@@ -101,6 +101,7 @@ class memoized(object):
     does not provide weak references; thus would prevent the instance from
     being garbage collected.
     '''
+
     def __init__(self, func):
         self.func = func
         self.cache = {}
@@ -172,7 +173,7 @@ def execute(*cmd, **kwargs):
 
     if len(kwargs):
         raise exception.SysinvException(_('Got unknown keyword args '
-                                        'to utils.execute: %r') % kwargs)
+                                          'to utils.execute: %r') % kwargs)
 
     if run_as_root and os.geteuid() != 0:
         cmd = ['sudo', 'sysinv-rootwrap', CONF.rootwrap_config] + list(cmd)
@@ -210,10 +211,10 @@ def execute(*cmd, **kwargs):
             if not ignore_exit_code and _returncode not in check_exit_code:
                 (stdout, stderr) = result
                 raise exception.ProcessExecutionError(
-                        exit_code=_returncode,
-                        stdout=stdout,
-                        stderr=stderr,
-                        cmd=' '.join(cmd))
+                    exit_code=_returncode,
+                    stdout=stdout,
+                    stderr=stderr,
+                    cmd=' '.join(cmd))
             return result
         except exception.ProcessExecutionError:
             if not attempts:
@@ -506,7 +507,7 @@ def is_system_usable_block_device(pydev_device):
     if pydev_device.get("ID_VENDOR") == constants.VENDOR_ID_LIO:
         # LIO devices are iSCSI, should be skipped above!
         LOG.error("Invalid id_path. Device %s (%s) is iSCSI!" %
-                    (id_path, pydev_device.get('DEVNAME')))
+                  (id_path, pydev_device.get('DEVNAME')))
         return False
     return True
 
@@ -701,7 +702,7 @@ def unlink_without_raise(path):
             return
         else:
             LOG.warn(_("Failed to unlink %(path)s, error: %(e)s") %
-                      {'path': path, 'e': e})
+                     {'path': path, 'e': e})
 
 
 def rmtree_without_raise(path):
@@ -710,7 +711,7 @@ def rmtree_without_raise(path):
             shutil.rmtree(path)
     except OSError as e:
         LOG.warn(_("Failed to remove dir %(path)s, error: %(e)s") %
-                {'path': path, 'e': e})
+                 {'path': path, 'e': e})
 
 
 def write_to_file(path, contents):
@@ -727,7 +728,7 @@ def create_link_without_raise(source, link):
         else:
             LOG.warn(_("Failed to create symlink from %(source)s to %(link)s"
                        ", error: %(e)s") %
-                       {'source': source, 'link': link, 'e': e})
+                     {'source': source, 'link': link, 'e': e})
 
 
 def safe_rstrip(value, chars=None):
@@ -833,9 +834,9 @@ def notify_mtc_and_recv(mtc_address, mtc_port, idict):
             LOG.exception("Mtc Response Error: %s" % mtc_response)
             pass
 
-    except socket.error, e:
+    except socket.error as e:
         LOG.exception(_("Socket Error: %s on %s:%s for %s") % (e,
-                        mtc_address, mtc_port, serialized_idict))
+                                                               mtc_address, mtc_port, serialized_idict))
         # if e not in [errno.EWOULDBLOCK, errno.EINTR]:
         #  raise exception.CommunicationError(_(
         #   "Socket error:  address=%s port=%s error=%s ") % (
@@ -861,7 +862,7 @@ def symlink_force(source, link_name):
     """
     try:
         os.symlink(source, link_name)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             os.remove(link_name)
             os.symlink(source, link_name)
@@ -877,7 +878,7 @@ def mounted(remote_dir, local_dir):
     except subprocess.CalledProcessError as e:
         raise OSError(("mount operation failed: "
                        "command={}, retcode={}, output='{}'").format(
-                          e.cmd, e.returncode, e.output))
+            e.cmd, e.returncode, e.output))
     try:
         yield
     finally:
@@ -888,7 +889,7 @@ def mounted(remote_dir, local_dir):
         except subprocess.CalledProcessError as e:
             raise OSError(("umount operation failed: "
                            "command={}, retcode={}, output='{}'").format(
-                              e.cmd, e.returncode, e.output))
+                e.cmd, e.returncode, e.output))
 
 
 def timestamped(dname, fmt='{dname}_%Y-%m-%d-%H-%M-%S'):

@@ -115,11 +115,11 @@ class User(base.APIBase):
         # user.forisystemid = wtypes.Unset
 
         user.links = [link.Link.make_link('self', pecan.request.host_url,
-                                         'iusers', user.uuid),
-                     link.Link.make_link('bookmark',
-                                         pecan.request.host_url,
-                                         'iusers', user.uuid,
-                                         bookmark=True)
+                                          'iusers', user.uuid),
+                      link.Link.make_link('bookmark',
+                                          pecan.request.host_url,
+                                          'iusers', user.uuid,
+                                          bookmark=True)
                       ]
 
         return user
@@ -161,11 +161,11 @@ class UserController(rest.RestController):
         self._from_isystems = from_isystems
 
     def _get_users_collection(self, isystem_uuid, marker, limit, sort_key,
-                             sort_dir, expand=False, resource_url=None):
+                              sort_dir, expand=False, resource_url=None):
 
         if self._from_isystems and not isystem_uuid:
             raise exception.InvalidParameterValue(_(
-                  "System id not specified."))
+                "System id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -177,14 +177,14 @@ class UserController(rest.RestController):
 
         if isystem_uuid:
             users = pecan.request.dbapi.iuser_get_by_isystem(
-                                                    isystem_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                isystem_uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         else:
             users = pecan.request.dbapi.iuser_get_list(limit, marker_obj,
-                                                     sort_key=sort_key,
-                                                     sort_dir=sort_dir)
+                                                       sort_key=sort_key,
+                                                       sort_dir=sort_dir)
 
         return UserCollection.convert_with_links(users, limit,
                                                  url=resource_url,

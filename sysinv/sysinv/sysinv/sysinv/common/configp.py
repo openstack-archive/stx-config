@@ -15,6 +15,7 @@ class Config(configparser.ConfigParser):
     """
     Override ConfigParser class to add dictionary functionality.
     """
+
     def as_dict(self):
         d = dict(self._sections)
         for key in d:

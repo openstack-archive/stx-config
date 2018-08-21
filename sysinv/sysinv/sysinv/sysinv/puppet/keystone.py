@@ -258,21 +258,21 @@ class KeystonePuppet(openstack.OpenstackBasePuppet):
 
     def get_public_url(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return self._get_public_url_from_service_config(self.SERVICE_NAME)
         else:
             return self._format_public_endpoint(self.SERVICE_PORT)
 
     def get_internal_url(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return self._get_internal_url_from_service_config(self.SERVICE_NAME)
         else:
             return self._format_private_endpoint(self.SERVICE_PORT)
 
     def get_admin_url(self):
         if (self._region_config() and
-                    self.SERVICE_TYPE in self._get_shared_services()):
+                self.SERVICE_TYPE in self._get_shared_services()):
             return self._get_admin_url_from_service_config(self.SERVICE_NAME)
         else:
             return self._format_private_endpoint(self.SERVICE_PORT)

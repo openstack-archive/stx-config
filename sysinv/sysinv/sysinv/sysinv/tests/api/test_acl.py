@@ -38,11 +38,11 @@ class TestACL(base.FunctionalTest):
 
     def get_json(self, path, expect_errors=False, headers=None, q=[], **param):
         return super(TestACL, self).get_json(path,
-                                                expect_errors=expect_errors,
-                                                headers=headers,
-                                                q=q,
-                                                extra_environ=self.environ,
-                                                **param)
+                                             expect_errors=expect_errors,
+                                             headers=headers,
+                                             q=q,
+                                             extra_environ=self.environ,
+                                             **param)
 
     def _make_app(self):
         cfg.CONF.set_override('cache', 'fake.cache', group=acl.OPT_GROUP_NAME)
@@ -61,7 +61,7 @@ class TestACL(base.FunctionalTest):
         self.skipTest("Skipping to prevent failure notification on Jenkins")
         self.mox.StubOutWithMock(self.dbapi, 'ihost_get')
         self.dbapi.ihost_get(self.fake_node['uuid']).AndReturn(
-                                 self.fake_node)
+            self.fake_node)
         self.mox.ReplayAll()
 
         response = self.get_json(self.node_path,

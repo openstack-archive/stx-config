@@ -316,11 +316,11 @@ class DiskOperator(object):
                     else:
                         # try lsblk command
                         lsblk_command = 'lsblk -dn --output MODEL %s' % (
-                                             device.get('DEVNAME'))
+                            device.get('DEVNAME'))
                         lsblk_process = subprocess.Popen(
-                                            lsblk_command,
-                                            stdout=subprocess.PIPE,
-                                            shell=True)
+                            lsblk_command,
+                            stdout=subprocess.PIPE,
+                            shell=True)
                         lsblk_output = lsblk_process.communicate()[0]
                         if lsblk_process.returncode == 0:
                             model_num = lsblk_output.strip()
@@ -370,18 +370,18 @@ class DiskOperator(object):
                 device_id, device_wwn = self.get_device_id_wwn(device)
 
                 attr = {
-                        'device_node': device.device_node,
-                        'device_num': device.device_number,
-                        'device_type': device_type,
-                        'device_path': device_path,
-                        'device_id': device_id,
-                        'device_wwn': device_wwn,
-                        'size_mib': size_mib,
-                        'available_mib': available_mib,
-                        'serial_id': serial_id,
-                        'capabilities': capabilities,
-                        'rpm': rotation_rate,
-                       }
+                    'device_node': device.device_node,
+                    'device_num': device.device_number,
+                    'device_type': device_type,
+                    'device_path': device_path,
+                    'device_id': device_id,
+                    'device_wwn': device_wwn,
+                    'size_mib': size_mib,
+                    'available_mib': available_mib,
+                    'serial_id': serial_id,
+                    'capabilities': capabilities,
+                    'rpm': rotation_rate,
+                }
 
                 idisk.append(attr)
 

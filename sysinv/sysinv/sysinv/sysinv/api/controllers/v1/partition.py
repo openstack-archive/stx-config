@@ -135,8 +135,8 @@ class PartitionCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = PartitionCollection()
         collection.partitions = [Partition.convert_with_links(
-                                      p, expand)
-                             for p in rpc_partitions]
+            p, expand)
+            for p in rpc_partitions]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -162,11 +162,11 @@ class PartitionController(rest.RestController):
 
         if self._from_ihosts and not ihost_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         if self._from_idisk and not disk_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Disk id not specified."))
+                "Disk id not specified."))
 
         if self._from_ipv and not ipv_uuid:
             raise exception.InvalidParameterValue(_(
@@ -178,8 +178,8 @@ class PartitionController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.partition.get_by_uuid(
-                                        pecan.request.context,
-                                        marker)
+                pecan.request.context,
+                marker)
 
         if self._from_ihosts and self._from_idisk:
             partitions = pecan.request.dbapi.partition_get_by_idisk(
@@ -244,7 +244,7 @@ class PartitionController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_partition = objects.partition.get_by_uuid(
-                                        pecan.request.context, partition_uuid)
+            pecan.request.context, partition_uuid)
         return Partition.convert_with_links(rpc_partition)
 
     @cutils.synchronized(LOCK_NAME)
@@ -351,7 +351,7 @@ def _check_host(partition, ihost, idisk):
     if ihost['id'] != idisk['forihostid']:
         raise wsme.exc.ClientSideError(_("The requested disk (%s) for the partition "
                                          "is not present on host %s.") %
-                                         (idisk.uuid, ihost.hostname))
+                                       (idisk.uuid, ihost.hostname))
 
 
 def _partition_pre_patch_checks(partition_obj, patch_obj, host_obj):
@@ -372,7 +372,7 @@ def _partition_pre_patch_checks(partition_obj, patch_obj, host_obj):
                 raise wsme.exc.ClientSideError(
                     _("Requested partition size must be larger than current "
                       "size: %s GiB <= %s GiB") % (p['value'] / 1024,
-                      math.floor(float(partition_obj.size_mib) / 1024 * 1000) / 1000.0))
+                                                   math.floor(float(partition_obj.size_mib) / 1024 * 1000) / 1000.0))
 
 
 def _is_user_created_partition(guid):
@@ -448,12 +448,12 @@ def _are_partition_operations_simultaneous(ihost, partition, operation):
     if (ihost.invprovision in
             [constants.PROVISIONED, constants.PROVISIONING]):
         if not (all(host_partition.get('status') in
-                [constants.PARTITION_READY_STATUS,
-                constants.PARTITION_IN_USE_STATUS,
-                constants.PARTITION_CREATE_ON_UNLOCK_STATUS,
-                constants.PARTITION_ERROR_STATUS,
-                constants.PARTITION_ERROR_STATUS_INTERNAL]
-                for host_partition in host_partitions)):
+                    [constants.PARTITION_READY_STATUS,
+                     constants.PARTITION_IN_USE_STATUS,
+                     constants.PARTITION_CREATE_ON_UNLOCK_STATUS,
+                     constants.PARTITION_ERROR_STATUS,
+                     constants.PARTITION_ERROR_STATUS_INTERNAL]
+                    for host_partition in host_partitions)):
             raise wsme.exc.ClientSideError(
                 "Cannot %s a partition while another partition "
                 "is being %sd. Wait for all other partitions to "
@@ -700,7 +700,7 @@ def _delete(partition):
 
         except exception.HTTPNotFound:
             msg = _("Marking partition for deletion failed: host %s") %\
-                  (ihost['hostname'])
+                (ihost['hostname'])
             raise wsme.exc.ClientSideError(msg)
     else:
         if (partition.get('status') ==
@@ -718,5 +718,5 @@ def _delete(partition):
             pecan.request.dbapi.partition_destroy(partition['uuid'])
         except exception.HTTPNotFound:
             msg = _("Partition deletion failed for host %s") %\
-                  (ihost['hostname'])
+                (ihost['hostname'])
             raise wsme.exc.ClientSideError(msg)

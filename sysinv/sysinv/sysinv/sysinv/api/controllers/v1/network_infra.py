@@ -130,11 +130,11 @@ class InfraNetwork(base.APIBase):
         # infra.forisystemid = wtypes.Unset
 
         infra.links = [link.Link.make_link('self', pecan.request.host_url,
-                                         'iinfras', infra.uuid),
-                     link.Link.make_link('bookmark',
-                                         pecan.request.host_url,
-                                         'iinfras', infra.uuid,
-                                         bookmark=True)
+                                           'iinfras', infra.uuid),
+                       link.Link.make_link('bookmark',
+                                           pecan.request.host_url,
+                                           'iinfras', infra.uuid,
+                                           bookmark=True)
                        ]
 
         return infra
@@ -173,11 +173,11 @@ class InfraNetworkController(rest.RestController):
         self._from_isystems = from_isystems
 
     def _get_infras_collection(self, isystem_uuid, marker, limit, sort_key,
-                             sort_dir, expand=False, resource_url=None):
+                               sort_dir, expand=False, resource_url=None):
 
         if self._from_isystems and not isystem_uuid:
             raise exception.InvalidParameterValue(_(
-                  "System id not specified."))
+                "System id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -298,7 +298,7 @@ class InfraNetworkController(rest.RestController):
                         (interface['ifname'], interface['vlan_id']))
                 raise wsme.exc.ClientSideError(msg)
             if (interface['vlan_id'] is not None and
-                        int(network_vlan_id) != interface['vlan_id']):
+                    int(network_vlan_id) != interface['vlan_id']):
                 msg = _("Interface (%s) VLAN id (%d) must be the same as "
                         "the VLAN id (%s) in the infrastructure network. " %
                         (interface['ifname'], interface['vlan_id'],
@@ -330,7 +330,7 @@ class InfraNetworkController(rest.RestController):
             if (infra_orig and infra_orig[subnetkey] and
                     infra[subnetkey] != infra_orig[subnetkey]):
                 raise wsme.exc.ClientSideError(_(
-                        "Infrastructure subnet cannot be modified."))
+                    "Infrastructure subnet cannot be modified."))
 
         if startkey in infra.keys() or endkey in infra.keys():
             if not subnet:
@@ -366,9 +366,9 @@ class InfraNetworkController(rest.RestController):
             infra[endkey] = subnet[-2]
 
         if IPAddress(infra[endkey]) <= IPAddress(infra[startkey]):
-                raise wsme.exc.ClientSideError(_(
-                    "Invalid infra range.  Start address %s must be below end "
-                    "address %s") % (infra[startkey], infra[endkey]))
+            raise wsme.exc.ClientSideError(_(
+                "Invalid infra range.  Start address %s must be below end "
+                "address %s") % (infra[startkey], infra[endkey]))
 
         # regenerate static addresses if start address changed
         if infra_orig and infra[startkey] != infra_orig[startkey]:
@@ -447,7 +447,7 @@ class InfraNetworkController(rest.RestController):
         """Retrieve a list of infras. Only one per system"""
 
         return self._get_infras_collection(isystem_uuid, marker, limit,
-                                          sort_key, sort_dir)
+                                           sort_key, sort_dir)
 
     @wsme_pecan.wsexpose(InfraNetworkCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)

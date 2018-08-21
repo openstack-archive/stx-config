@@ -518,7 +518,7 @@ class SensorGroupController(rest.RestController):
             valid_suppress = ['True', 'False', 'true', 'false', 'force_action']
             if rsensorgroup.suppress.lower() not in valid_suppress:
                 raise wsme.exc.ClientSideError(_("Invalid suppress value, "
-                                               "select 'True' or 'False'"))
+                                                 "select 'True' or 'False'"))
             elif rsensorgroup.suppress.lower() == 'force_action':
                 LOG.info("suppress=%s" % rsensorgroup.suppress.lower())
                 rsensorgroup.suppress = rsensorgroup_orig.suppress
@@ -551,9 +551,9 @@ class SensorGroupController(rest.RestController):
                 msg = _("HWMON has returned with "
                         "a status of %s, reason: %s, "
                         "recommended action: %s") % (
-                        hwmon_response.get('status'),
-                        hwmon_response.get('reason'),
-                        hwmon_response.get('action'))
+                    hwmon_response.get('status'),
+                    hwmon_response.get('reason'),
+                    hwmon_response.get('action'))
 
                 if force_action:
                     LOG.error(msg)
@@ -573,7 +573,7 @@ class SensorGroupController(rest.RestController):
                           'actions_major': rsensorgroup.actions_major_group,
                           'actions_critical': rsensorgroup.actions_critical_group}
             if 'suppress' in delta:
-                    sensor_val.update({'suppress': rsensorgroup.suppress})
+                sensor_val.update({'suppress': rsensorgroup.suppress})
             pecan.request.dbapi.isensorgroup_propagate(rsensorgroup.uuid, sensor_val)
 
         rsensorgroup.save()

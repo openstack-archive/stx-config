@@ -27,10 +27,10 @@
 # TODO(deva): move eventlet imports to sysinv.__init__ once we move to PBR
 
 import eventlet
-
-eventlet.monkey_patch(os=False)
-
 # See http://code.google.com/p/python-nose/issues/detail?id=373
 # The code below enables nosetests to work with i18n _() blocks
 import __builtin__
+
+eventlet.monkey_patch(os=False)
+
 setattr(__builtin__, '_', lambda x: x)

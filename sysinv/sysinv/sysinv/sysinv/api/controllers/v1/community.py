@@ -155,7 +155,7 @@ class CommunityController(rest.RestController):
         expand = True
         resource_url = '/'.join(['icommunity', 'detail'])
         return self._get_icommunity_collection(marker, limit, sort_key, sort_dir,
-                                            expand, resource_url)
+                                               expand, resource_url)
 
     @wsme_pecan.wsexpose(Community, wtypes.text)
     def get_one(self, name):

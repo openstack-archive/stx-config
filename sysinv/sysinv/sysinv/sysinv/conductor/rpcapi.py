@@ -384,7 +384,6 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
 
     def ipartition_update_by_ihost(self, context,
                                    ihost_uuid, ipart_dict_array):
-
         """Create or update partitions for an ihost with the supplied data.
 
         This method allows records for a host's partition to be created or
@@ -700,7 +699,7 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
         :param context: request context.
         """
         return self.call(context, self.make_msg('update_ntp_config',
-                         service_change=service_change))
+                                                service_change=service_change))
 
     def update_system_mode_config(self, context):
         """Synchronously, have the conductor update the system mode

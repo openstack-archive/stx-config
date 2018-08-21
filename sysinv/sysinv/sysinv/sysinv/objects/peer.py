@@ -31,15 +31,15 @@ class Peer(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
-            'cluster_id': int,
-            'name': utils.str_or_none,
-            'status': utils.str_or_none,
-            'info': utils.dict_or_none,
-            'capabilities': utils.dict_or_none,
-            'hosts': list,
-             }
+        'id': int,
+        'uuid': utils.str_or_none,
+        'cluster_id': int,
+        'name': utils.str_or_none,
+        'status': utils.str_or_none,
+        'info': utils.dict_or_none,
+        'capabilities': utils.dict_or_none,
+        'hosts': list,
+    }
 
     _foreign_fields = {'hosts': get_host_values}
 

@@ -135,7 +135,7 @@ class Cluster(base.APIBase):
                                          'tiers'])
 
         cluster.links = [link.Link.make_link('self', pecan.request.host_url,
-                                          'clusters', cluster.uuid),
+                                             'clusters', cluster.uuid),
                          link.Link.make_link('bookmark',
                                              pecan.request.host_url,
                                              'clusters', cluster.uuid,

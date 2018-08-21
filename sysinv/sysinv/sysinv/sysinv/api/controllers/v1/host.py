@@ -258,7 +258,7 @@ class HostStatesController(rest.RestController):
                 if int(socket) >= num_nodes:
                     raise wsme.exc.ClientSideError(
                         _('There is no Processor (Socket) '
-                           '%s on this host.') % socket)
+                          '%s on this host.') % socket)
                 capability.update({'num_cores_on_processor%s' % socket:
                                    int(value)})
 
@@ -299,9 +299,9 @@ class HostStatesController(rest.RestController):
                 function = cpu_utils.get_cpu_function(ihost, cpu)
                 if function == constants.NO_FUNCTION:
                     raise wsme.exc.ClientSideError(_('Could not determine '
-                        'assigned function for CPU %d' % cpu.cpu))
+                                                     'assigned function for CPU %d' % cpu.cpu))
                 if (not cpu.allocated_function or
-                   cpu.allocated_function.lower() != function.lower()):
+                        cpu.allocated_function.lower() != function.lower()):
                     values = {'allocated_function': function}
                     LOG.info("icpu_update uuid=%s value=%s" %
                              (cpu.uuid, values))
@@ -734,7 +734,7 @@ class Host(base.APIBase):
                                     'ihosts',
                                     uhost.uuid + "/lldp_agents",
                                     bookmark=True)
-                                 ]
+            ]
 
             uhost.lldp_neighbours = [
                 link.Link.make_link('self',
@@ -746,7 +746,7 @@ class Host(base.APIBase):
                                     'ihosts',
                                     uhost.uuid + "/lldp_neighbors",
                                     bookmark=True)
-                                     ]
+            ]
 
         # Don't expose the vsc_controllers field if we are not configured with
         # the nuage_vrs vswitch or we are not a compute node.
@@ -1153,7 +1153,7 @@ class HostController(rest.RestController):
         host = objects.host.get_by_uuid(pecan.request.context, uuid)
         pecan.request.dbapi.ihost_update(host['uuid'],
                                          {'install_state': install_state,
-                                         'install_state_info':
+                                          'install_state_info':
                                           install_state_info})
 
     @wsme_pecan.wsexpose(HostCollection, unicode, unicode, int, unicode,
@@ -1200,7 +1200,7 @@ class HostController(rest.RestController):
             have_unlocked_enabled_controller = False
             for c in controller_list:
                 if (c['administrative'] == constants.ADMIN_UNLOCKED and
-                   c['operational'] == constants.OPERATIONAL_ENABLED):
+                        c['operational'] == constants.OPERATIONAL_ENABLED):
                     have_unlocked_enabled_controller = True
                     break
 
@@ -1304,7 +1304,7 @@ class HostController(rest.RestController):
                     ihost_dict['mgmt_mac'])):
                 raise wsme.exc.ClientSideError(
                     _("Host-add Rejected: mgmt_mac %s has already been "
-                    "active") % ihost_dict['mgmt_mac'])
+                      "active") % ihost_dict['mgmt_mac'])
 
             # Use the uuid from the existing host
             ihost_dict['uuid'] = ihost_obj['uuid']
@@ -1440,9 +1440,9 @@ class HostController(rest.RestController):
             # Report mtc error
             raise wsme.exc.ClientSideError(_("Maintenance has returned with "
                                              "a status of %s, reason: %s, recommended action: %s") % (
-                                               mtc_response.get('status'),
-                                               mtc_response.get('reason'),
-                                               mtc_response.get('action')))
+                mtc_response.get('status'),
+                mtc_response.get('reason'),
+                mtc_response.get('action')))
 
         # once the ihost is added to mtc, attempt to power it on
         if power_on is not None and ihost_obj['bm_type'] is not None:
@@ -1463,9 +1463,9 @@ class HostController(rest.RestController):
                 # Report mtc error
                 raise wsme.exc.ClientSideError(_("Maintenance has returned with "
                                                  "a status of %s, reason: %s, recommended action: %s") % (
-                                                   mtc_response.get('status'),
-                                                   mtc_response.get('reason'),
-                                                   mtc_response.get('action')))
+                    mtc_response.get('status'),
+                    mtc_response.get('reason'),
+                    mtc_response.get('action')))
 
         # Notify the VIM that the host has been added - must be done after
         # the host has been added to mtc and saved to the DB.
@@ -1514,7 +1514,7 @@ class HostController(rest.RestController):
         have_unlocked_enabled_controller = False
         for c in controller_list:
             if (c['administrative'] == constants.ADMIN_UNLOCKED and
-               c['operational'] == constants.OPERATIONAL_ENABLED):
+                    c['operational'] == constants.OPERATIONAL_ENABLED):
                 have_unlocked_enabled_controller = True
                 break
 
@@ -1586,7 +1586,7 @@ class HostController(rest.RestController):
                     changed_paths = list()
 
                     bm_list = ['bm_type', 'bm_ip',
-                            'bm_username', 'bm_password']
+                               'bm_username', 'bm_password']
                     for bmi in bm_list:
                         if bmi in new_host:
                             changed_paths.append({
@@ -1596,13 +1596,13 @@ class HostController(rest.RestController):
                             })
 
                     ihost_obj = [ihost
-                                for ihost in pecan.request.dbapi.ihost_get_list()
-                                if ihost['mgmt_mac'] in my_macs]
+                                 for ihost in pecan.request.dbapi.ihost_get_list()
+                                 if ihost['mgmt_mac'] in my_macs]
                     if len(ihost_obj) != 1:
                         raise Exception("Unexpected: no/more_than_one host(s) contain(s) a management mac address from local network adapters")
 
                     self._patch(ihost_obj[0]['uuid'],
-                        changed_paths, None)
+                                changed_paths, None)
                 else:
                     self._do_post(new_host)
 
@@ -1686,7 +1686,7 @@ class HostController(rest.RestController):
         if len(patch) == optimizable:
             return self._patch(uuid, patch, profile_uuid)
         elif (pecan.request.user_agent.startswith('mtce') or
-           pecan.request.user_agent.startswith('vim')):
+              pecan.request.user_agent.startswith('vim')):
             return self._patch_sys(uuid, patch, profile_uuid)
         else:
             return self._patch_gen(uuid, patch, profile_uuid)
@@ -1785,16 +1785,16 @@ class HostController(rest.RestController):
                          (hostupdate.displayid, myaction))
             else:
                 LOG.info("%s ihost_patch_end stage_action rc %s" %
-                        (hostupdate.displayid, hostupdate.nextstep))
+                         (hostupdate.displayid, hostupdate.nextstep))
                 if hostupdate.nextstep == hostupdate.EXIT_RETURN_HOST:
                     return Host.convert_with_links(ihost_obj)
                 elif hostupdate.nextstep == hostupdate.EXIT_UPDATE_PREVAL:
                     if hostupdate.ihost_val_prenotify:
                             # update value in db  prior to notifications
-                            LOG.info("update ihost_val_prenotify: %s" %
-                                hostupdate.ihost_val_prenotify)
-                            ihost_obj = pecan.request.dbapi.ihost_update(
-                                ihost_obj['uuid'], hostupdate.ihost_val_prenotify)
+                        LOG.info("update ihost_val_prenotify: %s" %
+                                 hostupdate.ihost_val_prenotify)
+                        ihost_obj = pecan.request.dbapi.ihost_update(
+                            ihost_obj['uuid'], hostupdate.ihost_val_prenotify)
                     return Host.convert_with_links(ihost_obj)
 
             if myaction == constants.SUBFUNCTION_CONFIG_ACTION:
@@ -1823,7 +1823,7 @@ class HostController(rest.RestController):
                      (hostupdate.displayid, delta_handle))
             self.check_provisioning(hostupdate, patch)
             if (hostupdate.ihost_orig['administrative'] ==
-               constants.ADMIN_UNLOCKED):
+                    constants.ADMIN_UNLOCKED):
                 self.check_updates_while_unlocked(hostupdate, delta)
 
             current_ihosts = None
@@ -1879,7 +1879,7 @@ class HostController(rest.RestController):
                     constants.VIM_DEFAULT_TIMEOUT_IN_SECS)
             except Exception as e:
                 LOG.warn(_("No response vim_api %s on action=%s e=%s" %
-                         (ihost_obj['hostname'], action, e)))
+                           (ihost_obj['hostname'], action, e)))
                 self._api_token = None
                 if action == constants.FORCE_LOCK_ACTION:
                     pass
@@ -1941,7 +1941,7 @@ class HostController(rest.RestController):
 
                 new_ihost_mtc.update({
                     'infra_ip': self._get_infra_ip_by_ihost(ihost_obj['uuid'])
-                                    })
+                })
 
                 if new_ihost_mtc['operation'] == 'add':
                     mtc_response = mtce_api.host_add(
@@ -1967,7 +1967,7 @@ class HostController(rest.RestController):
         hostupdate.ihost_val_update({'action': constants.NONE_ACTION})
 
         if ((mtc_response['status'] == 'pass') or
-           (nonmtc_change_count == 0) or hostupdate.skip_notify_mtce):
+                (nonmtc_change_count == 0) or hostupdate.skip_notify_mtce):
 
             ihost_obj.save()
 
@@ -1977,19 +1977,19 @@ class HostController(rest.RestController):
 
             if hostupdate.notify_availability:
                 if (hostupdate.notify_availability ==
-                   constants.VIM_SERVICES_DISABLED):
+                        constants.VIM_SERVICES_DISABLED):
                     imsg_dict = {'availability':
                                  constants.AVAILABILITY_OFFLINE}
                 else:
                     imsg_dict = {'availability':
                                  constants.VIM_SERVICES_ENABLED}
                     if (hostupdate.notify_availability !=
-                       constants.VIM_SERVICES_ENABLED):
+                            constants.VIM_SERVICES_ENABLED):
                         LOG.error(_("Unexpected notify_availability = %s" %
-                                  hostupdate.notify_availability))
+                                    hostupdate.notify_availability))
 
                 LOG.info(_("%s notify_availability=%s" %
-                         (hostupdate.displayid, hostupdate.notify_availability)))
+                           (hostupdate.displayid, hostupdate.notify_availability)))
 
                 pecan.request.rpcapi.iplatform_update_by_ihost(
                     pecan.request.context, ihost_obj['uuid'], imsg_dict)
@@ -2165,18 +2165,18 @@ class HostController(rest.RestController):
                 personality.find(constants.STORAGE_HOSTNAME) != -1 and
                 not skip_ceph_checks):
             num_monitors, required_monitors, quorum_names = \
-                    self._ceph.get_monitors_status(pecan.request.dbapi)
+                self._ceph.get_monitors_status(pecan.request.dbapi)
             if num_monitors < required_monitors:
                 raise wsme.exc.ClientSideError(_(
-                             "Only %d storage "
-                             "monitor available. At least %s unlocked and "
-                             "enabled hosts with monitors are required. Please"
-                             " ensure hosts with monitors are unlocked and "
-                             "enabled - candidates: %s, %s, %s") %
-                             (num_monitors, constants.MIN_STOR_MONITORS,
-                              constants.CONTROLLER_0_HOSTNAME,
-                              constants.CONTROLLER_1_HOSTNAME,
-                              constants.STORAGE_0_HOSTNAME))
+                    "Only %d storage "
+                    "monitor available. At least %s unlocked and "
+                    "enabled hosts with monitors are required. Please"
+                    " ensure hosts with monitors are unlocked and "
+                    "enabled - candidates: %s, %s, %s") %
+                    (num_monitors, constants.MIN_STOR_MONITORS,
+                     constants.CONTROLLER_0_HOSTNAME,
+                     constants.CONTROLLER_1_HOSTNAME,
+                     constants.STORAGE_0_HOSTNAME))
 
             # If it is the last storage node to delete, we need to delete
             # ceph osd pools and update additional tier status to "defined"
@@ -2197,7 +2197,7 @@ class HostController(rest.RestController):
                     if (tier.name != constants.SB_TIER_DEFAULT_NAMES[
                             constants.SB_TIER_TYPE_CEPH] and not tier.forbackendid):
                         pecan.request.dbapi.storage_tier_update(tier.id,
-                            {'status': constants.SB_TIER_STATUS_DEFINED})
+                                                                {'status': constants.SB_TIER_STATUS_DEFINED})
 
         LOG.warn("REST API delete host=%s user_agent=%s" %
                  (ihost['uuid'], pecan.request.user_agent))
@@ -2219,9 +2219,9 @@ class HostController(rest.RestController):
                                                  "contact your system administrator."))
 
             if (ihost.hostname and ihost.personality and
-               ihost.invprovision and
-               ihost.invprovision == constants.PROVISIONED and
-               (constants.COMPUTE in ihost.subfunctions)):
+                ihost.invprovision and
+                ihost.invprovision == constants.PROVISIONED and
+                    (constants.COMPUTE in ihost.subfunctions)):
                 # wait for VIM signal
                 return
 
@@ -2314,9 +2314,9 @@ class HostController(rest.RestController):
         # with this host (if present)
         try:
             pecan.request.rpcapi.unconfigure_keystore_account(
-                                            pecan.request.context,
-                                            KEYRING_BM_SERVICE,
-                                            ihost.uuid)
+                pecan.request.context,
+                KEYRING_BM_SERVICE,
+                ihost.uuid)
         except exception.NotFound:
             pass
 
@@ -2341,16 +2341,16 @@ class HostController(rest.RestController):
         if (personality is not None and
                 personality.find(constants.STORAGE_HOSTNAME) != -1 and
                 ihost.hostname not in [constants.STORAGE_0_HOSTNAME,
-                constants.STORAGE_1_HOSTNAME] and
+                                       constants.STORAGE_1_HOSTNAME] and
                 ihost.invprovision in [constants.PROVISIONED,
-                constants.PROVISIONING]):
+                                       constants.PROVISIONING]):
             self._ceph.host_crush_remove(ihost.hostname)
 
         pecan.request.dbapi.ihost_destroy(ihost_id)
 
     def _check_upgrade_provision_order(self, personality, hostname):
         LOG.info("_check_upgrade_provision_order personality=%s, hostname=%s" %
-                  (personality, hostname))
+                 (personality, hostname))
 
         # If this is a simplex system skip this check; there's no other nodes
         simplex = (utils.get_system_mode() == constants.SYSTEM_MODE_SIMPLEX)
@@ -2562,7 +2562,7 @@ class HostController(rest.RestController):
             # and does not use any stale data that might be present on
             # controller-1.
             pecan.request.rpcapi.kill_ceph_storage_monitor(
-                    pecan.request.context)
+                pecan.request.context)
 
         self._update_load(uuid, body, new_target_load)
 
@@ -2752,7 +2752,7 @@ class HostController(rest.RestController):
         current_ihosts = pecan.request.dbapi.ihost_get_list()
         hostnames = [h['hostname'] for h in current_ihosts]
         return constants.CONTROLLER_0_HOSTNAME not in hostnames and \
-               constants.CONTROLLER_1_HOSTNAME not in hostnames
+            constants.CONTROLLER_1_HOSTNAME not in hostnames
 
     @staticmethod
     def _validate_delta(delta):
@@ -2813,9 +2813,9 @@ class HostController(rest.RestController):
                     hostname.startswith(constants.STORAGE_HOSTNAME)):
 
                 raise wsme.exc.ClientSideError(
-                        _("%s Reject attempt to configure "
-                        "invalid hostname for personality %s." %
-                        (hostname, personality)))
+                    _("%s Reject attempt to configure "
+                      "invalid hostname for personality %s." %
+                      (hostname, personality)))
         else:
             if personality and personality == constants.CONTROLLER:
                 valid_hostnames = [constants.CONTROLLER_0_HOSTNAME,
@@ -2850,7 +2850,7 @@ class HostController(rest.RestController):
         non_compute_hosts = ([constants.CONTROLLER_0_HOSTNAME,
                               constants.CONTROLLER_1_HOSTNAME])
         if (hostname in non_compute_hosts or
-           hostname.startswith(constants.STORAGE_HOSTNAME)):
+                hostname.startswith(constants.STORAGE_HOSTNAME)):
             raise wsme.exc.ClientSideError(
                 _("Hostname %s is not allowed for personality 'compute'. "
                   "Please check hostname and personality." % hostname))
@@ -2872,7 +2872,7 @@ class HostController(rest.RestController):
                 if h['hostname'] == constants.CONTROLLER_0_HOSTNAME:
                     controller_0_exists = True
                 elif h['hostname'] == constants.CONTROLLER_1_HOSTNAME:
-                        controller_1_exists = True
+                    controller_1_exists = True
             if controller_0_exists and controller_1_exists:
                 raise wsme.exc.ClientSideError(
                     _("Two controller nodes have already been configured. "
@@ -3261,7 +3261,7 @@ class HostController(rest.RestController):
                 raise wsme.exc.ClientSideError(msg)
             for controller in sdn_controllers:
                 if (controller and (controller.state ==
-                   constants.SDN_CONTROLLER_STATE_ENABLED)):
+                                    constants.SDN_CONTROLLER_STATE_ENABLED)):
                     break
             else:
                 raise wsme.exc.ClientSideError(msg)
@@ -3276,8 +3276,8 @@ class HostController(rest.RestController):
                         constants.SERVICE_PARAM_SECTION_NETWORK_DEFAULT]:
             try:
                 parm_list = pecan.request.dbapi.service_parameter_get_all(
-                                    service=constants.SERVICE_TYPE_NETWORK,
-                                    section=section)
+                    service=constants.SERVICE_TYPE_NETWORK,
+                    section=section)
                 neutron_parameters = neutron_parameters + parm_list
             except NoResultFound:
                 msg = _("Cannot unock a compute host without %s->%s "
@@ -3334,7 +3334,7 @@ class HostController(rest.RestController):
         for m in mems:
             # ignore updates when no change required
             if m.platform_reserved_mib is None or \
-                            m.platform_reserved_mib == reserved:
+                    m.platform_reserved_mib == reserved:
                 continue
             if m.platform_reserved_mib > reserved:
                 LOG.info("%s auto_adjust_memory numa_node=%d, "
@@ -3439,13 +3439,13 @@ class HostController(rest.RestController):
             for m in mems:
                 values = {}
                 if (m.vm_hugepages_nr_2M_pending is None and
-                   m.vm_hugepages_nr_2M and align_2M_memory):
+                        m.vm_hugepages_nr_2M and align_2M_memory):
                     values.update({'vm_hugepages_nr_2M_pending':
-                                  m.vm_hugepages_nr_2M})
+                                   m.vm_hugepages_nr_2M})
                 if (m.vm_hugepages_nr_1G_pending is None and
-                   m.vm_hugepages_nr_1G and align_1G_memory):
+                        m.vm_hugepages_nr_1G and align_1G_memory):
                     values.update({'vm_hugepages_nr_1G_pending':
-                                  m.vm_hugepages_nr_1G})
+                                   m.vm_hugepages_nr_1G})
                 if values:
                     LOG.info("%s align_pending_memory uuid=%s" %
                              (ihost['hostname'], values))
@@ -3537,7 +3537,7 @@ class HostController(rest.RestController):
         # NOTE: since the bm_mac is still in the DB; this is just to disallow user to modify it.
         if 'bm_mac' in delta:
             raise wsme.exc.ClientSideError(
-                        _("Patching Error: can't replace non-existent object 'bm_mac' "))
+                _("Patching Error: can't replace non-existent object 'bm_mac' "))
 
         bm_type_changed_to_none = False
 
@@ -3577,7 +3577,7 @@ class HostController(rest.RestController):
                      (delta, obm_ip, nbm_ip))
             if obm_ip != nbm_ip:
                 if (pecan.request.user_agent.startswith('mtce') and
-                  not bm_type_changed_to_none):
+                        not bm_type_changed_to_none):
                     raise wsme.exc.ClientSideError(
                         _("%s: Rejected: %s Board Management "
                           "controller IP Address is not user-modifiable." %
@@ -3585,8 +3585,8 @@ class HostController(rest.RestController):
 
         if (phost['bm_ip'] or phost['bm_type'] or phost['bm_username']):
             if (not phost['bm_type'] or
-              (phost['bm_type'] and phost['bm_type'].lower() ==
-               constants.BM_TYPE_NONE)) and not bm_type_changed_to_none:
+                (phost['bm_type'] and phost['bm_type'].lower() ==
+                 constants.BM_TYPE_NONE)) and not bm_type_changed_to_none:
                 raise wsme.exc.ClientSideError(
                     _("%s: Rejected: Board Management controller Type "
                       "is not provisioned.  Provisionable values: 'bmc'."
@@ -3615,7 +3615,7 @@ class HostController(rest.RestController):
 
         bm_type_str = phost['bm_type']
         if (phost['bm_type'] and
-           bm_type_str.lower() != constants.BM_TYPE_NONE):
+                bm_type_str.lower() != constants.BM_TYPE_NONE):
             LOG.info("Updating bm_type from %s to %s" %
                      (phost['bm_type'], constants.BM_TYPE_GENERIC))
             phost['bm_type'] = constants.BM_TYPE_GENERIC
@@ -3868,7 +3868,7 @@ class HostController(rest.RestController):
                 msg = _("New host hardware %s detected after upgrade "
                         "started at %s. "
                         "Allow downgrade of %s during upgrade abort phase."
-                         % (new_hw, upgrade_created_at, ihost['hostname']))
+                        % (new_hw, upgrade_created_at, ihost['hostname']))
                 LOG.info(msg)
                 return
 
@@ -4067,7 +4067,7 @@ class HostController(rest.RestController):
         if ttys_dcd is not None:
             if ihost['ttys_dcd'] is None or ihost['ttys_dcd'] != ttys_dcd:
                 if ((ihost['administrative'] == constants.ADMIN_LOCKED and
-                    ihost['availability'] == constants.AVAILABILITY_ONLINE) or
+                     ihost['availability'] == constants.AVAILABILITY_ONLINE) or
                     (ihost['administrative'] == constants.ADMIN_UNLOCKED and
                      ihost['operational'] == constants.OPERATIONAL_ENABLED)):
                     LOG.info("Notify conductor ttys_dcd change: (%s) (%s)" %
@@ -4231,7 +4231,7 @@ class HostController(rest.RestController):
     def _check_apply_profile(hostupdate):
         ihost = hostupdate.ihost_orig
         if (ihost['administrative'] == constants.ADMIN_UNLOCKED and
-           not utils.is_host_simplex_controller(ihost)):
+                not utils.is_host_simplex_controller(ihost)):
             raise wsme.exc.ClientSideError(
                 _("Can not apply profile to an 'unlocked' host %s; "
                   "Please 'Lock' first." % hostupdate.displayid))
@@ -4286,7 +4286,7 @@ class HostController(rest.RestController):
                     hostupdate.ihost_orig['invprovision'] is None:
                 LOG.info("stage_administrative_update: provisioning")
                 hostupdate.ihost_val_update({'invprovision':
-                                                 constants.PROVISIONING})
+                                             constants.PROVISIONING})
 
         if 'operational' in hostupdate.delta and \
                 hostupdate.ihost_patch['operational'] == \
@@ -4434,7 +4434,7 @@ class HostController(rest.RestController):
         elif action == constants.LOCK_ACTION:
             preval = {'ihost_action': constants.LOCK_ACTION}
         elif (action == constants.UNLOCK_ACTION or
-           action == constants.FORCE_UNLOCK_ACTION):
+              action == constants.FORCE_UNLOCK_ACTION):
             preval = {'ihost_action': constants.UNLOCK_ACTION}
         else:
             LOG.error("update_ihost_action unsupported action: %s" % action)
@@ -4450,7 +4450,7 @@ class HostController(rest.RestController):
     @staticmethod
     def update_vim_progress_status(action, hostupdate):
         LOG.info("%s Pending update_vim_progress_status %s" %
-            (hostupdate.displayid, action))
+                 (hostupdate.displayid, action))
         return True
 
     def check_provisioning(self, hostupdate, patch):
@@ -4463,11 +4463,11 @@ class HostController(rest.RestController):
         if hostupdate.ihost_orig['invprovision'] in provision_state:
             state_rel_path = ['hostname', 'personality', 'subfunctions']
             if any(p in state_rel_path for p in delta):
-                    raise wsme.exc.ClientSideError(
-                        _("The following fields can not be modified because "
-                          "this host %s has been configured: "
-                          "hostname, personality, subfunctions" %
-                          hostupdate.ihost_orig['hostname']))
+                raise wsme.exc.ClientSideError(
+                    _("The following fields can not be modified because "
+                      "this host %s has been configured: "
+                      "hostname, personality, subfunctions" %
+                      hostupdate.ihost_orig['hostname']))
 
         # Check whether any configurable installation parameters are updated
         install_parms = ['boot_device', 'rootfs_device', 'install_output', 'console', 'tboot']
@@ -4498,7 +4498,7 @@ class HostController(rest.RestController):
                       "the personality." % hostupdate.ihost_orig['hostname']))
 
             if (hostupdate.ihost_patch['personality'] in
-               (constants.CONTROLLER, constants.STORAGE)):
+                    (constants.CONTROLLER, constants.STORAGE)):
                 self._controller_storage_node_setup(hostupdate.ihost_patch,
                                                     hostupdate)
                 # check the subfunctions are updated properly
@@ -4568,7 +4568,7 @@ class HostController(rest.RestController):
         if 'hostname' in delta:
             if hostupdate.ihost_orig['hostname']:
                 if (hostupdate.ihost_patch['hostname'] !=
-                   hostupdate.ihost_orig['hostname']):
+                        hostupdate.ihost_orig['hostname']):
                     raise wsme.exc.ClientSideError(
                         _("The hostname field can not be modified because "
                           "the hostname %s has already been configured. "
@@ -4612,7 +4612,7 @@ class HostController(rest.RestController):
                 return
 
         if (utils.SystemHelper.get_product_build() ==
-                    constants.TIS_AIO_BUILD):
+                constants.TIS_AIO_BUILD):
             msg = _("Personality [%s] for host is not compatible "
                     "with installed software. ") % personality
 
@@ -4636,7 +4636,7 @@ class HostController(rest.RestController):
     def check_poweron(hostupdate):
         # Semantic Check: State Dependency: Power-On case
         if (hostupdate.ihost_orig['administrative'] ==
-           constants.ADMIN_UNLOCKED):
+                constants.ADMIN_UNLOCKED):
             raise wsme.exc.ClientSideError(
                 _("Can not 'Power-On' an already Powered-on "
                   "and 'unlocked' host %s" % hostupdate.displayid))
@@ -4655,7 +4655,7 @@ class HostController(rest.RestController):
                   "system commands"))
 
         if (hostupdate.ihost_orig['administrative'] ==
-           constants.ADMIN_UNLOCKED):
+                constants.ADMIN_UNLOCKED):
             raise wsme.exc.ClientSideError(
                 _("Can not 'Power-Off' an 'unlocked' host %s; "
                   "Please 'Lock' first" % hostupdate.displayid))
@@ -4673,7 +4673,7 @@ class HostController(rest.RestController):
                 _("Can not 'Reinstall' an 'unlocked' host %s; "
                   "Please 'Lock' first" % hostupdate.displayid))
         elif ((ihost['administrative'] == constants.ADMIN_LOCKED) and
-           (ihost['availability'] != "online")):
+              (ihost['availability'] != "online")):
             raise wsme.exc.ClientSideError(
                 _("Can not 'Reinstall' %s while it is 'offline'. "
                   "Please wait for this host's availability state "
@@ -4683,13 +4683,13 @@ class HostController(rest.RestController):
     def check_unlock(self, hostupdate, force_unlock=False):
         """Check semantics on  host-unlock."""
         if (hostupdate.action != constants.UNLOCK_ACTION and
-           hostupdate.action != constants.FORCE_UNLOCK_ACTION):
+                hostupdate.action != constants.FORCE_UNLOCK_ACTION):
             LOG.error("check_unlock unexpected action: %s" % hostupdate.action)
             return False
 
         # Semantic Check: Don't unlock if installation failed
         if (hostupdate.ihost_orig['install_state'] ==
-           constants.INSTALL_STATE_FAILED):
+                constants.INSTALL_STATE_FAILED):
             raise wsme.exc.ClientSideError(
                 _("Cannot unlock host %s due to installation failure" %
                   hostupdate.displayid))
@@ -4702,7 +4702,7 @@ class HostController(rest.RestController):
 
         # Semantic Check: Action Dependency: Power-Off / Unlock case
         if (hostupdate.ihost_orig['availability'] ==
-           constants.POWEROFF_ACTION):
+                constants.POWEROFF_ACTION):
             raise wsme.exc.ClientSideError(
                 _("Can not 'Unlock a Powered-Off' host %s; Power-on, "
                   "wait for 'online' status and then 'unlock'" %
@@ -4710,7 +4710,7 @@ class HostController(rest.RestController):
 
         # Semantic Check: Action Dependency: Online / Unlock case
         if (not force_unlock and hostupdate.ihost_orig['availability'] !=
-           constants.AVAILABILITY_ONLINE):
+                constants.AVAILABILITY_ONLINE):
             raise wsme.exc.ClientSideError(
                 _("Host %s is not online. "
                   "Wait for 'online' availability status and then 'unlock'" %
@@ -4740,7 +4740,7 @@ class HostController(rest.RestController):
         # To unlock, ensure reinstall has completed
         action_state = hostupdate.ihost_orig[constants.HOST_ACTION_STATE]
         if (action_state and
-           action_state == constants.HAS_REINSTALLING):
+                action_state == constants.HAS_REINSTALLING):
             if not force_unlock:
                 raise wsme.exc.ClientSideError(
                     _("Can not unlock host %s undergoing reinstall. "
@@ -4858,8 +4858,8 @@ class HostController(rest.RestController):
                         "controller.") % hostupdate.ihost_orig['hostname'])
 
         if StorageBackendConfig.has_backend_configured(
-                    pecan.request.dbapi,
-                    constants.CINDER_BACKEND_CEPH):
+                pecan.request.dbapi,
+                constants.CINDER_BACKEND_CEPH):
             try:
                 st_nodes = pecan.request.dbapi.ihost_get_by_personality(constants.STORAGE)
             except exception.NodeNotFound:
@@ -4901,17 +4901,17 @@ class HostController(rest.RestController):
                     num_monitors, required_monitors, quorum_names = \
                         self._ceph.get_monitors_status(pecan.request.dbapi)
                     if (hostupdate.ihost_orig['hostname'] in quorum_names and
-                         num_monitors - 1 < required_monitors):
+                            num_monitors - 1 < required_monitors):
                         raise wsme.exc.ClientSideError(_(
-                             "Only %d storage "
-                             "monitor available. At least %s unlocked and "
-                             "enabled hosts with monitors are required. Please"
-                             " ensure hosts with monitors are unlocked and "
-                             "enabled - candidates: %s, %s, %s") %
-                             (num_monitors, constants.MIN_STOR_MONITORS,
-                              constants.CONTROLLER_0_HOSTNAME,
-                              constants.CONTROLLER_1_HOSTNAME,
-                              constants.STORAGE_0_HOSTNAME))
+                            "Only %d storage "
+                            "monitor available. At least %s unlocked and "
+                            "enabled hosts with monitors are required. Please"
+                            " ensure hosts with monitors are unlocked and "
+                            "enabled - candidates: %s, %s, %s") %
+                            (num_monitors, constants.MIN_STOR_MONITORS,
+                             constants.CONTROLLER_0_HOSTNAME,
+                             constants.CONTROLLER_1_HOSTNAME,
+                             constants.STORAGE_0_HOSTNAME))
 
         if not force:
             # sm-lock-pre-check
@@ -5082,7 +5082,7 @@ class HostController(rest.RestController):
             if ihost_stors:
                 for ihost_stor in ihost_stors:
                     if (ihost_stor.administrative == constants.ADMIN_UNLOCKED and
-                       (ihost_stor.operational ==
+                        (ihost_stor.operational ==
                             constants.OPERATIONAL_ENABLED)):
 
                         ihost_stor_unlocked = True
@@ -5213,9 +5213,9 @@ class HostController(rest.RestController):
                 pecan.request.dbapi.tpmdevice_get_by_host(ihost['uuid'])
             if not tpmdevice or len(tpmdevice) > 1:
                 raise wsme.exc.ClientSideError(
-                        _("Global TPM configuration found; but "
-                          "no valid TPM Device configuration on host %s." %
-                          ihost['hostname']))
+                    _("Global TPM configuration found; but "
+                      "no valid TPM Device configuration on host %s." %
+                      ihost['hostname']))
             tpmdevice = tpmdevice[0]
             if tpmdevice.state == constants.TPMCONFIG_APPLYING:
                 raise wsme.exc.ClientSideError(
@@ -5403,17 +5403,17 @@ class HostController(rest.RestController):
                 self._ceph.get_monitors_status(pecan.request.dbapi)
 
             if (hostupdate.ihost_orig['hostname'] in quorum_names and
-                 num_monitors - 1 < required_monitors):
+                    num_monitors - 1 < required_monitors):
                 raise wsme.exc.ClientSideError(_(
-                             "Only %d storage "
-                             "monitor available. At least %s unlocked and "
-                             "enabled hosts with monitors are required. Please"
-                             " ensure hosts with monitors are unlocked and "
-                             "enabled - candidates: %s, %s, %s") %
-                             (num_monitors, constants.MIN_STOR_MONITORS,
-                              constants.CONTROLLER_0_HOSTNAME,
-                              constants.CONTROLLER_1_HOSTNAME,
-                              constants.STORAGE_0_HOSTNAME))
+                    "Only %d storage "
+                    "monitor available. At least %s unlocked and "
+                    "enabled hosts with monitors are required. Please"
+                    " ensure hosts with monitors are unlocked and "
+                    "enabled - candidates: %s, %s, %s") %
+                    (num_monitors, constants.MIN_STOR_MONITORS,
+                     constants.CONTROLLER_0_HOSTNAME,
+                     constants.CONTROLLER_1_HOSTNAME,
+                     constants.STORAGE_0_HOSTNAME))
 
             storage_nodes = pecan.request.dbapi.ihost_get_by_personality(
                 constants.STORAGE)
@@ -5423,17 +5423,17 @@ class HostController(rest.RestController):
             available_peer_count = 0
             for node in storage_nodes:
                 if (node['id'] != hostupdate.ihost_orig['id'] and
-                   node['peer_id'] == hostupdate.ihost_orig['peer_id']):
+                        node['peer_id'] == hostupdate.ihost_orig['peer_id']):
                     ihost_action_locking = False
                     ihost_action = node['ihost_action'] or ""
 
                     if (ihost_action.startswith(constants.FORCE_LOCK_ACTION) or
-                       ihost_action.startswith(constants.LOCK_ACTION)):
+                            ihost_action.startswith(constants.LOCK_ACTION)):
                         ihost_action_locking = True
 
                     if (node['administrative'] == constants.ADMIN_UNLOCKED and
-                       node['operational'] == constants.OPERATIONAL_ENABLED and not
-                       ihost_action_locking):
+                        node['operational'] == constants.OPERATIONAL_ENABLED and not
+                            ihost_action_locking):
                         available_peer_count += 1
 
             if available_peer_count < min_replication:
@@ -5478,7 +5478,7 @@ class HostController(rest.RestController):
                 LOG.info("%s check OSD host_health=%s" %
                          (hostupdate.displayid, host_health))
                 if (host_health is None or
-                   host_health == constants.CEPH_HEALTH_BLOCK):
+                        host_health == constants.CEPH_HEALTH_BLOCK):
                     LOG.info("%s host_health=%s" %
                              (hostupdate.displayid, host_health))
                     if not ceph_pools_empty:
@@ -5612,9 +5612,9 @@ class HostController(rest.RestController):
         partitions = pecan.request.dbapi.partition_get_by_ihost(ihost['uuid'])
 
         partition_transitory_states = [
-                constants.PARTITION_CREATE_IN_SVC_STATUS,
-                constants.PARTITION_DELETING_STATUS,
-                constants.PARTITION_MODIFYING_STATUS]
+            constants.PARTITION_CREATE_IN_SVC_STATUS,
+            constants.PARTITION_DELETING_STATUS,
+            constants.PARTITION_MODIFYING_STATUS]
 
         for part in partitions:
             if part.status in partition_transitory_states:
@@ -5665,12 +5665,12 @@ class HostController(rest.RestController):
         LOG.info("%s stage_action %s" % (hostupdate.displayid, action))
         rc = True
         if not action or (action and
-           action.lower() == constants.NONE_ACTION):
+                          action.lower() == constants.NONE_ACTION):
             LOG.error("Unrecognized action perform: %s" % action)
             return False
 
         if (action == constants.UNLOCK_ACTION or
-           action == constants.FORCE_UNLOCK_ACTION):
+                action == constants.FORCE_UNLOCK_ACTION):
             self._handle_unlock_action(hostupdate)
         elif action == constants.LOCK_ACTION:
             self._handle_lock_action(hostupdate)
@@ -5695,13 +5695,13 @@ class HostController(rest.RestController):
         elif action == constants.VIM_SERVICES_DISABLED:
             if not self._handle_vim_services_disabled(hostupdate):
                 LOG.warn(_("%s Exit _handle_vim_services_disabled" %
-                         hostupdate.ihost_patch['hostname']))
+                           hostupdate.ihost_patch['hostname']))
                 hostupdate.nextstep = hostupdate.EXIT_RETURN_HOST
                 rc = False
         elif action == constants.VIM_SERVICES_DISABLE_FAILED:
             if not self._handle_vim_services_disable_failed(hostupdate):
                 LOG.warn(_("%s Exit _handle_vim_services_disable failed" %
-                         hostupdate.ihost_patch['hostname']))
+                           hostupdate.ihost_patch['hostname']))
                 hostupdate.nextstep = hostupdate.EXIT_RETURN_HOST
                 rc = False
         elif action == constants.VIM_SERVICES_DISABLE_EXTEND:
@@ -5793,10 +5793,10 @@ class HostController(rest.RestController):
         hostupdate.notify_mtce = True
         if hostupdate.ihost_orig['personality'] == constants.STORAGE:
             istors = pecan.request.dbapi.istor_get_by_ihost(
-                                         hostupdate.ihost_orig['uuid'])
+                hostupdate.ihost_orig['uuid'])
             for stor in istors:
                 istor_obj = objects.storage.get_by_uuid(
-                                    pecan.request.context, stor.uuid)
+                    pecan.request.context, stor.uuid)
                 self._ceph.remove_osd_key(istor_obj['osdid'])
 
         hostupdate.ihost_val_update({constants.HOST_ACTION_STATE:
@@ -5836,10 +5836,10 @@ class HostController(rest.RestController):
                     vim_progress_status))
 
         if (not vim_progress_status or
-           not vim_progress_status.startswith(constants.VIM_SERVICES_ENABLED)):
+                not vim_progress_status.startswith(constants.VIM_SERVICES_ENABLED)):
             hostupdate.notify_availability = constants.VIM_SERVICES_ENABLED
             if (not vim_progress_status or
-               vim_progress_status == constants.VIM_SERVICES_DISABLED):
+                    vim_progress_status == constants.VIM_SERVICES_DISABLED):
                 # otherwise allow the audit to clear the error message
                 hostupdate.ihost_val_update({'vim_progress_status':
                                              constants.VIM_SERVICES_ENABLED})
@@ -5858,8 +5858,8 @@ class HostController(rest.RestController):
 
         ihost_task_string = ihost['ihost_action'] or ""
         if ((ihost_task_string.startswith(constants.LOCK_ACTION) or
-           ihost_task_string.startswith(constants.FORCE_LOCK_ACTION)) and
-           ihost['administrative'] != constants.ADMIN_LOCKED):
+             ihost_task_string.startswith(constants.FORCE_LOCK_ACTION)) and
+                ihost['administrative'] != constants.ADMIN_LOCKED):
             # passed - skip reset for force-lock
             # iHost['ihost_action'] = constants.LOCK_ACTION
             hostupdate.notify_availability = constants.VIM_SERVICES_DISABLED
@@ -5935,10 +5935,10 @@ class HostController(rest.RestController):
         if result_reason:
             LOG.info("services-disable-failed reason=%s" % result_reason)
             hostupdate.ihost_val_update({'vim_progress_status':
-                                        result_reason})
+                                         result_reason})
         else:
             hostupdate.ihost_val_update({'vim_progress_status':
-                                        constants.VIM_SERVICES_DISABLE_FAILED})
+                                         constants.VIM_SERVICES_DISABLE_FAILED})
 
         return True
 
@@ -5965,7 +5965,7 @@ class HostController(rest.RestController):
 
         if result_reason:
             hostupdate.ihost_val_prenotify_update({'vim_progress_status':
-                                                  result_reason})
+                                                   result_reason})
         else:
             hostupdate.ihost_val_prenotify_update(
                 {'vim_progress_status': constants.VIM_SERVICES_DELETE_FAILED})

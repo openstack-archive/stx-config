@@ -101,7 +101,7 @@ class PV(base.APIBase):
     "LVM physical volume's allocated PEs"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "This pv's meta data"
 
     forihostid = int
@@ -149,10 +149,10 @@ class PV(base.APIBase):
         pv.forihostid = wtypes.Unset
         pv.links = [link.Link.make_link('self', pecan.request.host_url,
                                         'ipvs', pv.uuid),
-                      link.Link.make_link('bookmark',
-                                          pecan.request.host_url,
-                                          'ipvs', pv.uuid,
-                                          bookmark=True)
+                    link.Link.make_link('bookmark',
+                                        pecan.request.host_url,
+                                        'ipvs', pv.uuid,
+                                        bookmark=True)
                     ]
         if expand:
             pv.idisks = [link.Link.make_link('self',
@@ -219,10 +219,10 @@ class PVController(rest.RestController):
         self._from_ilvg = from_ilvg
 
     def _get_pvs_collection(self, ihost_uuid, marker, limit, sort_key,
-                              sort_dir, expand=False, resource_url=None):
+                            sort_dir, expand=False, resource_url=None):
         if self._from_ihosts and not ihost_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -230,8 +230,8 @@ class PVController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.pv.get_by_uuid(
-                                        pecan.request.context,
-                                        marker)
+                pecan.request.context,
+                marker)
 
         if ihost_uuid:
             pvs = pecan.request.dbapi.ipv_get_by_ihost(ihost_uuid, limit,
@@ -256,12 +256,12 @@ class PVController(rest.RestController):
         """Retrieve a list of pvs."""
 
         return self._get_pvs_collection(ihost_uuid, marker, limit,
-                                          sort_key, sort_dir)
+                                        sort_key, sort_dir)
 
     @wsme_pecan.wsexpose(PVCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)
     def detail(self, ihost_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of pvs with detail."""
         # NOTE(lucasagomes): /detail should only work against collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -271,9 +271,9 @@ class PVController(rest.RestController):
         expand = True
         resource_url = '/'.join(['pvs', 'detail'])
         return self._get_pvs_collection(ihost_uuid,
-                                               marker, limit,
-                                               sort_key, sort_dir,
-                                               expand, resource_url)
+                                        marker, limit,
+                                        sort_key, sort_dir,
+                                        expand, resource_url)
 
     @wsme_pecan.wsexpose(PV, types.uuid)
     def get_one(self, pv_uuid):
@@ -282,7 +282,7 @@ class PVController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_pv = objects.pv.get_by_uuid(
-                                        pecan.request.context, pv_uuid)
+            pecan.request.context, pv_uuid)
         return PV.convert_with_links(rpc_pv)
 
     @cutils.synchronized(LOCK_NAME)
@@ -316,7 +316,7 @@ class PVController(rest.RestController):
         LOG.debug("patch_data: %s" % patch)
 
         rpc_pv = objects.pv.get_by_uuid(
-                       pecan.request.context, pv_uuid)
+            pecan.request.context, pv_uuid)
 
         # replace ihost_uuid and ipv_uuid with corresponding
         patch_obj = jsonpatch.JsonPatch(patch)
@@ -487,9 +487,9 @@ def _check_host(pv, ihost, op):
     elif (ilvg.lvm_vg_name == constants.LVG_CGTS_VG):
         if ihost['personality'] != constants.CONTROLLER:
             raise wsme.exc.ClientSideError(
-                    _("Physical volume operations for %s are only supported "
-                      "on %s hosts") % (constants.LVG_CGTS_VG,
-                                        constants.CONTROLLER))
+                _("Physical volume operations for %s are only supported "
+                  "on %s hosts") % (constants.LVG_CGTS_VG,
+                                    constants.CONTROLLER))
 
     # semantic check: host must be locked for a nova-local change on
     # a host with a compute subfunction (compute or AIO)
@@ -669,7 +669,7 @@ def _check_lvg(op, pv):
                   "group."))
         if ilvg.lvm_vg_name == constants.LVG_CINDER_VOLUMES:
             if ((pv['pv_state'] in
-                [constants.PROVISIONED, constants.PV_ADD]) and
+                 [constants.PROVISIONED, constants.PV_ADD]) and
                 StorageBackendConfig.has_backend(
                     pecan.request.dbapi, constants.CINDER_BACKEND_LVM)):
                 raise wsme.exc.ClientSideError(

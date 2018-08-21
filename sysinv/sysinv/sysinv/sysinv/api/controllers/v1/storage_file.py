@@ -161,7 +161,7 @@ class StorageFileCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = StorageFileCollection()
         collection.storage_file = \
-                                 [StorageFile.convert_with_links(p, expand)
+            [StorageFile.convert_with_links(p, expand)
              for p in rpc_storage_file]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
@@ -190,11 +190,11 @@ class StorageFileController(rest.RestController):
                 marker)
 
         file_storage_backends = \
-                                pecan.request.dbapi.storage_file_get_list(
-                                    limit,
-                                    marker_obj,
-                                    sort_key=sort_key,
-                                    sort_dir=sort_dir)
+            pecan.request.dbapi.storage_file_get_list(
+                limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
 
         return StorageFileCollection \
             .convert_with_links(file_storage_backends,
@@ -326,7 +326,7 @@ def _check_backend_file(req, storage_file, confirmed=False):
         for k in HIERA_DATA[svc]:
             if not capabilities.get(k, None):
                 raise wsme.exc.ClientSideError("Missing required %s service "
-                                                   "parameter: %s" % (svc, k))
+                                               "parameter: %s" % (svc, k))
 
     # Update based on any discovered values
     storage_file['capabilities'] = capabilities
@@ -446,8 +446,8 @@ def _pre_patch_checks(storage_file_obj, patch_obj):
             # Make sure we aren't removing a service.- Not currently Supported.
             if len(current_svcs - updated_svcs):
                 raise wsme.exc.ClientSideError(
-                        _("Removing %s is not supported.") % ','.join(
-                                current_svcs - updated_svcs))
+                    _("Removing %s is not supported.") % ','.join(
+                        current_svcs - updated_svcs))
             p['value'] = ','.join(updated_svcs)
 
 

@@ -146,7 +146,7 @@ class Memory(base.APIBase):
     "The numa node or zone the imemory. API only attribute"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "This memory's meta data"
 
     forihostid = int
@@ -181,23 +181,23 @@ class Memory(base.APIBase):
         memory = Memory(**rpc_port.as_dict())
         if not expand:
             memory.unset_fields_except(['uuid', 'memtotal_mib', 'memavail_mib',
-                'platform_reserved_mib', 'hugepages_configured',
-                'vswitch_hugepages_size_mib', 'vswitch_hugepages_nr',
-                'vswitch_hugepages_reqd',
-                'vswitch_hugepages_avail',
-                'vm_hugepages_nr_2M',
-                'vm_hugepages_nr_1G', 'vm_hugepages_use_1G',
-                'vm_hugepages_nr_2M_pending',
-                'vm_hugepages_avail_2M',
-                'vm_hugepages_nr_1G_pending',
-                'vm_hugepages_avail_1G',
-                'vm_hugepages_nr_4K',
-                'vm_hugepages_possible_2M', 'vm_hugepages_possible_1G',
-                'numa_node', 'ihost_uuid', 'inode_uuid',
-                'forihostid', 'forinodeid',
-                'capabilities',
-                'created_at', 'updated_at',
-                'minimum_platform_reserved_mib'])
+                                        'platform_reserved_mib', 'hugepages_configured',
+                                        'vswitch_hugepages_size_mib', 'vswitch_hugepages_nr',
+                                        'vswitch_hugepages_reqd',
+                                        'vswitch_hugepages_avail',
+                                        'vm_hugepages_nr_2M',
+                                        'vm_hugepages_nr_1G', 'vm_hugepages_use_1G',
+                                        'vm_hugepages_nr_2M_pending',
+                                        'vm_hugepages_avail_2M',
+                                        'vm_hugepages_nr_1G_pending',
+                                        'vm_hugepages_avail_1G',
+                                        'vm_hugepages_nr_4K',
+                                        'vm_hugepages_possible_2M', 'vm_hugepages_possible_1G',
+                                        'numa_node', 'ihost_uuid', 'inode_uuid',
+                                        'forihostid', 'forinodeid',
+                                        'capabilities',
+                                        'created_at', 'updated_at',
+                                        'minimum_platform_reserved_mib'])
 
         # never expose the id attribute
         memory.forihostid = wtypes.Unset
@@ -247,16 +247,16 @@ class MemoryController(rest.RestController):
         self._from_inode = from_inode
 
     def _get_memorys_collection(self, i_uuid, inode_uuid, marker,
-                              limit, sort_key, sort_dir,
-                              expand=False, resource_url=None):
+                                limit, sort_key, sort_dir,
+                                expand=False, resource_url=None):
 
         if self._from_ihosts and not i_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         if self._from_inode and not i_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Node id not specified."))
+                "Node id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -268,47 +268,47 @@ class MemoryController(rest.RestController):
 
         if self._from_ihosts:
             memorys = pecan.request.dbapi.imemory_get_by_ihost(
-                                                    i_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                i_uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
 
         elif self._from_inode:
             memorys = pecan.request.dbapi.imemory_get_by_inode(
-                                                    i_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                i_uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         else:
             if i_uuid and not inode_uuid:
                 memorys = pecan.request.dbapi.imemory_get_by_ihost(
-                                                    i_uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid, limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
             elif i_uuid and inode_uuid:   # Need ihost_uuid ?
                 memorys = pecan.request.dbapi.imemory_get_by_ihost_inode(
-                                                    i_uuid,
-                                                    inode_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid,
+                    inode_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             elif inode_uuid:   # Need ihost_uuid ?
                 memorys = pecan.request.dbapi.imemory_get_by_ihost_inode(
-                                                    i_uuid,  # None
-                                                    inode_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    i_uuid,  # None
+                    inode_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             else:
                 memorys = pecan.request.dbapi.imemory_get_list(limit,
-                                                     marker_obj,
-                                                     sort_key=sort_key,
-                                                     sort_dir=sort_dir)
+                                                               marker_obj,
+                                                               sort_key=sort_key,
+                                                               sort_dir=sort_dir)
 
         return MemoryCollection.convert_with_links(memorys, limit,
                                                    url=resource_url,
@@ -323,13 +323,13 @@ class MemoryController(rest.RestController):
         """Retrieve a list of memorys."""
 
         return self._get_memorys_collection(ihost_uuid, inode_uuid,
-                                          marker, limit,
-                                          sort_key, sort_dir)
+                                            marker, limit,
+                                            sort_key, sort_dir)
 
     @wsme_pecan.wsexpose(MemoryCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)
     def detail(self, ihost_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of memorys with detail."""
         # NOTE(lucasagomes): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -362,7 +362,7 @@ class MemoryController(rest.RestController):
         try:
             ihost_uuid = memory.ihost_uuid
             new_memory = pecan.request.dbapi.imemory_create(ihost_uuid,
-                                                      memory.as_dict())
+                                                            memory.as_dict())
 
         except exception.SysinvException as e:
             LOG.exception(e)
@@ -379,7 +379,7 @@ class MemoryController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_port = objects.memory.get_by_uuid(
-                       pecan.request.context, memory_uuid)
+            pecan.request.context, memory_uuid)
 
         if 'forihostid' in rpc_port:
             ihostId = rpc_port['forihostid']
@@ -405,12 +405,12 @@ class MemoryController(rest.RestController):
             _check_host(host_id)
         else:
             raise wsme.exc.ClientSideError(_(
-                  "Hostname or uuid must be defined"))
+                "Hostname or uuid must be defined"))
 
         try:
             # Semantics checks and update hugepage memory accounting
             patch = _check_huge_values(rpc_port, patch,
-                    vm_hugepages_nr_2M_pending, vm_hugepages_nr_1G_pending)
+                                       vm_hugepages_nr_2M_pending, vm_hugepages_nr_1G_pending)
         except wsme.exc.ClientSideError as e:
             inode = pecan.request.dbapi.inode_get(inode_id=rpc_port.forinodeid)
             numa_node = inode.numa_node
@@ -436,7 +436,7 @@ class MemoryController(rest.RestController):
                 p['path'] = '/forinodeid'
                 try:
                     inode = objects.node.get_by_uuid(
-                                     pecan.request.context, p['value'])
+                        pecan.request.context, p['value'])
                     p['value'] = inode.id
                 except exception.SysinvException:
                     p['value'] = None
@@ -498,7 +498,7 @@ def _update(mem_uuid, mem_values):
 
         # Semantics checks and update hugepage memory accounting
         mem_values = _check_huge_values(rpc_port, mem_values,
-                                         vm_hugepages_nr_2M_pending, vm_hugepages_nr_1G_pending)
+                                        vm_hugepages_nr_2M_pending, vm_hugepages_nr_1G_pending)
 
         # Semantics checks for platform memory
         _check_memory(rpc_port, host_id, platform_reserved_mib,
@@ -516,7 +516,7 @@ def _check_host(ihost):
         current_ihosts = pecan.request.dbapi.ihost_get_list()
         for h in current_ihosts:
             if (h['administrative'] != 'locked' and
-                        h['hostname'] != ihost['hostname']):
+                    h['hostname'] != ihost['hostname']):
                 unlocked = True
         if unlocked:
             raise wsme.exc.ClientSideError(_("Host must be locked."))
@@ -542,7 +542,7 @@ def _check_memory(rpc_port, ihost, platform_reserved_mib=None,
         if int(platform_reserved_mib) < min_platform_memory:
             raise wsme.exc.ClientSideError(_(
                 "Platform reserved memory for numa node %s must be greater than the minimum value %d")
-                                           % (inode.numa_node, min_platform_memory))
+                % (inode.numa_node, min_platform_memory))
 
         # Check if it is within 2/3 percent of the total memory
         node_memtotal_mib = rpc_port['node_memtotal_mib']
@@ -555,9 +555,9 @@ def _check_memory(rpc_port, ihost, platform_reserved_mib=None,
             msg_platform_over = (_("Platform reserved memory %s MiB "
                                    "on node %s is not within range [%s, %s]")
                                  % (int(platform_reserved_mib),
-                                   inode.numa_node,
-                                   required_platform_reserved,
-                                   max_platform_reserved))
+                                    inode.numa_node,
+                                    required_platform_reserved,
+                                    max_platform_reserved))
 
             if cutils.is_virtual() or cutils.is_virtual_compute(ihost):
                 LOG.warn(msg_platform_over)
@@ -611,7 +611,7 @@ def _check_huge_values(rpc_port, patch, vm_hugepages_nr_2M=None,
     if rpc_port['vm_hugepages_use_1G'] == 'False' and vm_hugepages_nr_1G:
         # cannot provision 1G huge pages if the processor does not support them
         raise wsme.exc.ClientSideError(_(
-              "Processor does not support 1G huge pages."))
+            "Processor does not support 1G huge pages."))
 
     # Check for invalid characters
     if vm_hugepages_nr_2M:
@@ -619,29 +619,29 @@ def _check_huge_values(rpc_port, patch, vm_hugepages_nr_2M=None,
             val = int(vm_hugepages_nr_2M)
         except ValueError:
             raise wsme.exc.ClientSideError(_(
-                  "VM huge pages 2M must be a number"))
+                "VM huge pages 2M must be a number"))
         if int(vm_hugepages_nr_2M) < 0:
             raise wsme.exc.ClientSideError(_(
-                  "VM huge pages 2M must be greater than or equal to zero"))
+                "VM huge pages 2M must be greater than or equal to zero"))
 
     if vm_hugepages_nr_1G:
         try:
             val = int(vm_hugepages_nr_1G)
         except ValueError:
             raise wsme.exc.ClientSideError(_(
-                  "VM huge pages 1G must be a number"))
+                "VM huge pages 1G must be a number"))
         if val < 0:
             raise wsme.exc.ClientSideError(_(
-                  "VM huge pages 1G must be greater than or equal to zero"))
+                "VM huge pages 1G must be greater than or equal to zero"))
 
     # Check to make sure that the huge pages aren't over committed
     if rpc_port['vm_hugepages_possible_2M'] is None and vm_hugepages_nr_2M:
         raise wsme.exc.ClientSideError(_(
-              "No available space for 2M huge page allocation"))
+            "No available space for 2M huge page allocation"))
 
     if rpc_port['vm_hugepages_possible_1G'] is None and vm_hugepages_nr_1G:
         raise wsme.exc.ClientSideError(_(
-              "No available space for 1G huge page allocation"))
+            "No available space for 1G huge page allocation"))
 
     # Update the number of available huge pages
     num_2M_for_1G = 512

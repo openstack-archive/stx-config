@@ -57,8 +57,8 @@ class PVOperator(object):
         # Execute the command
         try:
             pvdisplay_process = subprocess.Popen(pvdisplay_command,
-                                             stdout=subprocess.PIPE,
-                                             shell=True)
+                                                 stdout=subprocess.PIPE,
+                                                 shell=True)
             pvdisplay_output = pvdisplay_process.stdout.read()
         except Exception as e:
             self.handle_exception("Could not retrieve pvdisplay "

@@ -94,7 +94,7 @@ class WorkerTestCase(base.DbTestCase):
         # update is called twice inside Worker.run
         for i in range(6):
             db.bm_node_update(mox.IgnoreArg(), mox.IgnoreArg(),
-                                        mox.IgnoreArg())
+                              mox.IgnoreArg())
         self.mox.ReplayAll()
 
         params_list = [{'fake1': ''}, {'fake2': ''}, {'fake3': ''}]
@@ -121,7 +121,7 @@ class WorkerTestCase(base.DbTestCase):
         # update is called twice inside Worker.run
         for i in range(6):
             db.bm_node_update(mox.IgnoreArg(), mox.IgnoreArg(),
-                                        mox.IgnoreArg())
+                              mox.IgnoreArg())
         self.mox.ReplayAll()
 
         params_list = [{'fake1': ''}, {'fake2': ''}, {'fake3': ''}]
@@ -219,14 +219,14 @@ class PhysicalWorkTestCase(tests_base.TestCase):
         bmdh.discovery(address, port)
         bmdh.login_iscsi(address, port, iqn)
         bmdh.work_on_disk(dev, root_mb, swap_mb, image_path).\
-                AndRaise(TestException)
+            AndRaise(TestException)
         bmdh.logout_iscsi(address, port, iqn)
         self.mox.ReplayAll()
 
         self.assertRaises(TestException,
-                         bmdh.deploy,
-                         address, port, iqn, lun, image_path,
-                         pxe_config_path, root_mb, swap_mb)
+                          bmdh.deploy,
+                          address, port, iqn, lun, image_path,
+                          pxe_config_path, root_mb, swap_mb)
 
 
 class SwitchPxeConfigTestCase(tests_base.TestCase):

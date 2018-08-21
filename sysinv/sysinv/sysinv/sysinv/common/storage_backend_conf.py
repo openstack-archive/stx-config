@@ -31,7 +31,7 @@ class StorageBackendConfig(object):
         backend_list = api.storage_backend_get_list()
         for backend in backend_list:
             if backend.backend == target and \
-                   backend.name == constants.SB_DEFAULT_NAMES[target]:
+                    backend.name == constants.SB_DEFAULT_NAMES[target]:
                 return backend
 
     @staticmethod
@@ -116,7 +116,7 @@ class StorageBackendConfig(object):
         backend_list = api.storage_backend_get_list()
         for backend in backend_list:
             if backend.state == constants.SB_STATE_CONFIGURING and \
-                   backend.name == constants.SB_DEFAULT_NAMES[backend.backend]:
+                    backend.name == constants.SB_DEFAULT_NAMES[backend.backend]:
                 # At this point we can have but only max 1 configuring backend
                 # at any moment
                 return backend
@@ -131,7 +131,7 @@ class StorageBackendConfig(object):
         backend_list = api.storage_backend_get_list()
         for backend in backend_list:
             if backend.state == constants.SB_STATE_CONFIGURING and \
-                   backend.backend == target:
+                    backend.backend == target:
                 # At this point we can have but only max 1 configuring backend
                 # at any moment
                 return backend
@@ -159,7 +159,7 @@ class StorageBackendConfig(object):
             backend_list = dbapi.storage_backend_get_list()
             for backend in backend_list:
                 if backend.state == constants.SB_STATE_CONFIGURED and \
-                       backend.backend == target:
+                        backend.backend == target:
                     configured = True
                     break
 
@@ -345,8 +345,8 @@ class StorageBackendConfig(object):
         """
         for backend in api.storage_backend_get_list():
             if backend.backend == constants.SB_TYPE_CEPH and \
-                   backend.name == constants.SB_DEFAULT_NAMES[
-                       constants.SB_TYPE_CEPH]:
+                backend.name == constants.SB_DEFAULT_NAMES[
+                    constants.SB_TYPE_CEPH]:
                 return backend.task == constants.SB_TASK_RESTORE
 
     @staticmethod

@@ -482,7 +482,7 @@ class StorageTierIndependentTCs(base.FunctionalTest):
 
         response = self.delete('/storage_tiers/%s' % uuid_map[
             constants.SB_TIER_DEFAULT_NAMES[constants.SB_TIER_TYPE_CEPH]],
-                               expect_errors=True)
+            expect_errors=True)
         self.assertEqual(http_client.BAD_REQUEST, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -565,7 +565,7 @@ class StorageTierDependentTCs(base.FunctionalTest):
         tier_list = self.get_json('/storage_tiers', expect_errors=False)
         self.assertEqual(constants.SB_TIER_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                         tier_list['storage_tiers'][0]['name'])
+            tier_list['storage_tiers'][0]['name'])
         self.assertEqual(constants.SB_TIER_STATUS_DEFINED,
                          tier_list['storage_tiers'][0]['status'])
 
@@ -601,7 +601,7 @@ class StorageTierDependentTCs(base.FunctionalTest):
         }
         with nested(mock.patch.object(StorageBackendConfig, 'get_ceph_mon_ip_addresses'),
                     mock.patch.object(StorageBackendConfig, 'set_img_conversions_defaults')) as (
-                                          mock_ceph_mon, mock_conv):
+                mock_ceph_mon, mock_conv):
             response = self.post_json('/storage_backend', values, expect_errors=False)
         self.assertEqual(http_client.OK, response.status_int)
         self.assertEqual('ceph',  # Expected
@@ -614,7 +614,7 @@ class StorageTierDependentTCs(base.FunctionalTest):
         tier_list = self.get_json('/storage_tiers', expect_errors=False)
         self.assertEqual(constants.SB_TIER_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                         tier_list['storage_tiers'][0]['name'])
+            tier_list['storage_tiers'][0]['name'])
         self.assertEqual(constants.SB_TIER_STATUS_IN_USE,
                          tier_list['storage_tiers'][0]['status'])
         default_tier_uuid = tier_list['storage_tiers'][0]['uuid']
@@ -644,7 +644,7 @@ class StorageTierDependentTCs(base.FunctionalTest):
         tier_list = self.get_json('/storage_tiers', expect_errors=False)
         self.assertEqual(constants.SB_TIER_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                         tier_list['storage_tiers'][0]['name'])
+            tier_list['storage_tiers'][0]['name'])
         self.assertEqual(constants.SB_TIER_STATUS_IN_USE,
                          tier_list['storage_tiers'][0]['status'])
 
@@ -665,7 +665,7 @@ class StorageTierDependentTCs(base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
         self.assertIn('Storage tier (%s) already present' % constants.SB_TIER_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                      response.json['error_message'])
+            response.json['error_message'])
 
         # Create a second storage tier
         values = {'cluster_uuid': saved_cluster_db_uuid,
@@ -744,21 +744,21 @@ class StorageTierDependentTCs(base.FunctionalTest):
                                  expect_errors=False)
         self.assertEqual(constants.SB_TIER_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                         response['tiers'][0]['name'])
+            response['tiers'][0]['name'])
         self.assertEqual('gold', response['tiers'][1]['name'])
 
         # validate the tier view
         tier_list = self.get_json('/storage_tiers', expect_errors=False)
         self.assertEqual(constants.SB_TIER_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                         tier_list['storage_tiers'][0]['name'])
+            tier_list['storage_tiers'][0]['name'])
         self.assertEqual('gold', tier_list['storage_tiers'][1]['name'])
 
         response = self.get_json('/storage_tiers/%s' % tier_list['storage_tiers'][0]['uuid'],
                                  expect_errors=False)
         self.assertEqual(constants.SB_TIER_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                         response['name'])
+            response['name'])
         self.assertEqual([0], response['stors'])
 
         response = self.get_json('/storage_tiers/%s' % tier_list['storage_tiers'][1]['uuid'],
@@ -827,5 +827,5 @@ class StorageTierDependentTCs(base.FunctionalTest):
         self.assertEqual(http_client.OK, response.status_int)
         self.assertEqual(constants.SB_DEFAULT_NAMES[
             constants.SB_TIER_TYPE_CEPH],
-                         backend_list['storage_backends'][0]['name'])
+            backend_list['storage_backends'][0]['name'])
         self.assertEqual('ceph-gold', backend_list['storage_backends'][1]['name'])

@@ -16,7 +16,6 @@
 #    under the License.
 
 import eventlet
-eventlet.monkey_patch()
 
 import contextlib
 import sys
@@ -27,6 +26,7 @@ from sysinv.openstack.common import log as logging
 from sysinv.openstack.common import rpc
 from sysinv.openstack.common.rpc import impl_zmq
 
+eventlet.monkey_patch()
 CONF = cfg.CONF
 CONF.register_opts(rpc.rpc_opts)
 CONF.register_opts(impl_zmq.zmq_opts)

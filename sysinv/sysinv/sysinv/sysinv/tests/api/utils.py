@@ -31,11 +31,11 @@ class FakeMemcache(object):
             'access': {
                 'token': {'id': ADMIN_TOKEN},
                 'user': {
-                        'id': 'user_id1',
-                        'name': 'user_name1',
-                        'tenantId': '123i2910',
-                        'tenantName': 'mytenant',
-                        'roles': [{'name': 'admin'}]
+                    'id': 'user_id1',
+                    'name': 'user_name1',
+                    'tenantId': '123i2910',
+                    'tenantName': 'mytenant',
+                    'roles': [{'name': 'admin'}]
                 },
             }
         },
@@ -43,11 +43,11 @@ class FakeMemcache(object):
             'access': {
                 'token': {'id': MEMBER_TOKEN},
                 'user': {
-                        'id': 'user_id2',
-                        'name': 'user-good',
-                        'tenantId': 'project-good',
-                        'tenantName': 'goodies',
-                        'roles': [{'name': 'Member'}]
+                    'id': 'user_id2',
+                    'name': 'user-good',
+                    'tenantId': 'project-good',
+                    'tenantName': 'goodies',
+                    'roles': [{'name': 'Member'}]
                 }
             }
         }

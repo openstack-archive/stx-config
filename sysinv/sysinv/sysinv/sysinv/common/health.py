@@ -121,7 +121,7 @@ class Health(object):
         return success, allowed, affecting
 
     def get_alarms_degrade(self, alarm_ignore_list=[],
-            entity_instance_id_filter=""):
+                           entity_instance_id_filter=""):
         """Return all the alarms that cause the degrade"""
         db_alarms = self._dbapi.ialarm_get_all(include_suppress=True)
         degrade_alarms = []
@@ -343,7 +343,7 @@ class Health(object):
                     % (Health.SUCCESS_MSG if success else Health.FAIL_MSG)
                 if not success:
                     output += _('Number of instances on controller-1: %s\n') \
-                              % (running_instances)
+                        % (running_instances)
 
             health_ok = health_ok and success
         else:

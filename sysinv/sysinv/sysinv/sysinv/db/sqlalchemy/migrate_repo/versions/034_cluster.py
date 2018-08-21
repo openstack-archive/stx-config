@@ -18,10 +18,10 @@ def upgrade(migrate_engine):
     meta.bind = migrate_engine
 
     Table('i_system',
-        meta,
-        Column('id', Integer,
-            primary_key=True, nullable=False),
-        mysql_engine=ENGINE, mysql_charset=CHARSET)
+          meta,
+          Column('id', Integer,
+                 primary_key=True, nullable=False),
+          mysql_engine=ENGINE, mysql_charset=CHARSET)
 
     clusters = Table(
         'clusters',
@@ -82,8 +82,8 @@ def upgrade(migrate_engine):
                    autoload=True)
 
     i_host.create_column(Column('peer_id', Integer,
-                         ForeignKey('peers.id'),
-                         nullable=True))
+                                ForeignKey('peers.id'),
+                                nullable=True))
 
 
 def downgrade(migrate_engine):

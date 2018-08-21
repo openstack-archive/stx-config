@@ -98,10 +98,10 @@ class Service(base.APIBase):
 
         service.links = [link.Link.make_link('self', pecan.request.host_url,
                                              'services', service.name),
-                               link.Link.make_link('bookmark',
-                                                    pecan.request.host_url,
-                                                    'services', service.name,
-                                                    bookmark=True)
+                         link.Link.make_link('bookmark',
+                                             pecan.request.host_url,
+                                             'services', service.name,
+                                             bookmark=True)
                          ]
 
         return service
@@ -112,7 +112,7 @@ def _check_service_data(op, service):
     name = service['name']
     if name not in constants.ALL_OPTIONAL_SERVICES:
         raise wsme.exc.ClientSideError(_(
-                        "Invalid service name"))
+            "Invalid service name"))
 
     # magnum-specific error checking
     if name == constants.SERVICE_TYPE_MAGNUM:
@@ -132,7 +132,7 @@ def _check_service_data(op, service):
             system = pecan.request.dbapi.isystem_get_one()
             if system.system_type != constants.TIS_STD_BUILD:
                 raise wsme.exc.ClientSideError(_(
-                        "Magnum can be enabled on only Standard systems"))
+                    "Magnum can be enabled on only Standard systems"))
 
     # ironic-specific error checking
     if name == constants.SERVICE_TYPE_IRONIC:
@@ -140,7 +140,7 @@ def _check_service_data(op, service):
             system = pecan.request.dbapi.isystem_get_one()
             if system.system_type != constants.TIS_STD_BUILD:
                 raise wsme.exc.ClientSideError(_(
-                        "Ironic can be enabled on only Standard systems"))
+                    "Ironic can be enabled on only Standard systems"))
 
     return service
 
@@ -155,7 +155,7 @@ class SMServiceController(rest.RestController):
         sm_service = sm_api.service_show(uuid)
         if sm_service is None:
             raise wsme.exc.ClientSideError(_(
-                    "Service %s could not be found") % uuid)
+                "Service %s could not be found") % uuid)
         return SMService(**sm_service)
 
     @wsme_pecan.wsexpose(SMServiceCollection)
@@ -169,7 +169,7 @@ class SMServiceController(rest.RestController):
                 return SMServiceCollection.convert(sm_services)
         LOG.error("Bad response from SM API")
         raise wsme.exc.ClientSideError(_(
-                    "Bad response from SM API"))
+            "Bad response from SM API"))
 
     @cutils.synchronized(LOCK_NAME)
     @wsme_pecan.wsexpose(Service, wtypes.text, body=[unicode])
@@ -189,13 +189,13 @@ class SMServiceController(rest.RestController):
 
         try:
             service = Service(**jsonpatch.apply_patch(
-                    rpc_service.as_dict(), patch_obj))
+                rpc_service.as_dict(), patch_obj))
 
         except utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
         service = _check_service_data(
-                "modify", service.as_dict())
+            "modify", service.as_dict())
 
         try:
             # Update only the fields that have changed
@@ -206,8 +206,8 @@ class SMServiceController(rest.RestController):
             rpc_service.save()
 
             pecan.request.rpcapi.update_service_config(
-                    pecan.request.context, service_name,
-                    do_apply=True)
+                pecan.request.context, service_name,
+                do_apply=True)
 
             return Service.convert_with_links(rpc_service)
 

@@ -331,7 +331,7 @@ class LVGController(rest.RestController):
                     if lvm_type != mate_type:
                         mate_lvg_caps[constants.LVG_CINDER_PARAM_LVM_TYPE] = lvm_type
                         pecan.request.dbapi.ilvg_update(mate_lvg['uuid'],
-                            {'capabilities': mate_lvg_caps})
+                                                        {'capabilities': mate_lvg_caps})
 
             # Save
             rpc_lvg.save()
@@ -520,7 +520,7 @@ def _check_host(lvg):
                                          "on hosts with personality: %s") %
                                        constants.STORAGE)
     elif (constants.COMPUTE not in ihost.subfunctions and
-              lvg['lvm_vg_name'] == constants.LVG_NOVA_LOCAL):
+          lvg['lvm_vg_name'] == constants.LVG_NOVA_LOCAL):
         raise wsme.exc.ClientSideError(_("%s can only be added to a host which "
                                          "has a %s subfunction.") %
                                        (constants.LVG_NOVA_LOCAL,
@@ -706,7 +706,7 @@ def _check(op, lvg):
                                            constants.LVG_CGTS_VG)
         elif lvg['lvm_vg_name'] == constants.LVG_CINDER_VOLUMES:
             if ((lvg['vg_state'] in
-                [constants.PROVISIONED, constants.LVG_ADD]) and
+                 [constants.PROVISIONED, constants.LVG_ADD]) and
                 StorageBackendConfig.has_backend(
                     pecan.request.dbapi, constants.CINDER_BACKEND_LVM)):
                 raise wsme.exc.ClientSideError(
@@ -810,8 +810,8 @@ def _create(lvg, iprofile=None, applyprofile=None):
             else:
                 # Default LVM type
                 lvg_caps_dict = {
-                        constants.LVG_CINDER_PARAM_LVM_TYPE:
-                        constants.LVG_CINDER_LVM_TYPE_THIN
+                    constants.LVG_CINDER_PARAM_LVM_TYPE:
+                    constants.LVG_CINDER_LVM_TYPE_THIN
                 }
                 # Get the VG type from mate controller if present or set default
                 # as Cinder type must be the same on both controllers.

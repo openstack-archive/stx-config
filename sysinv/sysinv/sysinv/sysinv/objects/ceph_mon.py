@@ -18,14 +18,14 @@ class CephMon(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-              'id': int,
-              'uuid': utils.uuid_or_none,
+        'id': int,
+        'uuid': utils.uuid_or_none,
 
-              'device_path': utils.str_or_none,
-              'ceph_mon_gib': utils.int_or_none,
+        'device_path': utils.str_or_none,
+        'ceph_mon_gib': utils.int_or_none,
 
-              'forihostid': utils.int_or_none,
-              'hostname': utils.str_or_none,
+        'forihostid': utils.int_or_none,
+        'hostname': utils.str_or_none,
     }
 
     _foreign_fields = {

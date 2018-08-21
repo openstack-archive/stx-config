@@ -128,7 +128,7 @@ class EthernetPort(base.APIBase):
     "Represent the bootp port of the host"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "Represent meta data of the port"
 
     host_id = int
@@ -207,7 +207,7 @@ class EthernetPortCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = EthernetPortCollection()
         collection.ethernet_ports = [EthernetPort.convert_with_links(p, expand)
-                                    for p in rpc_ports]
+                                     for p in rpc_ports]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -234,15 +234,15 @@ class EthernetPortController(rest.RestController):
 
         if self._from_ihosts and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         if self._from_iinterface and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "Interface id not specified."))
+                "Interface id not specified."))
 
         if self._from_inode and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "inode id not specified."))
+                "inode id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -250,64 +250,64 @@ class EthernetPortController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.ethernet_port.get_by_uuid(
-                                        pecan.request.context,
-                                        marker)
+                pecan.request.context,
+                marker)
 
         if self._from_ihosts:
             ports = pecan.request.dbapi.ethernet_port_get_by_host(
-                                                    uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         elif self._from_inode:
             ports = pecan.request.dbapi.ethernet_port_get_by_numa_node(
-                                                    uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         elif self._from_iinterface:
             ports = pecan.request.dbapi.ethernet_port_get_by_interface(
-                                                    uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                uuid,
+                limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         else:
             if uuid and not interface_uuid:
                 ports = pecan.request.dbapi.ethernet_port_get_by_host(
-                                                    uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    uuid, limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
             elif uuid and interface_uuid:   # Need ihost_uuid ?
                 ports = pecan.request.dbapi.ethernet_port_get_by_host_interface(
-                                                    uuid,
-                                                    interface_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    uuid,
+                    interface_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             elif interface_uuid:   # Need ihost_uuid ?
                 ports = pecan.request.dbapi.ethernet_port_get_by_host_interface(
-                                                    uuid,  # None
-                                                    interface_uuid,
-                                                    limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    uuid,  # None
+                    interface_uuid,
+                    limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
             else:
                 ports = pecan.request.dbapi.ethernet_port_get_list(
-                                                    limit, marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    limit, marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
         return EthernetPortCollection.convert_with_links(ports, limit,
-                                                 url=resource_url,
-                                                 expand=expand,
-                                                 sort_key=sort_key,
-                                                 sort_dir=sort_dir)
+                                                         url=resource_url,
+                                                         expand=expand,
+                                                         sort_key=sort_key,
+                                                         sort_dir=sort_dir)
 
     @wsme_pecan.wsexpose(EthernetPortCollection, types.uuid, types.uuid,
                          types.uuid, types.uuid, int, wtypes.text, wtypes.text)

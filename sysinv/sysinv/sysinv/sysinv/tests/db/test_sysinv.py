@@ -106,7 +106,7 @@ class DbNodeTestCase(base.DbTestCase):
         forihostid = n['id']
 
         p = self.dbapi.icpu_create(forihostid,
-                utils.get_test_icpu(forinodeid=3, cpu=2))
+                                   utils.get_test_icpu(forinodeid=3, cpu=2))
         self.assertEqual(n['id'], p['forihostid'])
 
     def test_create_memoryToplogy_on_a_server_and_cpu(self):
@@ -116,14 +116,14 @@ class DbNodeTestCase(base.DbTestCase):
         forihostid = n['id']
 
         p = self.dbapi.icpu_create(forihostid,
-                utils.get_test_icpu(forinodeid=1, cpu=3))
+                                   utils.get_test_icpu(forinodeid=1, cpu=3))
         self.assertEqual(n['id'], p['forihostid'])
 
         forSocketNuma = p['forinodeid']
 
         m = self.dbapi.imemory_create(forihostid,
-                utils.get_test_imemory(Hugepagesize=hmemsize,
-                        forinodeid=forSocketNuma))
+                                      utils.get_test_imemory(Hugepagesize=hmemsize,
+                                                             forinodeid=forSocketNuma))
         self.assertEqual(n['id'], m['forihostid'])
         self.assertEqual(p['forinodeid'], m['forinodeid'])
 
@@ -133,7 +133,7 @@ class DbNodeTestCase(base.DbTestCase):
         forihostid = n['id']
 
         p = self.dbapi.ethernet_port_create(forihostid,
-                utils.get_test_port(name='eth0', pciaddr="00:03.0"))
+                                            utils.get_test_port(name='eth0', pciaddr="00:03.0"))
         self.assertEqual(n['id'], p['host_id'])
 
     def test_create_storageVolume_on_a_server(self):
@@ -142,7 +142,7 @@ class DbNodeTestCase(base.DbTestCase):
         forihostid = n['id']
         # diskType= '{"diskType":"SAS"}'))
         p = self.dbapi.idisk_create(forihostid,
-                utils.get_test_idisk(deviceId='sda0'))
+                                    utils.get_test_idisk(deviceId='sda0'))
         self.assertEqual(n['id'], p['forihostid'])
 
     # Storage Backend: Base class

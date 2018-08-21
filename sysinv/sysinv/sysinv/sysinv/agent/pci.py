@@ -30,7 +30,7 @@ ETHERNET_PCI_CLASSES = ['ethernet controller', 'network controller']
 KNOWN_PCI_DEVICES = [{"vendor_id": constants.NOVA_PCI_ALIAS_QAT_PF_VENDOR,
                       "device_id": constants.NOVA_PCI_ALIAS_QAT_DH895XCC_PF_DEVICE,
                       "class_id": constants.NOVA_PCI_ALIAS_QAT_CLASS},
-                      {"vendor_id": constants.NOVA_PCI_ALIAS_QAT_PF_VENDOR,
+                     {"vendor_id": constants.NOVA_PCI_ALIAS_QAT_PF_VENDOR,
                       "device_id": constants.NOVA_PCI_ALIAS_QAT_C62X_PF_DEVICE,
                       "class_id": constants.NOVA_PCI_ALIAS_QAT_CLASS},
                      {"class_id": constants.NOVA_PCI_ALIAS_GPU_CLASS}]
@@ -49,8 +49,8 @@ IGNORE_SIGNAL_PROCESSING_PCI_CLASSES = ['performance counters']
 # with separately (ie. Ethernet devices), or do not make sense to expose
 # to a guest.
 IGNORE_PCI_CLASSES = ETHERNET_PCI_CLASSES + IGNORE_BRIDGE_PCI_CLASSES + \
-                     IGNORE_PERIPHERAL_PCI_CLASSES + \
-                     IGNORE_SIGNAL_PROCESSING_PCI_CLASSES
+    IGNORE_PERIPHERAL_PCI_CLASSES + \
+    IGNORE_SIGNAL_PROCESSING_PCI_CLASSES
 
 pciaddr = 0
 pclass = 1
@@ -239,7 +239,7 @@ class PCIOperator(object):
         try:
             drivers = [
                 os.path.basename(os.readlink(ddriver + '/' + d)) for d in os.listdir(ddriver)
-                       ]
+            ]
             driver = str(','.join(str(d) for d in drivers))
 
         except Exception:
@@ -376,8 +376,8 @@ class PCIOperator(object):
                         ','.join(str(x) for x in sriov_vfs_pci_address),
                     "driver": driver,
                     "enabled": self.pci_get_enabled_attr(pclass_id,
-                        pvendor_id, pdevice_id),
-                         }
+                                                         pvendor_id, pdevice_id),
+                }
 
                 pci_attrs_array.append(attrs)
 
@@ -552,7 +552,7 @@ class PCIOperator(object):
                             speed = f.readline().rstrip()
                             if speed not in VALID_PORT_SPEED:
                                 LOG.error("Invalid port speed = %s for %s " %
-                                         (speed, n))
+                                          (speed, n))
                                 speed = None
                     except Exception:
                         LOG.warning("ATTR speed unknown for: %s (flags: %s)" % (n, hex(flags)))

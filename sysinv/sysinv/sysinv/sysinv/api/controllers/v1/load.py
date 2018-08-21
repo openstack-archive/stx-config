@@ -337,9 +337,9 @@ class LoadController(rest.RestController):
         hosts = pecan.request.dbapi.host_upgrade_get_list()
         for host in hosts:
             if host.target_load == load.id or host.software_load == load.id:
-                    raise wsme.exc.ClientSideError(_(
-                        "Unable to delete load, load in use by host (id: %s)")
-                        % host.forihostid)
+                raise wsme.exc.ClientSideError(_(
+                    "Unable to delete load, load in use by host (id: %s)")
+                    % host.forihostid)
 
         cutils.validate_load_for_delete(load)
 

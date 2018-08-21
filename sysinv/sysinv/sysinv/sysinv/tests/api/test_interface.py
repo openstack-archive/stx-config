@@ -26,10 +26,10 @@ from sysinv.openstack.common.rpc import common as rpc_common
 
 
 providernet_list = {
-            'group0-data1': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [
+    'group0-data1': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [
                     {"minimum": 700,
                      "name": "group0-data1-r3-0",
                      "tenant_id": "7e0ec7688fb64cf89c9c4fc2e2bd4c94",
@@ -38,95 +38,95 @@ providernet_list = {
                      "maximum": 715,
                      "description": None
                      }],
-                "vlan_transparent": False,
-                "type": "vlan",
+        "vlan_transparent": False,
+        "type": "vlan",
                 "id": "237848e3-4f7b-4f74-bf35-d4da470be228",
                 "name": "group0-data1"},
-            'group0-data0': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [
+    'group0-data0': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [
                     {"minimum": 600, "name": "group0-data0-r1-0",
                      "tenant_id": "3103030ac5a64dc6a6f0c05da79c5c3c",
                      "shared": False,
                      "id": "62b0d1aa-a4c7-47a3-9363-6726720c89a9",
                      "maximum": 615, "description": None}],
-                "vlan_transparent": False,
-                "type": "vlan",
+        "vlan_transparent": False,
+        "type": "vlan",
                 "id": "3dee9198-fc3c-4313-a5c5-7b72a4bad57e",
                 "name": "group0-data0"},
-            'group0-data0b': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [
-                    {"minimum": 616, "name": "group0-data0b-r2-0",
-                     "tenant_id": None, "shared": True,
-                     "id": "7a133887-fe6d-4976-a006-d12948c9498d",
-                     "maximum": 631, "description": None}],
-                "vlan_transparent": False,
-                "type": "vlan",
+    'group0-data0b': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [
+            {"minimum": 616, "name": "group0-data0b-r2-0",
+             "tenant_id": None, "shared": True,
+             "id": "7a133887-fe6d-4976-a006-d12948c9498d",
+             "maximum": 631, "description": None}],
+        "vlan_transparent": False,
+        "type": "vlan",
                 "id": "83aa5122-49fb-4b97-8cd8-a201dd2d5b0e",
                 "name": "group0-data0b"},
-            'group0-ext0': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [{"description": None, "minimum": 4,
+    'group0-ext0': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [{"description": None, "minimum": 4,
                             "id": "72f21b11-6d17-486e-a4e6-4eaf5f00f23e",
                             "name": "group0-ext0-r0-0",
                             "tenant_id": None, "maximum": 4,
                             "shared": True,
                             "vxlan": {"group": "239.0.2.1",
                                       "port": 8472, "ttl": 10}}],
-                "vlan_transparent": False,
-                "type": "vxlan",
+        "vlan_transparent": False,
+        "type": "vxlan",
                 "id": "da9f7bb1-2114-4ffd-8a4c-9ca215d98fa2",
                 "name": "group0-ext0"},
-            'group0-ext1': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [{"description": None, "minimum": 4,
+    'group0-ext1': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [{"description": None, "minimum": 4,
                             "id": "72f21b11-6d17-486e-a4e6-4eaf5f00f23e",
                             "name": "group0-ext1-r0-0",
                             "tenant_id": None, "maximum": 4,
                             "shared": True,
                             "vxlan": {"group": "239.0.2.1",
                                       "port": 8472, "ttl": 10}}],
-                "vlan_transparent": False,
-                "type": "vxlan",
+        "vlan_transparent": False,
+        "type": "vxlan",
                 "id": "da9f7bb1-2114-4ffd-8a4c-9ca215d98fa3",
                 "name": "group0-ext1"},
-            'group0-ext2': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [{"description": None, "minimum": 4,
+    'group0-ext2': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [{"description": None, "minimum": 4,
                             "id": "72f21b11-6d17-486e-a4e6-4eaf5f00f23e",
                             "name": "group0-ext2-r0-0",
                             "tenant_id": None, "maximum": 4,
                             "shared": True,
                             "vxlan": {"group": "239.0.2.1",
                                       "port": 8472, "ttl": 10}}],
-                "vlan_transparent": False,
-                "type": "vxlan",
+        "vlan_transparent": False,
+        "type": "vxlan",
                 "id": "da9f7bb1-2114-4ffd-8a4c-9ca215d98fa2",
                 "name": "group0-ext2"},
-            'group0-ext3': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [{"description": None, "minimum": 4,
+    'group0-ext3': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [{"description": None, "minimum": 4,
                             "id": "72f21b11-6d17-486e-a4e6-4eaf5f00f23e",
                             "name": "group0-ext2-r0-0",
                             "tenant_id": None, "maximum": 4,
                             "shared": True,
                             "vxlan": {"group": "239.0.2.1",
                                       "port": 8472, "ttl": 10}}],
-                "vlan_transparent": False,
-                "type": "vxlan",
+        "vlan_transparent": False,
+        "type": "vxlan",
                 "id": "da9f7bb1-2114-4ffd-8a4c-9ca215d98fa2",
                 "name": "group0-ext3"},
-            'group0-flat': {
-                "status": "ACTIVE", "description": None,
-                "mtu": 1500,
-                "ranges": [{"description": None, "minimum": 4,
+    'group0-flat': {
+        "status": "ACTIVE", "description": None,
+        "mtu": 1500,
+        "ranges": [{"description": None, "minimum": 4,
                             "id": "72f21b11-6d17-486e-a4e6-4eaf5f00f23e",
                             "name": "group0-flat-r0-0",
                             "tenant_id": None, "maximum": 4,
@@ -134,8 +134,8 @@ providernet_list = {
                             "shared": True,
                             "vxlan": {"group": "239.0.2.1",
                                       "port": 8472, "ttl": 10}}],
-                "vlan_transparent": False,
-                "type": "flat",
+        "vlan_transparent": False,
+        "type": "flat",
                 "id": "da9f7bb1-2114-4ffd-8a4c-9ca215d98fa3",
                 "name": "group0-flat"}
 }
@@ -1283,7 +1283,7 @@ class TestPost(InterfaceTestCase):
     # bond0
     def test_create_bond_invalid_overlap_ae(self):
         bond_iface = self._create_compute_bond('bond0',
-            constants.NETWORK_TYPE_DATA, providernetworks='group0-data0')
+                                               constants.NETWORK_TYPE_DATA, providernetworks='group0-data0')
         port, iface1 = self._create_ethernet()
 
         ndict = dbutils.post_get_test_interface(
@@ -1307,7 +1307,7 @@ class TestPost(InterfaceTestCase):
     # interface vlan0
     def test_create_bond_invalid_overlap_vlan(self):
         vlan_iface = self._create_compute_vlan('vlan0',
-            constants.NETWORK_TYPE_DATA, 10, providernetworks='group0-ext0')
+                                               constants.NETWORK_TYPE_DATA, 10, providernetworks='group0-ext0')
         port, iface1 = self._create_ethernet()
 
         ndict = dbutils.post_get_test_interface(
@@ -1324,7 +1324,7 @@ class TestPost(InterfaceTestCase):
     # Expected message: Can only have one interface for vlan type.
     def test_create_vlan_invalid_uses(self):
         bond_iface = self._create_compute_bond('bond0',
-            constants.NETWORK_TYPE_DATA, providernetworks='group0-data0')
+                                               constants.NETWORK_TYPE_DATA, providernetworks='group0-data0')
         port, iface1 = self._create_ethernet()
 
         ndict = dbutils.post_get_test_interface(
@@ -1345,9 +1345,9 @@ class TestPost(InterfaceTestCase):
             'vlan1', constants.NETWORK_TYPE_DATA, 1,
             providernetworks='group0-ext0')
         self._create_compute_vlan('vlan2',
-            constants.NETWORK_TYPE_DATA, 2,
-            lower_iface=vlan_iface, providernetworks='group0-ext1',
-            expect_errors=True)
+                                  constants.NETWORK_TYPE_DATA, 2,
+                                  lower_iface=vlan_iface, providernetworks='group0-ext1',
+                                  expect_errors=True)
 
     # Expected message: data VLAN cannot be created over a LAG interface with
     # network type pxeboot
@@ -1355,9 +1355,9 @@ class TestPost(InterfaceTestCase):
         bond_iface = self._create_compute_bond(
             'pxeboot', constants.NETWORK_TYPE_PXEBOOT)
         self._create_compute_vlan('vlan2',
-            constants.NETWORK_TYPE_DATA, 2,
-            lower_iface=bond_iface, providernetworks='group0-ext1',
-            expect_errors=True)
+                                  constants.NETWORK_TYPE_DATA, 2,
+                                  lower_iface=bond_iface, providernetworks='group0-ext1',
+                                  expect_errors=True)
 
     # Expected message: data VLAN cannot be created over a LAG interface with
     # network type mgmt
@@ -1416,20 +1416,20 @@ class TestPost(InterfaceTestCase):
     # interface
     def test_create_invalid_oam_data_ethernet(self):
         self._create_ethernet('shared',
-            networktype=(constants.NETWORK_TYPE_OAM + ',' +
-                         constants.NETWORK_TYPE_DATA),
-            expect_errors=True)
+                              networktype=(constants.NETWORK_TYPE_OAM + ',' +
+                                           constants.NETWORK_TYPE_DATA),
+                              expect_errors=True)
 
     # Expected message:
     # Only pxeboot,mgmt,infra network types can be combined on a single
     # interface
     def test_create_invalid_mgmt_data_ethernet(self):
         self._create_ethernet('shared',
-            networktype=(constants.NETWORK_TYPE_MGMT + ',' +
-                         constants.NETWORK_TYPE_DATA),
-            providernetworks='group0-data0',
-            host=self.compute,
-            expect_errors=True)
+                              networktype=(constants.NETWORK_TYPE_MGMT + ',' +
+                                           constants.NETWORK_TYPE_DATA),
+                              providernetworks='group0-data0',
+                              host=self.compute,
+                              expect_errors=True)
 
     # Expected message:
     # Only pxeboot,mgmt,infra network types can be combined on a single
@@ -1469,10 +1469,10 @@ class TestCpePost(InterfaceTestCase):
     # Network type list may only contain at most one type
     def test_create_invalid_infra_data_ae(self):
         self._create_bond('shared',
-            networktype=(constants.NETWORK_TYPE_INFRA + ',' +
-                         constants.NETWORK_TYPE_DATA),
-            providernetworks='group0-data0',
-            expect_errors=True)
+                          networktype=(constants.NETWORK_TYPE_INFRA + ',' +
+                                       constants.NETWORK_TYPE_DATA),
+                          providernetworks='group0-data0',
+                          expect_errors=True)
 
     # Expected message: oam VLAN cannot be created over an interface with
     # network type data

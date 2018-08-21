@@ -105,7 +105,7 @@ class Port(base.APIBase):
     "The kernel driver for this device"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "Represent meta data of the port"
 
     host_id = int
@@ -181,14 +181,14 @@ class Port(base.APIBase):
                             ]
 
         port.lldp_neighbours = [link.Link.make_link('self',
-                                            pecan.request.host_url,
-                                            'ports',
-                                            port.uuid + "/lldp_neighbors"),
+                                                    pecan.request.host_url,
+                                                    'ports',
+                                                    port.uuid + "/lldp_neighbors"),
                                 link.Link.make_link('bookmark',
-                                            pecan.request.host_url,
-                                            'ports',
-                                            port.uuid + "/lldp_neighbors",
-                                            bookmark=True)
+                                                    pecan.request.host_url,
+                                                    'ports',
+                                                    port.uuid + "/lldp_neighbors",
+                                                    bookmark=True)
                                 ]
 
         return port
@@ -240,15 +240,15 @@ class PortController(rest.RestController):
 
         if self._from_ihosts and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         if self._from_iinterface and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "Interface id not specified."))
+                "Interface id not specified."))
 
         if self._from_inode and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "inode id not specified."))
+                "inode id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)

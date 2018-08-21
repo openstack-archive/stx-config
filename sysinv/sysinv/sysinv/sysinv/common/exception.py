@@ -228,12 +228,12 @@ class CephPoolRulesetFailure(CephFailure):
 
 class CephPoolSetQuotaFailure(CephFailure):
     message = _("Error seting the OSD pool quota %(name)s for %(pool)s to %(value)s") \
-                + ": %(reason)s"
+        + ": %(reason)s"
 
 
 class CephPoolGetQuotaFailure(CephFailure):
     message = _("Error geting the OSD pool quota for %(pool)s") \
-                + ": %(reason)s"
+        + ": %(reason)s"
 
 
 class CephGetClusterUsageFailure(CephFailure):
@@ -1143,6 +1143,7 @@ class OpenStackException(PickleableException):
     """
     OpenStack Exception
     """
+
     def __init__(self, message, reason):
         """
         Create an OpenStack exception
@@ -1188,6 +1189,7 @@ class OpenStackRestAPIException(PickleableException):
     """
     OpenStack Rest-API Exception
     """
+
     def __init__(self, message, http_status_code, reason):
         """
         Create an OpenStack Rest-API exception

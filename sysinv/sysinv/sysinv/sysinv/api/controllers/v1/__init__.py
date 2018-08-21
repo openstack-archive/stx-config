@@ -234,7 +234,7 @@ class V1(base.APIBase):
                                         bookmark=True, type='text/html')
                     ]
         v1.media_types = [MediaType('application/json',
-                          'application/vnd.openstack.sysinv.v1+json')]
+                                    'application/vnd.openstack.sysinv.v1+json')]
 
         v1.isystems = [link.Link.make_link('self', pecan.request.host_url,
                                            'isystems', ''),
@@ -245,11 +245,11 @@ class V1(base.APIBase):
                        ]
 
         v1.ihosts = [link.Link.make_link('self', pecan.request.host_url,
-                                        'ihosts', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'ihosts', '',
-                                        bookmark=True)
+                                         'ihosts', ''),
+                     link.Link.make_link('bookmark',
+                                         pecan.request.host_url,
+                                         'ihosts', '',
+                                         bookmark=True)
                      ]
 
         v1.helm_charts = [link.Link.make_link('self', pecan.request.host_url,
@@ -269,11 +269,11 @@ class V1(base.APIBase):
                     ]
 
         v1.icpu = [link.Link.make_link('self', pecan.request.host_url,
-                                        'icpu', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'icpu', '',
-                                        bookmark=True)
+                                       'icpu', ''),
+                   link.Link.make_link('bookmark',
+                                       pecan.request.host_url,
+                                       'icpu', '',
+                                       bookmark=True)
                    ]
 
         v1.imemory = [link.Link.make_link('self', pecan.request.host_url,
@@ -285,20 +285,20 @@ class V1(base.APIBase):
                       ]
 
         v1.iprofile = [link.Link.make_link('self', pecan.request.host_url,
-                                        'iprofile', ''),
+                                           'iprofile', ''),
                        link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'iprofile', '',
-                                        bookmark=True)
+                                           pecan.request.host_url,
+                                           'iprofile', '',
+                                           bookmark=True)
                        ]
 
         v1.iinterfaces = [link.Link.make_link('self',
-                                        pecan.request.host_url,
-                                        'iinterfaces', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'iinterfaces', '',
-                                        bookmark=True)
+                                              pecan.request.host_url,
+                                              'iinterfaces', ''),
+                          link.Link.make_link('bookmark',
+                                              pecan.request.host_url,
+                                              'iinterfaces', '',
+                                              bookmark=True)
                           ]
 
         v1.ports = [link.Link.make_link('self',
@@ -310,38 +310,38 @@ class V1(base.APIBase):
                                         bookmark=True)
                     ]
         v1.ethernet_ports = [link.Link.make_link('self',
-                                        pecan.request.host_url,
-                                        'ethernet_ports', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'ethernet_ports', '',
-                                        bookmark=True)
+                                                 pecan.request.host_url,
+                                                 'ethernet_ports', ''),
+                             link.Link.make_link('bookmark',
+                                                 pecan.request.host_url,
+                                                 'ethernet_ports', '',
+                                                 bookmark=True)
                              ]
         v1.istors = [link.Link.make_link('self',
-                                        pecan.request.host_url,
-                                        'istors', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'istors', '',
-                                        bookmark=True)
+                                         pecan.request.host_url,
+                                         'istors', ''),
+                     link.Link.make_link('bookmark',
+                                         pecan.request.host_url,
+                                         'istors', '',
+                                         bookmark=True)
                      ]
 
         v1.idisks = [link.Link.make_link('self',
-                                        pecan.request.host_url,
-                                        'idisks', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'idisks', '',
-                                        bookmark=True)
+                                         pecan.request.host_url,
+                                         'idisks', ''),
+                     link.Link.make_link('bookmark',
+                                         pecan.request.host_url,
+                                         'idisks', '',
+                                         bookmark=True)
                      ]
 
         v1.partitions = [link.Link.make_link('self',
-                                         pecan.request.host_url,
-                                         'partitions', ''),
-                     link.Link.make_link('bookmark',
-                                         pecan.request.host_url,
-                                         'partitions', '',
-                                         bookmark=True)
+                                             pecan.request.host_url,
+                                             'partitions', ''),
+                         link.Link.make_link('bookmark',
+                                             pecan.request.host_url,
+                                             'partitions', '',
+                                             bookmark=True)
                          ]
 
         v1.ilvgs = [link.Link.make_link('self',
@@ -364,62 +364,62 @@ class V1(base.APIBase):
 
         v1.itrapdest = [link.Link.make_link('self', pecan.request.host_url,
                                             'itrapdest', ''),
-                       link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'itrapdest', '',
-                                           bookmark=True)
+                        link.Link.make_link('bookmark',
+                                            pecan.request.host_url,
+                                            'itrapdest', '',
+                                            bookmark=True)
                         ]
 
         v1.icommunity = [link.Link.make_link('self', pecan.request.host_url,
                                              'icommunity', ''),
-                       link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'icommunity', '',
-                                           bookmark=True)
+                         link.Link.make_link('bookmark',
+                                             pecan.request.host_url,
+                                             'icommunity', '',
+                                             bookmark=True)
                          ]
 
         v1.iuser = [link.Link.make_link('self', pecan.request.host_url,
                                         'iuser', ''),
-                      link.Link.make_link('bookmark',
-                                          pecan.request.host_url,
-                                          'iuser', '',
-                                          bookmark=True)
+                    link.Link.make_link('bookmark',
+                                        pecan.request.host_url,
+                                        'iuser', '',
+                                        bookmark=True)
                     ]
 
         v1.idns = [link.Link.make_link('self', pecan.request.host_url,
-                                          'idns', ''),
-                      link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'idns', '',
-                                           bookmark=True)
+                                       'idns', ''),
+                   link.Link.make_link('bookmark',
+                                       pecan.request.host_url,
+                                       'idns', '',
+                                       bookmark=True)
                    ]
 
         v1.intp = [link.Link.make_link('self', pecan.request.host_url,
-                                          'intp', ''),
-                      link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'intp', '',
-                                           bookmark=True)
+                                       'intp', ''),
+                   link.Link.make_link('bookmark',
+                                       pecan.request.host_url,
+                                       'intp', '',
+                                       bookmark=True)
                    ]
 
         v1.iextoam = [link.Link.make_link('self', pecan.request.host_url,
                                           'iextoam', ''),
                       link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'iextoam', '',
-                                           bookmark=True)
+                                          pecan.request.host_url,
+                                          'iextoam', '',
+                                          bookmark=True)
                       ]
 
         v1.controller_fs = [link.Link.make_link('self', pecan.request.host_url,
                                                 'controller_fs', ''),
                             link.Link.make_link('bookmark',
-                                                 pecan.request.host_url,
-                                                 'controller_fs', '',
-                                                 bookmark=True)
+                                                pecan.request.host_url,
+                                                'controller_fs', '',
+                                                bookmark=True)
                             ]
 
         v1.storage_backend = [link.Link.make_link('self',
-                                                   pecan.request.host_url,
+                                                  pecan.request.host_url,
                                                   'storage_backend', ''),
                               link.Link.make_link('bookmark',
                                                   pecan.request.host_url,
@@ -493,19 +493,18 @@ class V1(base.APIBase):
 
         v1.drbdconfig = [link.Link.make_link('self', pecan.request.host_url,
                                              'drbdconfig', ''),
-                      link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'drbdconfig', '',
-                                           bookmark=True)
+                         link.Link.make_link('bookmark',
+                                             pecan.request.host_url,
+                                             'drbdconfig', '',
+                                             bookmark=True)
                          ]
 
-
         v1.iinfra = [link.Link.make_link('self', pecan.request.host_url,
-                                          'iinfra', ''),
-                      link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'iinfra', '',
-                                           bookmark=True)
+                                         'iinfra', ''),
+                     link.Link.make_link('bookmark',
+                                         pecan.request.host_url,
+                                         'iinfra', '',
+                                         bookmark=True)
                      ]
         v1.addresses = [link.Link.make_link('self', pecan.request.host_url,
                                             'addresses', ''),
@@ -530,12 +529,12 @@ class V1(base.APIBase):
                      ]
 
         v1.certificate = [link.Link.make_link('self',
-                                         pecan.request.host_url,
-                                         'certificate', ''),
+                                              pecan.request.host_url,
+                                              'certificate', ''),
                           link.Link.make_link('bookmark',
-                                         pecan.request.host_url,
-                                         'certificate', '',
-                                         bookmark=True)
+                                              pecan.request.host_url,
+                                              'certificate', '',
+                                              bookmark=True)
                           ]
 
         v1.isensors = [link.Link.make_link('self',
@@ -605,21 +604,21 @@ class V1(base.APIBase):
                        ]
 
         v1.lldp_agents = [link.Link.make_link('self',
-                                                    pecan.request.host_url,
-                                                    'lldp_agents', ''),
+                                              pecan.request.host_url,
+                                              'lldp_agents', ''),
                           link.Link.make_link('bookmark',
-                                                    pecan.request.host_url,
-                                                    'lldp_agents', '',
-                                                    bookmark=True)
+                                              pecan.request.host_url,
+                                              'lldp_agents', '',
+                                              bookmark=True)
                           ]
 
         v1.lldp_neighbours = [link.Link.make_link('self',
-                                                    pecan.request.host_url,
-                                                    'lldp_neighbours', ''),
+                                                  pecan.request.host_url,
+                                                  'lldp_neighbours', ''),
                               link.Link.make_link('bookmark',
-                                                    pecan.request.host_url,
-                                                    'lldp_neighbours', '',
-                                                    bookmark=True)
+                                                  pecan.request.host_url,
+                                                  'lldp_neighbours', '',
+                                                  bookmark=True)
                               ]
 
         # sm service

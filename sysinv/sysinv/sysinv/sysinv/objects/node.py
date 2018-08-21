@@ -18,13 +18,13 @@ class Node(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
-            'forihostid': int,
+        'id': int,
+        'uuid': utils.str_or_none,
+        'forihostid': int,
 
-            'numa_node': int,
-            'capabilities': utils.dict_or_none,
-             }
+        'numa_node': int,
+        'capabilities': utils.dict_or_none,
+    }
 
     @base.remotable_classmethod
     def get_by_uuid(cls, context, uuid):

@@ -17,15 +17,14 @@ import datetime
 import gettext
 import iso8601
 import netaddr
-
-gettext.install('sysinv')
-
 from sysinv.common import exception
 from sysinv.objects import base
 from sysinv.objects import utils
 from sysinv.openstack.common import context
 from sysinv.openstack.common import timeutils
 from sysinv.tests import base as test_base
+
+gettext.install('sysinv')
 
 
 class MyObj(base.SysinvObject):
@@ -312,7 +311,7 @@ class _TestObject(object):
                     'sysinv_object.version': '1.5',
                     'sysinv_object.changes': ['bar'],
                     'sysinv_object.data': {'foo': 1,
-                                         'bar': 'loaded!'}}
+                                           'bar': 'loaded!'}}
         self.assertEqual(obj.obj_to_primitive(), expected)
 
     def test_changes_in_primitive(self):

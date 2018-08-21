@@ -34,6 +34,7 @@ LOG = log.getLogger(__name__)
 class ParsableErrorMiddleware(object):
     """Replace error body with something the client can parse.
     """
+
     def __init__(self, app):
         self.app = app
 
@@ -76,11 +77,11 @@ class ParsableErrorMiddleware(object):
                     # simple check xml is valid
                     body = [et.ElementTree.tostring(
                             et.ElementTree.fromstring('<error_message>' +
-                                '\n'.join(app_iter) + '</error_message>'))]
+                                                      '\n'.join(app_iter) + '</error_message>'))]
                 except et.ElementTree.ParseError as err:
                     LOG.error('Error parsing HTTP response: %s' % err)
                     body = ['<error_message>%s' % state['status_code'] +
-                        '</error_message>']
+                            '</error_message>']
                 state['headers'].append(('Content-Type', 'application/xml'))
             else:
                 body = [json.dumps({'error_message': '\n'.join(app_iter)})]

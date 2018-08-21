@@ -169,6 +169,7 @@ class Connection(object):
     An instance of this class should never be created by users of the rpc API.
     Use rpc.create_connection() instead.
     """
+
     def close(self):
         """Close the connection.
 
@@ -429,6 +430,7 @@ class ClientException(Exception):
     hit by an RPC proxy object. Merely instantiating it records the
     current exception information, which will be passed back to the
     RPC client without exceptional logging."""
+
     def __init__(self):
         self._exc_info = sys.exc_info()
 

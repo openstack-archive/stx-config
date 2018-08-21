@@ -48,11 +48,11 @@ def main():
 
             if vid == args.vid and did == args.did:
                 print("Vendor ID: %s Device ID: %s is supported" %
-                     (args.vid, args.did))
+                      (args.vid, args.did))
                 return 0
 
     print("Vendor ID: %s Device ID: %s is not supported" %
-         (args.vid, args.did))
+          (args.vid, args.did))
     return 1
 
 

@@ -198,7 +198,7 @@ def _get_no_of_partitions(disk_device_path):
     :return number of partitions
     """
     output, _, _ = _command_pipe(
-        ['sgdisk','-p', disk_device_path],
+        ['sgdisk', '-p', disk_device_path],
         ['sed', "1,/^Number.*Start.*(sector).*End/d"],
         device_node=disk_device_path)
     rows = [row.strip() for row in output.splitlines() if row.strip()]
@@ -876,7 +876,7 @@ def main(argv):
         CONF.action.func(CONF.action.data, CONF.action.mode, CONF.action.pfile)
     else:
         LOG.error(_("Unknown action: %(action)") % {"action":
-                                                        CONF.action.name})
+                                                    CONF.action.name})
 
 
 if __name__ == "__main__":

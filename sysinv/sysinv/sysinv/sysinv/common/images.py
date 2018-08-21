@@ -209,7 +209,7 @@ def image_to_raw(image_href, path, path_tmp):
         backing_file = data.backing_file
         if backing_file is not None:
             raise exception.ImageUnacceptable(image_id=image_href,
-                reason=_("fmt=%(fmt)s backed by: %(backing_file)s") %
+                                              reason=_("fmt=%(fmt)s backed by: %(backing_file)s") %
                                               {'fmt': fmt,
                                                'backing_file': backing_file})
 
@@ -223,8 +223,8 @@ def image_to_raw(image_href, path, path_tmp):
                 data = qemu_img_info(staged)
                 if data.file_format != "raw":
                     raise exception.ImageConvertFailed(image_id=image_href,
-                        reason=_("Converted to raw, but format is now %s") %
-                        data.file_format)
+                                                       reason=_("Converted to raw, but format is now %s") %
+                                                       data.file_format)
 
                 os.rename(staged, path)
         else:

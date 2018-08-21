@@ -263,11 +263,11 @@ class StorageCephController(rest.RestController):
                 marker)
 
         ceph_storage_backends = \
-                pecan.request.dbapi.storage_ceph_get_list(
-                    limit,
-                    marker_obj,
-                    sort_key=sort_key,
-                    sort_dir=sort_dir)
+            pecan.request.dbapi.storage_ceph_get_list(
+                limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
 
         return StorageCephCollection \
             .convert_with_links(ceph_storage_backends,
@@ -566,7 +566,7 @@ def _apply_backend_changes(op, sb_obj):
     services = api_helper.getListFromServices(sb_obj.as_dict())
     # Make sure img_conversion partition is present
     if (constants.SB_SVC_CINDER in services or
-         constants.SB_SVC_GLANCE in services):
+            constants.SB_SVC_GLANCE in services):
         StorageBackendConfig.set_img_conversions_defaults(
             pecan.request.dbapi, controller_fs_api)
 
@@ -1004,8 +1004,8 @@ def _patch(storceph_uuid, patch):
             # Adjust object_gateway if swift is added to the services list
             # rather than added via the object_gateway attribute
             if (constants.SB_SVC_SWIFT in storceph_config.services and
-                  (ostorceph.services and
-                   constants.SB_SVC_SWIFT not in ostorceph.services)):
+                (ostorceph.services and
+                 constants.SB_SVC_SWIFT not in ostorceph.services)):
                 storceph_config.object_gateway = True
                 storceph_config.task = constants.SB_TASK_ADD_OBJECT_GATEWAY
                 object_gateway_install = True
@@ -1032,7 +1032,7 @@ def _patch(storceph_uuid, patch):
             # Semantic checks on new or modified parameters:
             orig_cap = ostorceph.as_dict()['capabilities']
             if constants.CEPH_BACKEND_REPLICATION_CAP in new_cap and \
-                 constants.CEPH_BACKEND_REPLICATION_CAP in orig_cap:
+                    constants.CEPH_BACKEND_REPLICATION_CAP in orig_cap:
 
                 # Currently, the only moment when we allow modification
                 # of ceph storage backend parameters is after the manifests have
@@ -1040,7 +1040,7 @@ def _patch(storceph_uuid, patch):
                 ceph_task = StorageBackendConfig.get_ceph_backend_task(pecan.request.dbapi)
                 ceph_state = StorageBackendConfig.get_ceph_backend_state(pecan.request.dbapi)
                 if ceph_task != constants.SB_TASK_PROVISION_STORAGE and \
-                                ceph_state != constants.SB_STATE_CONFIGURING:
+                        ceph_state != constants.SB_STATE_CONFIGURING:
                     raise wsme.exc.ClientSideError(
                         _("Can not modify ceph replication factor when "
                           "storage backend state is \'%s\' and task is \'%s.\' "
@@ -1062,7 +1062,7 @@ def _patch(storceph_uuid, patch):
                 # Changing ceph replication to a smaller factor
                 # than previously configured is not supported
                 if int(new_cap[constants.CEPH_BACKEND_REPLICATION_CAP]) < \
-                     int(orig_cap[constants.CEPH_BACKEND_REPLICATION_CAP]):
+                        int(orig_cap[constants.CEPH_BACKEND_REPLICATION_CAP]):
                     raise wsme.exc.ClientSideError(
                         _("Can not modify ceph replication factor from %s to "
                           "a smaller value %s. This operation is not supported." %
@@ -1155,7 +1155,7 @@ def _delete(sb_uuid):
         else:
             status = constants.SB_TIER_STATUS_DEFINED
         pecan.request.dbapi.storage_tier_update(tier_obj.id,
-            {'forbackendid': None, 'status': status})
+                                                {'forbackendid': None, 'status': status})
     except exception.StorageTierNotFound as e:
         # Shouldn't happen. Log exception. Try to delete the backend anyway
         LOG.exception(e)

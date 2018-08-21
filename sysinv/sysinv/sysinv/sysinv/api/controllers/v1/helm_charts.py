@@ -66,8 +66,8 @@ class HelmChartsController(rest.RestController):
 
     def validate_name_and_namespace(self, name, namespace):
         if not name:
-                raise wsme.exc.ClientSideError(_(
-                    "Helm-override-update rejected: name must be specified"))
+            raise wsme.exc.ClientSideError(_(
+                "Helm-override-update rejected: name must be specified"))
         if not namespace:
             raise wsme.exc.ClientSideError(_(
                 "Helm-override-update rejected: namespace must be specified"))
@@ -150,7 +150,7 @@ class HelmChartsController(rest.RestController):
 
             # Extract the info we want.
             values = output.split('USER-SUPPLIED VALUES:\n')[1].split(
-                                  '\nCOMPUTED VALUES:')[0]
+                '\nCOMPUTED VALUES:')[0]
         except exception.SysinvException:
             raise
         finally:

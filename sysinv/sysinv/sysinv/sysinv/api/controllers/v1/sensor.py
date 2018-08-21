@@ -520,9 +520,9 @@ class SensorController(rest.RestController):
                 msg = _("HWMON has returned with "
                         "a status of %s, reason: %s, "
                         "recommended action: %s") % (
-                        hwmon_response.get('status'),
-                        hwmon_response.get('reason'),
-                        hwmon_response.get('action'))
+                    hwmon_response.get('status'),
+                    hwmon_response.get('reason'),
+                    hwmon_response.get('action'))
 
                 if force_action:
                     LOG.error(msg)

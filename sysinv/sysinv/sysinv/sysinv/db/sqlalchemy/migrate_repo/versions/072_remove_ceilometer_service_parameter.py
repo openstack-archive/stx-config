@@ -35,7 +35,7 @@ def upgrade(migrate_engine):
                      autoload=True)
 
         ceilometer_metering_time_to_live_delete = sp_t.delete().where(
-             sp_t.c.service == 'ceilometer')
+            sp_t.c.service == 'ceilometer')
         ceilometer_metering_time_to_live_delete.execute()
     return True
 

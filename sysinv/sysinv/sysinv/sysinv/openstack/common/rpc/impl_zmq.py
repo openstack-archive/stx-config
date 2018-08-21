@@ -223,13 +223,13 @@ class ZmqClient(object):
 
         if not envelope:
             self.outq.send(map(bytes,
-                           (msg_id, topic, 'cast', _serialize(data))))
+                               (msg_id, topic, 'cast', _serialize(data))))
             return
 
         rpc_envelope = rpc_common.serialize_msg(data[1], envelope)
         zmq_msg = reduce(lambda x, y: x + y, rpc_envelope.items())
         self.outq.send(map(bytes,
-                       (msg_id, topic, 'impl_zmq_v2', data[0]) + zmq_msg))
+                           (msg_id, topic, 'impl_zmq_v2', data[0]) + zmq_msg))
 
     def close(self):
         self.outq.close()
@@ -237,6 +237,7 @@ class ZmqClient(object):
 
 class RpcContext(rpc_common.CommonRpcContext):
     """Context that supports replying to a rpc.call."""
+
     def __init__(self, **kwargs):
         self.replies = []
         super(RpcContext, self).__init__(**kwargs)

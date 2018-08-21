@@ -51,16 +51,16 @@ from sysinv.common.storage_backend_conf import StorageBackendConfig
 from oslo_config import cfg
 
 journal_opts = [
-                cfg.IntOpt('journal_max_size',
-                           default=10240,
-                           help='Maximum size of a journal.'),
-                cfg.IntOpt('journal_min_size',
-                           default=200,
-                           help='Minimum size of a journal.'),
-                cfg.IntOpt('journal_default_size',
-                           default=400,
-                           help='Default size of a journal.'),
-               ]
+    cfg.IntOpt('journal_max_size',
+               default=10240,
+               help='Maximum size of a journal.'),
+    cfg.IntOpt('journal_min_size',
+               default=200,
+               help='Minimum size of a journal.'),
+    cfg.IntOpt('journal_default_size',
+               default=400,
+               help='Default size of a journal.'),
+]
 
 CONF = cfg.CONF
 CONF.register_opts(journal_opts, 'journal')
@@ -96,7 +96,7 @@ class Storage(base.APIBase):
     "Represent the operational state of the istor"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "This stor's meta data"
 
     forihostid = int
@@ -242,7 +242,7 @@ class StorageController(rest.RestController):
 
         if self._from_ihosts and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         if self._from_tier and not uuid:
             raise exception.InvalidParameterValue(_(
@@ -254,8 +254,8 @@ class StorageController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.storage.get_by_uuid(
-                                        pecan.request.context,
-                                        marker)
+                pecan.request.context,
+                marker)
 
         if self._from_ihosts:
             stors = pecan.request.dbapi.istor_get_by_ihost(uuid, limit,
@@ -289,7 +289,7 @@ class StorageController(rest.RestController):
     @wsme_pecan.wsexpose(StorageCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)
     def detail(self, ihost_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of stors with detail."""
         # NOTE(lucasagomes): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -299,9 +299,9 @@ class StorageController(rest.RestController):
         expand = True
         resource_url = '/'.join(['stors', 'detail'])
         return self._get_stors_collection(ihost_uuid,
-                                               marker, limit,
-                                               sort_key, sort_dir,
-                                               expand, resource_url)
+                                          marker, limit,
+                                          sort_key, sort_dir,
+                                          expand, resource_url)
 
     @wsme_pecan.wsexpose(Storage, types.uuid)
     def get_one(self, stor_uuid):
@@ -313,7 +313,7 @@ class StorageController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_stor = objects.storage.get_by_uuid(
-                                        pecan.request.context, stor_uuid)
+            pecan.request.context, stor_uuid)
         return Storage.convert_with_links(rpc_stor)
 
     @cutils.synchronized(LOCK_NAME)
@@ -356,7 +356,7 @@ class StorageController(rest.RestController):
 
         try:
             rpc_stor = objects.storage.get_by_uuid(
-                           pecan.request.context, stor_uuid)
+                pecan.request.context, stor_uuid)
         except exception.ServerNotFound:
             raise wsme.exc.ClientSideError(_("No stor with the provided"
                                              " uuid: %s" % stor_uuid))
@@ -377,8 +377,8 @@ class StorageController(rest.RestController):
 
         try:
             stor = Storage(**jsonpatch.apply_patch(
-                                               rpc_stor.as_dict(),
-                                               patch_obj))
+                rpc_stor.as_dict(),
+                patch_obj))
 
         except utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
@@ -455,8 +455,8 @@ class StorageController(rest.RestController):
             self.delete_stor(stor_uuid)
         else:
             raise wsme.exc.ClientSideError(_(
-                    "Deleting a Storage Function other than %s is not "
-                    "supported on this setup") % constants.STOR_FUNCTION_JOURNAL)
+                "Deleting a Storage Function other than %s is not "
+                "supported on this setup") % constants.STOR_FUNCTION_JOURNAL)
 
     def delete_stor(self, stor_uuid):
         """Delete a stor"""
@@ -548,9 +548,9 @@ def _check_disk(stor):
     # semantic check: whether idisk is a rootfs disk
     capabilities = idisk['capabilities']
     if ('stor_function' in capabilities and
-         capabilities['stor_function'] == 'rootfs'):
-            raise wsme.exc.ClientSideError(_(
-                "Can not associate to a rootfs disk"))
+            capabilities['stor_function'] == 'rootfs'):
+        raise wsme.exc.ClientSideError(_(
+            "Can not associate to a rootfs disk"))
 
     return idisk_uuid
 
@@ -619,10 +619,10 @@ def _check_journal_location(journal_location, stor, action):
                 available_journals = ""
                 for stor_obj in existing_journal_stors:
                     available_journals = (available_journals +
-                                         stor_obj.uuid + "\n")
+                                          stor_obj.uuid + "\n")
                 raise wsme.exc.ClientSideError(_(
-                      "Multiple journal stors are available. Choose from:\n%s"
-                      % available_journals))
+                    "Multiple journal stors are available. Choose from:\n%s"
+                    % available_journals))
             elif len(existing_journal_stors) == 1:
                 journal_location = existing_journal_stors[0].uuid
             elif len(existing_journal_stors) == 0:
@@ -866,7 +866,7 @@ def _create(stor, iprofile=None, create_pv=True):
             # stor['uuid'], since sometimes we get the UUID of the newly
             # created stor late, we can only set it late.
             journal_location = stor['journal_location'] if \
-                                stor.get('journal_location') else new_stor['uuid']
+                stor.get('journal_location') else new_stor['uuid']
         new_journal = _create_journal(journal_location,
                                       stor['journal_size_mib'],
                                       new_stor)

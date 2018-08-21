@@ -79,6 +79,7 @@ class ContextHook(hooks.PecanHook):
         or admin substring. Otherwise it is set to False.
 
     """
+
     def __init__(self, public_api_routes):
         self.public_api_routes = public_api_routes
         super(ContextHook, self).__init__()
@@ -122,6 +123,7 @@ class AdminAuthHook(hooks.PecanHook):
     rejects the request otherwise.
 
     """
+
     def before(self, state):
         ctx = state.request.context
         is_admin_api = policy.check('admin_api', {}, ctx.to_dict())
@@ -142,6 +144,7 @@ class NoExceptionTracebackHook(hooks.PecanHook):
     # 'on_error' never fired for wsme+pecan pair. wsme @wsexpose decorator
     # catches and handles all the errors, so 'on_error' dedicated for unhandled
     # exceptions never fired.
+
     def after(self, state):
         # Omit empty body. Some errors may not have body at this level yet.
         if not state.response.body:
@@ -253,19 +256,19 @@ class AuditLogging(hooks.PecanHook):
                                json_post_data(state))
 
         log_data = "{} \"{} {} {}\" status: {} len: {} time: {}{} host:{} agent:{} user: {} tenant: {} domain: {}".format(
-                                                      state.request.remote_addr,
-                                                      state.request.method,
-                                                      url_path,
-                                                      server_protocol,
-                                                      state.response.status_int,
-                                                      response_content_length,
-                                                      elapsed,
-                                                      filtered_json,
-                                                      state.request.host,
-                                                      state.request.user_agent,
-                                                      user_name,
-                                                      tenant,
-                                                      domain_name)
+            state.request.remote_addr,
+            state.request.method,
+            url_path,
+            server_protocol,
+            state.response.status_int,
+            response_content_length,
+            elapsed,
+            filtered_json,
+            state.request.host,
+            state.request.user_agent,
+            user_name,
+            tenant,
+            domain_name)
 
         # The following ctx object will be output in the logger as
         # something like this:
@@ -404,7 +407,7 @@ class DBTransactionHook(hooks.PecanHook):
 
     def rollback_transaction(self, state):
         if (hasattr(state.request.context, 'session') and
-           state.request.context.session):
+                state.request.context.session):
             session = state.request.context.session
             session.rollback()
             LOG.info("rollback_transaction %s" % session)
@@ -412,7 +415,7 @@ class DBTransactionHook(hooks.PecanHook):
 
     def clear(self, state):
         if (hasattr(state.request.context, 'session') and
-           state.request.context.session):
+                state.request.context.session):
             session = state.request.context.session
             session.remove()
         return

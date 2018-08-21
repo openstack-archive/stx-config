@@ -112,21 +112,21 @@ class RemoteLogging(base.APIBase):
         remotelogging = RemoteLogging(**rpc_remotelogging.as_dict())
         if not expand:
             remotelogging.unset_fields_except(['uuid',
-                                     'ip_address',
-                                     'enabled',
-                                     'transport',
-                                     'port',
-                                     'key_file',
-                                     'isystem_uuid',
-                                     'created_at',
-                                     'updated_at'])
+                                               'ip_address',
+                                               'enabled',
+                                               'transport',
+                                               'port',
+                                               'key_file',
+                                               'isystem_uuid',
+                                               'created_at',
+                                               'updated_at'])
 
         remotelogging.links = [link.Link.make_link('self', pecan.request.host_url,
-                                         'remoteloggings', remotelogging.uuid),
+                                                   'remoteloggings', remotelogging.uuid),
                                link.Link.make_link('bookmark',
-                                         pecan.request.host_url,
-                                         'remoteloggings', remotelogging.uuid,
-                                         bookmark=True)
+                                                   pecan.request.host_url,
+                                                   'remoteloggings', remotelogging.uuid,
+                                                   bookmark=True)
                                ]
 
         return remotelogging
@@ -146,7 +146,7 @@ class RemoteLoggingCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = RemoteLoggingCollection()
         collection.remoteloggings = [RemoteLogging.convert_with_links(p, expand)
-                            for p in remoteloggings]
+                                     for p in remoteloggings]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -160,14 +160,14 @@ def _check_remotelogging_data(op, remotelogging):
 
     # Validate ip_address
     if ip_address:
-            try:
-                IPAddress(ip_address)
+        try:
+            IPAddress(ip_address)
 
-            except (AddrFormatError, ValueError):
-                raise wsme.exc.ClientSideError(_(
-                        "Invalid remote logging server %s "
-                        "Please configure a valid "
-                        "IP address.") % (ip_address))
+        except (AddrFormatError, ValueError):
+            raise wsme.exc.ClientSideError(_(
+                "Invalid remote logging server %s "
+                "Please configure a valid "
+                "IP address.") % (ip_address))
 
     else:
         raise wsme.exc.ClientSideError(_("No remote logging provided."))
@@ -197,7 +197,7 @@ class RemoteLoggingController(rest.RestController):
     }
 
     def _get_remoteloggings_collection(self, marker, limit, sort_key,
-                             sort_dir, expand=False, resource_url=None):
+                                       sort_dir, expand=False, resource_url=None):
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -205,12 +205,12 @@ class RemoteLoggingController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.remotelogging.get_by_uuid(pecan.request.context,
-                                                  marker)
+                                                           marker)
 
         remoteloggings = pecan.request.dbapi.remotelogging_get_list(limit,
-                                                    marker_obj,
-                                                     sort_key=sort_key,
-                                                     sort_dir=sort_dir)
+                                                                    marker_obj,
+                                                                    sort_key=sort_key,
+                                                                    sort_dir=sort_dir)
 
         return RemoteLoggingCollection.convert_with_links(remoteloggings,
                                                           limit,
@@ -283,7 +283,7 @@ class RemoteLoggingController(rest.RestController):
 
         try:
             remotelogging = RemoteLogging(**jsonpatch.apply_patch(rpc_remotelogging.as_dict(),
-                                               patch_obj))
+                                                                  patch_obj))
 
         except utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)

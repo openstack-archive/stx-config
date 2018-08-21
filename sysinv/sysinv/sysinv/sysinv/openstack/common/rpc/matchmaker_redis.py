@@ -59,6 +59,7 @@ class RedisTopicExchange(RedisExchange):
     Exchange where all topic keys are split, sending to second half.
     i.e. "compute.host" sends a message to "compute" running on "host"
     """
+
     def run(self, topic):
         while True:
             member_name = self.redis.srandmember(topic)
@@ -80,6 +81,7 @@ class RedisFanoutExchange(RedisExchange):
     """
     Return a list of all hosts.
     """
+
     def run(self, topic):
         topic = topic.split('~', 1)[1]
         hosts = self.redis.smembers(topic)
@@ -93,6 +95,7 @@ class MatchMakerRedis(mm_common.HeartbeatMatchMakerBase):
     """
     MatchMaker registering and looking-up hosts with a Redis server.
     """
+
     def __init__(self):
         super(MatchMakerRedis, self).__init__()
 

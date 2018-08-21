@@ -26,22 +26,22 @@ class InfraNetwork(base.SysinvObject):
     dbapi = db_api.get_instance()
 
     fields = {
-            'id': int,
-            'uuid': utils.str_or_none,
-            'forisystemid': utils.int_or_none,
-            'isystem_uuid': utils.str_or_none,
+        'id': int,
+        'uuid': utils.str_or_none,
+        'forisystemid': utils.int_or_none,
+        'isystem_uuid': utils.str_or_none,
 
-            'infra_subnet': utils.str_or_none,
-            'infra_start': utils.str_or_none,
-            'infra_end': utils.str_or_none,
-            'infra_mtu': utils.str_or_none,
-            'infra_vlan_id': utils.str_or_none,
+        'infra_subnet': utils.str_or_none,
+        'infra_start': utils.str_or_none,
+        'infra_end': utils.str_or_none,
+        'infra_mtu': utils.str_or_none,
+        'infra_vlan_id': utils.str_or_none,
 
-            'infra_c0_ip': utils.str_or_none,
-            'infra_c1_ip': utils.str_or_none,
-            'infra_nfs_ip': utils.str_or_none,
-            'infra_cinder_ip': utils.str_or_none,
-             }
+        'infra_c0_ip': utils.str_or_none,
+        'infra_c1_ip': utils.str_or_none,
+        'infra_nfs_ip': utils.str_or_none,
+        'infra_cinder_ip': utils.str_or_none,
+    }
 
     # NOTE: names must match those assigned by config_controller
     address_names = {

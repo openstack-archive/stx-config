@@ -70,7 +70,7 @@ class Node(base.APIBase):
     "numa node zone for this inode"
 
     capabilities = {wtypes.text: utils.ValidTypes(wtypes.text,
-                    six.integer_types)}
+                                                  six.integer_types)}
     "This node's meta data"
 
     forihostid = int
@@ -128,29 +128,29 @@ class Node(base.APIBase):
                                               pecan.request.host_url,
                                               'inodes',
                                               node.uuid + "/icpus"),
-                              link.Link.make_link('bookmark',
-                                                  pecan.request.host_url,
-                                                  'inodes',
-                                                  node.uuid + "/icpus",
-                                                  bookmark=True)
+                          link.Link.make_link('bookmark',
+                                              pecan.request.host_url,
+                                              'inodes',
+                                              node.uuid + "/icpus",
+                                              bookmark=True)
                           ]
 
             node.imemorys = [link.Link.make_link('self',
-                                              pecan.request.host_url,
-                                              'inodes',
-                                              node.uuid + "/imemorys"),
-                              link.Link.make_link('bookmark',
-                                                  pecan.request.host_url,
-                                                  'inodes',
-                                                  node.uuid + "/imemorys",
-                                                  bookmark=True)
+                                                 pecan.request.host_url,
+                                                 'inodes',
+                                                 node.uuid + "/imemorys"),
+                             link.Link.make_link('bookmark',
+                                                 pecan.request.host_url,
+                                                 'inodes',
+                                                 node.uuid + "/imemorys",
+                                                 bookmark=True)
                              ]
 
             node.ports = [link.Link.make_link('self',
                                               pecan.request.host_url,
                                               'inodes',
                                               node.uuid + "/ports"),
-                              link.Link.make_link('bookmark',
+                          link.Link.make_link('bookmark',
                                               pecan.request.host_url,
                                               'inodes',
                                               node.uuid + "/ports",
@@ -205,7 +205,7 @@ class NodeController(rest.RestController):
                               sort_dir, expand=False, resource_url=None):
         if self._from_ihosts and not ihost_uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -243,7 +243,7 @@ class NodeController(rest.RestController):
     @wsme_pecan.wsexpose(NodeCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)
     def detail(self, ihost_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of nodes with detail."""
         # NOTE(lucasagomes): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -253,9 +253,9 @@ class NodeController(rest.RestController):
         expand = True
         resource_url = '/'.join(['nodes', 'detail'])
         return self._get_nodes_collection(ihost_uuid,
-                                               marker, limit,
-                                               sort_key, sort_dir,
-                                               expand, resource_url)
+                                          marker, limit,
+                                          sort_key, sort_dir,
+                                          expand, resource_url)
 
     @wsme_pecan.wsexpose(Node, types.uuid)
     def get_one(self, node_uuid):
@@ -288,7 +288,7 @@ class NodeController(rest.RestController):
             LOG.debug("inode post nodes ihostid: %s" % forihostid)
 
             new_node = pecan.request.dbapi.inode_create(
-                                  forihostid, node)
+                forihostid, node)
 
         except exception.SysinvException as e:
             LOG.exception(e)
@@ -305,7 +305,7 @@ class NodeController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_node = objects.node.get_by_uuid(
-                       pecan.request.context, node_uuid)
+            pecan.request.context, node_uuid)
 
         # replace ihost_uuid and inode_uuid with corresponding
         patch_obj = jsonpatch.JsonPatch(patch)
@@ -318,8 +318,8 @@ class NodeController(rest.RestController):
 
         try:
             node = Node(**jsonpatch.apply_patch(
-                                               rpc_node.as_dict(),
-                                               patch_obj))
+                rpc_node.as_dict(),
+                patch_obj))
 
         except utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)

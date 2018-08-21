@@ -31,6 +31,7 @@ class Service(service.Service):
     """Service object for binaries running on hosts.
 
     A service enables rpc by listening to queues based on topic and host."""
+
     def __init__(self, host, topic, manager=None, serializer=None):
         super(Service, self).__init__()
         self.host = host

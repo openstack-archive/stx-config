@@ -36,7 +36,7 @@ class MuranoPuppet(openstack.OpenstackBasePuppet):
 
     def get_system_config(self):
         ksuser = self._get_service_user_name(self.SERVICE_NAME) \
-                 + self._region_name()
+            + self._region_name()
         config = {
             'openstack::murano::params::service_enabled':
                 self._get_service_enabled(),

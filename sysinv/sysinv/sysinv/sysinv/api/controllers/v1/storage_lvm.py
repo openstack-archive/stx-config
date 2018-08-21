@@ -182,7 +182,7 @@ class StorageLVMController(rest.RestController):
     }
 
     def _get_storage_lvm_collection(self, marker, limit, sort_key, sort_dir,
-                                     expand=False, resource_url=None):
+                                    expand=False, resource_url=None):
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
@@ -194,11 +194,11 @@ class StorageLVMController(rest.RestController):
                 marker)
 
         lvm_storage_backends = \
-                pecan.request.dbapi.storage_lvm_get_list(
-                    limit,
-                    marker_obj,
-                    sort_key=sort_key,
-                    sort_dir=sort_dir)
+            pecan.request.dbapi.storage_lvm_get_list(
+                limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
 
         return StorageLVMCollection \
             .convert_with_links(lvm_storage_backends,
@@ -214,7 +214,7 @@ class StorageLVMController(rest.RestController):
         """Retrieve a list of lvm storage backends."""
 
         return self._get_storage_lvm_collection(marker, limit, sort_key,
-                                                 sort_dir)
+                                                sort_dir)
 
     @wsme_pecan.wsexpose(StorageLVM, types.uuid)
     def get_one(self, storage_lvm_uuid):
@@ -660,8 +660,8 @@ def _delete(sb_uuid):
 
     # Run the backend specific semantic checks
     _check_backend_lvm(constants.SB_API_OP_DELETE,
-                        storage_lvm_obj.as_dict(),
-                        True)
+                       storage_lvm_obj.as_dict(),
+                       True)
 
     # Enable the backend changes:
     _apply_backend_changes(constants.SB_API_OP_DELETE, storage_lvm_obj)

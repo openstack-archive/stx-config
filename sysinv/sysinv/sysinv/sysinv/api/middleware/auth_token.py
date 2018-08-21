@@ -32,6 +32,7 @@ class AuthTokenMiddleware(auth_token.AuthProtocol):
     for public routes in the API.
 
     """
+
     def __init__(self, app, conf, public_api_routes=[]):
         self._sysinv_app = app
         route_pattern_tpl = '%s(\.json|\.xml)?$'

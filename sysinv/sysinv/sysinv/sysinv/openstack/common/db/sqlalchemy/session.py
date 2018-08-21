@@ -277,7 +277,7 @@ database_opts = [
     cfg.StrOpt('connection',
                default='sqlite:///' +
                        os.path.abspath(os.path.join(os.path.dirname(__file__),
-                       '../', '$sqlite_db')),
+                                                    '../', '$sqlite_db')),
                help='The SQLAlchemy connection string used to connect to the '
                     'database',
                deprecated_name='sql_connection',
@@ -369,6 +369,7 @@ class SqliteForeignKeysListener(PoolListener):
     so the foreign key constraints will be enabled here for every
     database connection
     """
+
     def connect(self, dbapi_con, con_record):
         dbapi_con.execute('pragma foreign_keys=ON')
 
@@ -631,6 +632,7 @@ def create_engine(sql_connection, sqlite_fk=False):
 
 class Query(sqlalchemy.orm.query.Query):
     """Subclass of sqlalchemy.query with soft_delete() method."""
+
     def soft_delete(self, synchronize_session='evaluate'):
         return self.update({'deleted': literal_column('id'),
                             'updated_at': literal_column('updated_at'),
@@ -666,11 +668,11 @@ def get_maker(engine, autocommit=True, expire_on_commit=False):
     if _MAKER is None:
         scopefunc = get_thread_id()
         _MAKER = sqlalchemy.orm.scoped_session(sqlalchemy.orm.sessionmaker(bind=engine,
-                                       class_=Session,
-                                       autocommit=autocommit,
-                                       expire_on_commit=expire_on_commit,
-                                       query_cls=Query),
-                                       scopefunc=get_thread_id)
+                                                                           class_=Session,
+                                                                           autocommit=autocommit,
+                                                                           expire_on_commit=expire_on_commit,
+                                                                           query_cls=Query),
+                                               scopefunc=get_thread_id)
 
         LOG.info("get_maker greenthread current_thread=%s session=%s "
                  "autocommit=%s, scopefunc=%s" %

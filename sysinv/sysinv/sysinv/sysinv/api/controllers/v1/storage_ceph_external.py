@@ -290,8 +290,8 @@ class StorageCephExternalController(rest.RestController):
         except Exception as e:
             LOG.exception(e)
             return dict(
-                    success="",
-                    error=e.value)
+                success="",
+                error=e.value)
 
         return dict(success="Success: ceph config file is uploaded", error="")
 
@@ -396,7 +396,7 @@ def _check_backend_ceph_external(storage_ceph_ext):
 
 def _apply_ceph_external_backend_changes(op, sb_obj, orig_sb_obj=None):
     if ((op == constants.SB_API_OP_CREATE) or
-           (op == constants.SB_API_OP_MODIFY and
+        (op == constants.SB_API_OP_MODIFY and
             sb_obj.get('ceph_conf') != orig_sb_obj.get('ceph_conf'))):
 
         values = {'task': constants.SB_TASK_APPLY_CONFIG_FILE}
@@ -413,9 +413,9 @@ def _apply_ceph_external_backend_changes(op, sb_obj, orig_sb_obj=None):
         services = api_helper.getListFromServices(sb_obj)
 
         pecan.request.rpcapi.update_ceph_external_config(
-                                                pecan.request.context,
-                                                sb_obj.get('uuid'),
-                                                services)
+            pecan.request.context,
+            sb_obj.get('uuid'),
+            services)
     elif op == constants.SB_API_OP_DELETE:
         msg = _("Delete a Ceph external backend is not supported currently.")
         raise wsme.exc.ClientSideError(msg)
@@ -430,9 +430,9 @@ def _apply_ceph_external_backend_changes(op, sb_obj, orig_sb_obj=None):
                     services.append(svc)
 
         pecan.request.rpcapi.update_ceph_external_config(
-                                                pecan.request.context,
-                                                sb_obj.get('uuid'),
-                                                services)
+            pecan.request.context,
+            sb_obj.get('uuid'),
+            services)
 
 
 def _set_defaults_ceph_external(storage_ceph_ext):

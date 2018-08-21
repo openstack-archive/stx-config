@@ -134,10 +134,10 @@ class PCIDevice(base.APIBase):
 
         device.links = [link.Link.make_link('self', pecan.request.host_url,
                                             'pci_devices', device.uuid),
-                      link.Link.make_link('bookmark',
-                                          pecan.request.host_url,
-                                          'pci_devices', device.uuid,
-                                          bookmark=True)
+                        link.Link.make_link('bookmark',
+                                            pecan.request.host_url,
+                                            'pci_devices', device.uuid,
+                                            bookmark=True)
                         ]
         return device
 
@@ -175,36 +175,36 @@ class PCIDeviceController(rest.RestController):
         self._from_ihosts = from_ihosts
 
     def _get_pci_devices_collection(self, uuid, marker, limit, sort_key,
-                                sort_dir, expand=False, resource_url=None):
+                                    sort_dir, expand=False, resource_url=None):
         if self._from_ihosts and not uuid:
             raise exception.InvalidParameterValue(_(
-                  "Host id not specified."))
+                "Host id not specified."))
 
         limit = utils.validate_limit(limit)
         sort_dir = utils.validate_sort_dir(sort_dir)
         marker_obj = None
         if marker:
             marker_obj = objects.pci_device.get_by_uuid(
-                                        pecan.request.context,
-                                        marker)
+                pecan.request.context,
+                marker)
         if self._from_ihosts:
             devices = pecan.request.dbapi.pci_device_get_by_host(
-                                                    uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                uuid, limit,
+                marker_obj,
+                sort_key=sort_key,
+                sort_dir=sort_dir)
         else:
             if uuid:
                 devices = pecan.request.dbapi.pci_device_get_by_host(
-                                                    uuid, limit,
-                                                    marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    uuid, limit,
+                    marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
             else:
                 devices = pecan.request.dbapi.pci_device_get_list(
-                                                    limit, marker_obj,
-                                                    sort_key=sort_key,
-                                                    sort_dir=sort_dir)
+                    limit, marker_obj,
+                    sort_key=sort_key,
+                    sort_dir=sort_dir)
 
         return PCIDeviceCollection.convert_with_links(devices, limit,
                                                       url=resource_url,
@@ -218,7 +218,7 @@ class PCIDeviceController(rest.RestController):
                 sort_key='id', sort_dir='asc'):
         """Retrieve a list of devices."""
         return self._get_pci_devices_collection(uuid,
-                                          marker, limit, sort_key, sort_dir)
+                                                marker, limit, sort_key, sort_dir)
 
     @wsme_pecan.wsexpose(PCIDeviceCollection, types.uuid, types.uuid, int,
                          wtypes.text, wtypes.text)
