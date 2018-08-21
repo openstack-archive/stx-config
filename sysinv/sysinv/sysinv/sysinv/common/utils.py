@@ -938,7 +938,7 @@ def is_virtual_compute(ihost):
 def is_low_core_system(ihost, dba):
     """
     Determine if the hosts core count is less than or equal to a xeon-d cpu
-    used with get_required_platform_reserved_memory to set the the required
+    used with get_required_platform_reserved_memory to set the required
     platform memory for xeon-d systems
     """
     cpu_list = dba.icpu_get_by_ihost(ihost['uuid'])
