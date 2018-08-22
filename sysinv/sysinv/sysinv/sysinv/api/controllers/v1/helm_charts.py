@@ -87,7 +87,9 @@ class HelmChartsController(rest.RestController):
         try:
             db_chart = objects.helm_overrides.get_by_name(
                 pecan.request.context, name, namespace)
-            db_values = db_chart.user_overrides
+            # The following line is necessary as we are checking to
+            # see if it throws an exception
+            db_values = db_chart.user_overrides  # noqa
         except exception.HelmOverrideNotFound:
             if name in SYSTEM_CHARTS:
                 pecan.request.dbapi.helm_override_create({
