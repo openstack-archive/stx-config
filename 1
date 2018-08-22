@@ -1,0 +1,67 @@
+Implementation of PTP support in SysInv and Puppet
+
+Precision Time Protocol (PTP) support is added to StarlingX.
+Controller Nodes act as a Boundary Clocks and synchronize its clock to a
+Grand Master clock via OAM interface. Serve as a time source to other nodes.
+Compute/Storage Nodes are Slave Clocks (Ordinary Clocks) and synchronize
+its clock to a Controller Nodes via Management interface.
+API is provided to enable and configure PTP as follows:
+"system ptp-modify --enabled=<true/false>" is there to turn it on/off.
+Note that NTP must be disabled first before turning PTP service on.
+"system ptp-modify --mode=<hardware/software/legacy>" selects time stamping.
+Hardware timestamping is the default option and achieves best time syncing.
+"system ptp-modify --transport=<l2,udp>" switches between IEEE 802.3 or UDP
+network transport for PTP messaging. L2 is the default transport.
+"system ptp-modify --mechanism=<e2e,p2p>" sets the PTP delay mechanism.
+Options: default delay request-response (E2E) mechanism and peer delay (P2P).
+"system ptp-show" displays the current status of PTP service.
+
+Change-Id: I6bb6162903c70a49b55f4fc02b44e5ca8a66d5a5
+Story: 2002935
+Task: 22923
+Signed-off-by: Alex Kozyrev <alex.kozyrev@windriver.com>
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# HEAD detached from 5354843
+# You are currently editing a commit while rebasing branch 'ptp' on '5354843'.
+#
+# Changes to be committed:
+#   (use "git reset HEAD^1 <file>..." to unstage)
+#
+#	modified:   puppet-manifests/src/manifests/compute.pp
+#	modified:   puppet-manifests/src/manifests/controller.pp
+#	modified:   puppet-manifests/src/manifests/storage.pp
+#	modified:   puppet-manifests/src/modules/platform/manifests/firewall.pp
+#	new file:   puppet-manifests/src/modules/platform/manifests/ptp.pp
+#	modified:   puppet-manifests/src/modules/platform/templates/ntp.conf.client.erb
+#	modified:   puppet-manifests/src/modules/platform/templates/ntp.conf.server.erb
+#	new file:   puppet-manifests/src/modules/platform/templates/phc2sys.erb
+#	new file:   puppet-manifests/src/modules/platform/templates/phc2sys.pmon.conf.erb
+#	new file:   puppet-manifests/src/modules/platform/templates/phc2sys.service.erb
+#	new file:   puppet-manifests/src/modules/platform/templates/ptp4l.conf.erb
+#	new file:   puppet-manifests/src/modules/platform/templates/ptp4l.erb
+#	new file:   puppet-manifests/src/modules/platform/templates/ptp4l.pmon.conf.erb
+#	new file:   puppet-manifests/src/modules/platform/templates/ptp4l.service.erb
+#	modified:   sysinv/cgts-client/centos/build_srpm.data
+#	modified:   sysinv/cgts-client/cgts-client/cgtsclient/common/utils.py
+#	modified:   sysinv/cgts-client/cgts-client/cgtsclient/v1/client.py
+#	new file:   sysinv/cgts-client/cgts-client/cgtsclient/v1/ptp.py
+#	new file:   sysinv/cgts-client/cgts-client/cgtsclient/v1/ptp_shell.py
+#	modified:   sysinv/cgts-client/cgts-client/cgtsclient/v1/shell.py
+#	modified:   sysinv/sysinv/centos/build_srpm.data
+#	modified:   sysinv/sysinv/sysinv/sysinv/api/controllers/v1/__init__.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/api/controllers/v1/ntp.py
+#	new file:   sysinv/sysinv/sysinv/sysinv/api/controllers/v1/ptp.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/common/exception.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/conductor/manager.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/conductor/rpcapi.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/db/api.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/db/sqlalchemy/api.py
+#	new file:   sysinv/sysinv/sysinv/sysinv/db/sqlalchemy/migrate_repo/versions/075_ptp.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/db/sqlalchemy/models.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/objects/__init__.py
+#	new file:   sysinv/sysinv/sysinv/sysinv/objects/ptp.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/puppet/platform.py
+#	modified:   sysinv/sysinv/sysinv/sysinv/tests/db/sqlalchemy/test_migrations.py
+#
