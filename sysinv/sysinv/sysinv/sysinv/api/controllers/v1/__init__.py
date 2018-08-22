@@ -53,6 +53,7 @@ from sysinv.api.controllers.v1 import partition
 from sysinv.api.controllers.v1 import pci_device
 from sysinv.api.controllers.v1 import port
 from sysinv.api.controllers.v1 import profile
+from sysinv.api.controllers.v1 import ptp
 from sysinv.api.controllers.v1 import pv
 from sysinv.api.controllers.v1 import remotelogging
 from sysinv.api.controllers.v1 import route
@@ -136,6 +137,9 @@ class V1(base.APIBase):
 
     intp = [link.Link]
     "Links to the intp resource"
+
+    ptp = [link.Link]
+    "Links to the ptp resource"
 
     iextoam = [link.Link]
     "Links to the iextoam resource"
@@ -401,6 +405,14 @@ class V1(base.APIBase):
                                            'intp', '',
                                            bookmark=True)
                    ]
+
+        v1.ptp = [link.Link.make_link('self', pecan.request.host_url,
+                                      'ptp', ''),
+                  link.Link.make_link('bookmark',
+                                      pecan.request.host_url,
+                                      'ptp', '',
+                                      bookmark=True)
+                  ]
 
         v1.iextoam = [link.Link.make_link('self', pecan.request.host_url,
                                           'iextoam', ''),
@@ -717,6 +729,7 @@ class Controller(rest.RestController):
     iuser = user.UserController()
     idns = dns.DNSController()
     intp = ntp.NTPController()
+    ptp = ptp.PTPController()
     iextoam = network_oam.OAMNetworkController()
     controller_fs = controller_fs.ControllerFsController()
     storage_backend = storage_backend.StorageBackendController()
