@@ -174,8 +174,45 @@ function install_controllerconfig {
 
 function install_fm_api {
     git_clone $STXFAULT_REPO $STXFAULT_DIR $STXFAULT_BRANCH
+    install_fm_common
     pushd $STXFAULT_DIR/fm-api
-    sudo python setup.py install --root=/ --install-lib=$PYTHON_SITE_DIR --prefix=/usr --install-data=/usr/share --single-version-externally-managed
+    sudo python setup.py install \
+        --root=/ \
+        --install-lib=$PYTHON_SITE_DIR \
+        --prefix=/usr \
+        --install-data=/usr/share \
+        --single-version-externally-managed
+    popd
+}
+
+function install_fm_common {
+    local version
+
+    pushd $STXFAULT_DIR/fm-common/sources
+    # get fm version
+    read x version <<< $(grep '^Version: ' $STXFAULT_DIR/fm-common/PKG-INFO)
+    MAJOR=${version%%.*}
+    MINOR=${version##*.}
+
+    # build
+    make MAJOR=$MAJOR MINOR=$MINOR
+    sudo python setup.py build
+
+    # install
+    make DEST_DIR=$STXFAULT_DIR/build MAJOR=$MAJOR MINOR=$MINOR install_non_bb
+
+    sudo python setup.py install \
+        --root=/ \
+        --install-lib=$PYTHON_SITE_DIR \
+        --prefix=/usr \
+        --install-data=/usr/share \
+
+    install -d /usr/bin
+    install -m 755 fm_db_sync_event_suppression.py /usr/bin/fm_db_sync_event_suppression.py
+
+    # install the headers that used by fm-mgr package
+#    install -m 644 -p -D fmConfig.h %{buildroot}%{_includedir}/fmConfig.h
+#    install -m 644 -p -D fmLog.h %{buildroot}%{_includedir}/fmLog.h
     popd
 }
 
