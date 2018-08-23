@@ -108,3 +108,15 @@
     vars:
       tox_envlist: flake8
       tox_extra_args: -c configutilities/configutilities/tox.ini
+
+- job:
+    name: stx-devstack-config
+    parent: stx-devstack-base
+    timeout: 7800
+    required-projects:
+      - openstack/stx-fault
+    vars:
+      tox_envlist: functional
+      devstack_plugins:
+        stx-fault: git://git.starlingx.io/stx-fault
+        stx-config: git://git.starlingx.io/stx-config

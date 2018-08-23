@@ -12,8 +12,8 @@
 #
 echo_summary "sysinv devstack plugin.sh called: $1/$2"
 source $DEST/stx-config/devstack/lib/stx-config
-# check for service enabled
 
+# check for service enabled
 if is_service_enabled sysinv-api sysinv-cond; then
     if [[ "$1" == "stack" && "$2" == "install" ]]; then
         # Perform installation of sysinv source

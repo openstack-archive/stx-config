@@ -10,6 +10,7 @@
 # - ``SERVICE_{TENANT_NAME|PASSWORD}`` must be defined
 # - ``SERVICE_HOST``
 # - ``KEYSTONE_TOKEN_FORMAT`` must be defined
+# - The stx-fault plugin must be enabled
 
 # ``stack.sh`` calls the entry points in this order:
 #
@@ -40,13 +41,8 @@ STXCONFIG_CONFUTILS=$DEST/stx-config/configutilities/configutilities
 GITDIR["tsconfig"]=$STXUPDATE_DIR/tsconfig/tsconfig/
 TSCONFIG_DIR=$STXUPDATE_DIR/tsconfig/
 CGCS_PATCH_DIR=$STXUPDATE_DIR/cgcs-patch/
-STXFAULT_REPO=${STXFAULT_REPO:-${GIT_BASE}/openstack/stx-fault.git}
-STXFAULT_DIR=$DEST/stx-fault
-STXFAULT_BRANCH=${STXFAULT_BRANCH:-master}
 STXUTILS_PLATFORM_DIR=$STXUTILS_DIR/middleware/util/recipes-common/platform-util
 STXUTILS_BRANCH=${STXUTILS_BRANCH:-master}
-GITDIR["fm-api"]=$STXFAULT_DIR/fm-api
-#TSCONFIG_DIR=$STXFAULT_DIR/tsconfig
 SYSINV_SERVICE_PROTOCOL=${SYSINV_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 SYSINV_SERVICE_PORT=${SYSINV_SERVICE_PORT:-6385}
 SYSINV_SERVICE_HOST=${SYSINV_SERVICE_HOST:-$SERVICE_HOST}
@@ -172,13 +168,6 @@ function install_controllerconfig {
     popd
 }
 
-function install_fm_api {
-    git_clone $STXFAULT_REPO $STXFAULT_DIR $STXFAULT_BRANCH
-    pushd $STXFAULT_DIR/fm-api
-    sudo python setup.py install --root=/ --install-lib=$PYTHON_SITE_DIR --prefix=/usr --install-data=/usr/share --single-version-externally-managed
-    popd
-}
-
 function install_sysinv {
     local req_services="key rabbit nova neutron"
     for srv in $req_services;do
@@ -211,7 +200,6 @@ function install_sysinv_depends {
     install_configutilities
     install_controllerconfig
     install_tsconfig
-    install_fm_api
 }
 
 function install_tsconfig {
