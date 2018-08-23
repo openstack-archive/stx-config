@@ -172,10 +172,66 @@ function install_controllerconfig {
     popd
 }
 
-function install_fm_api {
+function install_fault {
     git_clone $STXFAULT_REPO $STXFAULT_DIR $STXFAULT_BRANCH
+    install_fm_common
+    install_fm_api
+}
+
+function install_fm_api {
     pushd $STXFAULT_DIR/fm-api
-    sudo python setup.py install --root=/ --install-lib=$PYTHON_SITE_DIR --prefix=/usr --install-data=/usr/share --single-version-externally-managed
+    sudo python setup.py install \
+        --root=/ \
+        --install-lib=$PYTHON_SITE_DIR \
+        --prefix=/usr \
+        --install-data=/usr/share \
+        --single-version-externally-managed
+    popd
+}
+
+function install_fm_common {
+    local x version
+
+    # get fm version
+    read x version <<< $(grep '^Version: ' $STXFAULT_DIR/fm-common/PKG-INFO)
+    local major=${version%%.*}
+    local minor=${version##*.}
+
+    # Set up the destinations
+    # Making an assumption here about SYSINV_BIN_DIR having ../include be valid
+    local prefix=${SYSINV_BIN_DIR%/*}
+
+    # build
+    pushd $STXFAULT_DIR/fm-common/sources
+    make MAJOR=$major MINOR=$minor
+    sudo python setup.py build
+
+    # install
+    sudo make \
+        DEST_DIR=$prefix \
+        BIN_DIR=/bin \
+        LIB_DIR=/lib \
+        INC_DIR=/include \
+        MAJOR=$major \
+        MINOR=$minor \
+        install_non_bb
+
+    sudo python setup.py install \
+        --root=/ \
+        --install-lib=$PYTHON_SITE_DIR \
+        --prefix=/usr \
+        --install-data=/usr/share \
+
+    # This _is_ nasty, clean it up
+    sudo install -m 755 fm_db_sync_event_suppression.py $prefix/bin/fm_db_sync_event_suppression.py
+
+    # install the headers that used by fm-mgr package
+    sudo install -m 644 -p -D fmConfig.h $prefix/include/fmConfig.h
+    sudo install -m 644 -p -D fmLog.h $prefix/include/fmLog.h
+
+    # Make sure we can find it later
+    # TODO: this should be managed better
+    echo /usr/local/lib | sudo tee /etc/ld.so.conf.d/devstack.conf
     popd
 }
 
@@ -211,7 +267,7 @@ function install_sysinv_depends {
     install_configutilities
     install_controllerconfig
     install_tsconfig
-    install_fm_api
+    install_fault
 }
 
 function install_tsconfig {
