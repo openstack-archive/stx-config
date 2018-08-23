@@ -1,8 +1,12 @@
+#!/bin/bash
 # Devstack settings
 
 # Defaults
 # --------
 
+STX_CONFIG_NAME=stx-config
 
 ######### Plugin Specific ##########
 enable_service sysinv sysinv-api sysinv-cond
+#define_plugin sysinv
+#plugin_requires sysinv update fault
