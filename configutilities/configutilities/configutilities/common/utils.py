@@ -44,8 +44,7 @@ EXPECTED_SERVICE_NAME_AND_TYPE = (
      "GNOCCHI_SERVICE_NAME": "gnocchi",
      "GNOCCHI_SERVICE_TYPE": "metric",
      "FM_SERVICE_NAME": "fm",
-     "FM_SERVICE_TYPE": "faultmanagement",
-})
+     "FM_SERVICE_TYPE": "faultmanagement"})
 
 
 def is_valid_vlan(vlan):
