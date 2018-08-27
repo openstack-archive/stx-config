@@ -98,7 +98,8 @@ class openstack::gnocchi::api
       mode    => '0640',
     }
 
-    if $::platform::params::init_database {
+    $storage_configured = inline_template("<% if File.exists?('/opt/gnocchi/tmp/gnocchi-config') -%>true<% else %>false<% end -%>")
+    if ! str2bool($storage_configured) {
       include ::openstack::gnocchi::metricd
       $sacks_number = $::openstack::gnocchi::metricd::metricd_workers + 2
 
