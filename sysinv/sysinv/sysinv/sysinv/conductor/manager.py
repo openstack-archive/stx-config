@@ -7280,11 +7280,11 @@ class ConductorManager(service.PeriodicService):
 
                 if not os.path.isfile(CFS_DRBDADM_RECONFIGURED):
                     progress = "drbdadm resize all"
-                    cmd = ["drbdadm", "resize", "all"]
                     if standby_host:
+                        cmd = ["drbdadm", "resize", "all"]
                         stdout, __ = cutils.execute(*cmd, attempts=retry_attempts, run_as_root=True)
                     else:
-                        cmd = cmd + ['--assume-peer-has-space']
+                        cmd = ["drbdadm", "--", "--assume-peer-has-space", "resize", "all"]
                         stdout, __ = cutils.execute(*cmd, attempts=retry_attempts, run_as_root=True)
                     LOG.info("Performed %s" % progress)
                     cutils.touch(CFS_DRBDADM_RECONFIGURED)
