@@ -1,0 +1,8 @@
+Code-Review+2: John Kung <john.kung@windriver.com>
+Workflow+1: Eric MacDonald <eric.macdonald@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 31 Aug 2018 19:51:18 +0000
+Reviewed-on: https://review.openstack.org/597637
+Project: openstack/stx-config
+Branch: refs/heads/master
