@@ -837,19 +837,8 @@ class AgentManager(service.PeriodicService):
             LOG.exception("Sysinv Agent exception updating idisk conductor.")
             pass
 
-        ipartition = self._ipartition_operator.ipartition_get()
-        try:
-            rpcapi.ipartition_update_by_ihost(icontext,
-                                              ihost['uuid'],
-                                              ipartition)
-        except AttributeError:
-            # safe to ignore during upgrades
-            LOG.warn("Skip updating ipartition conductor. "
-                     "Upgrade in progress?")
-        except exception.SysinvException:
-            LOG.exception("Sysinv Agent exception updating ipartition"
-                          " conductor.")
-            pass
+        self._update_disk_partitions(rpcapi, icontext,
+                                     ihost['uuid'], force_update=True)
 
         ipv = self._ipv_operator.ipv_get()
         try:
@@ -1025,6 +1014,27 @@ class AgentManager(service.PeriodicService):
                 return False
         return True
 
+    @utils.synchronized(constants.PARTITION_MANAGE_LOCK)
+    def _update_disk_partitions(self, rpcapi, icontext,
+                                host_uuid, force_update=False):
+        ipartition = self._ipartition_operator.ipartition_get()
+        if not force_update:
+            if self._prev_partition == ipartition:
+                return
+            self._prev_partition = ipartition
+        try:
+            rpcapi.ipartition_update_by_ihost(
+                icontext, host_uuid, ipartition)
+        except AttributeError:
+            # safe to ignore during upgrades
+            LOG.warn("Skip updating ipartition conductor. "
+                     "Upgrade in progress?")
+        except exception.SysinvException:
+            LOG.exception("Sysinv Agent exception updating "
+                          "ipartition conductor.")
+            if not force_update:
+                self._prev_partition = None
+
     @periodic_task.periodic_task(spacing=CONF.agent.audit_interval,
                                  run_immediately=True)
     def _agent_audit(self, context):
@@ -1032,6 +1042,7 @@ class AgentManager(service.PeriodicService):
         self.agent_audit(context, host_uuid=self._ihost_uuid,
                          force_updates=None)
 
+    @utils.synchronized('agent-exclusive-action')
     def agent_audit(self, context, host_uuid, force_updates, cinder_device=None):
         # perform inventory audit
         if self._ihost_uuid != host_uuid:
@@ -1199,23 +1210,7 @@ class AgentManager(service.PeriodicService):
 
             # Update disk partitions
             if self._ihost_personality != constants.STORAGE:
-                ipartition = self._ipartition_operator.ipartition_get()
-                if ((self._prev_partition is None) or
-                        (self._prev_partition != ipartition)):
-                    self._prev_partition = ipartition
-                    try:
-                        rpcapi.ipartition_update_by_ihost(icontext,
-                                                          self._ihost_uuid,
-                                                          ipartition)
-                    except AttributeError:
-                        # safe to ignore during upgrades
-                        LOG.warn("Skip updating ipartition conductor. "
-                                 "Upgrade in progress?")
-                    except exception.SysinvException:
-                        LOG.exception("Sysinv Agent exception updating "
-                                      "ipartition conductor.")
-                        self._prev_partition = None
-                        pass
+                self._update_disk_partitions(rpcapi, icontext, self._ihost_uuid)
 
             # Update physical volumes
             ipv = self._ipv_operator.ipv_get(cinder_device=cinder_device)
@@ -1357,6 +1352,7 @@ class AgentManager(service.PeriodicService):
             self._update_config_applied(iconfig_uuid)
             self._report_config_applied(context)
 
+    @utils.synchronized('agent-exclusive-action')
     def config_apply_runtime_manifest(self, context, config_uuid, config_dict):
         """Asynchronously, have the agent apply the runtime manifest with the
         list of supplied tasks.
