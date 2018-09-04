@@ -14,6 +14,7 @@ import time
 
 import configutilities.common.exceptions as cexeptions
 import configutilities.common.utils as cutils
+from six.moves import input
 
 
 def is_valid_management_address(ip_address, management_subnet):
@@ -80,7 +81,7 @@ def configure_management():
 
     print
     while True:
-        user_input = raw_input("Enter management interface name: ")
+        user_input = input("Enter management interface name: ")
         if user_input in interface_list:
             management_interface = user_input
             break
@@ -89,7 +90,7 @@ def configure_management():
             continue
 
     while True:
-        user_input = raw_input("Enter management address CIDR: ")
+        user_input = input("Enter management address CIDR: ")
         try:
             management_cidr = netaddr.IPNetwork(user_input)
             management_ip = management_cidr.ip
@@ -105,8 +106,8 @@ def configure_management():
                    "please enter a valid management address CIDR")
 
     while True:
-        user_input = raw_input("Enter management gateway address [" +
-                               str(management_network[1]) + "]: ")
+        user_input = input("Enter management gateway address [" +
+                           str(management_network[1]) + "]: ")
         if user_input == "":
             user_input = management_network[1]
 
@@ -123,7 +124,7 @@ def configure_management():
 
     min_addresses = 8
     while True:
-        user_input = raw_input("Enter System Controller subnet: ")
+        user_input = input("Enter System Controller subnet: ")
         try:
             system_controller_subnet = cutils.validate_network_str(
                 user_input, min_addresses)
