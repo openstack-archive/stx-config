@@ -139,6 +139,7 @@ class openstack::nova::compute (
 ) inherits ::openstack::nova::params {
   include ::nova::pci
   include ::platform::params
+  include ::platform::kubernetes::params
 
   include ::platform::network::mgmt::params
   include ::platform::network::infra::params
@@ -146,6 +147,12 @@ class openstack::nova::compute (
   include ::nova::compute::neutron
 
   include ::openstack::nova::sshd
+
+  if $::platform::kubernetes::params::enabled {
+    $service_enabled = false
+  } else {
+    $service_enabled = true
+  }
 
   $host_private_key_file = $host_key_type ? {
     'ssh-rsa'   => "/etc/ssh/ssh_host_rsa_key",
@@ -238,6 +245,7 @@ class openstack::nova::compute (
   create_resources(sshkey, $ssh_keys, {})
 
   class { '::nova::compute':
+    enabled => $service_enabled,
     vncserver_proxyclient_address => $::platform::params::hostname,
   }
 
@@ -672,8 +680,12 @@ class openstack::nova::compute::pci
 
 
 class openstack::nova::compute::reload {
-  exec { 'pmon-restart-nova-compute':
-    command => "pmon-restart nova-compute",
+  include ::platform::kubernetes::params
+
+  if $::platform::kubernetes::params::enabled != true {
+    exec { 'pmon-restart-nova-compute':
+      command => "pmon-restart nova-compute",
+    }
   }
 }
 
