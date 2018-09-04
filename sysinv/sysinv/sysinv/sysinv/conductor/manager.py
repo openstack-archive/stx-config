@@ -8741,6 +8741,7 @@ class ConductorManager(service.PeriodicService):
 
         controller_0 = self.dbapi.ihost_get_by_hostname(
             constants.CONTROLLER_0_HOSTNAME)
+        kubernetes_config = system.capabilities.get('kubernetes_enabled', False)
 
         # TODO: This code is only useful for supporting R5 to R6 upgrades.
         #       Remove in future release.
@@ -8782,18 +8783,19 @@ class ConductorManager(service.PeriodicService):
                     tsc.system_type == constants.TIS_AIO_BUILD and
                         state == constants.UPGRADE_ABORTING_ROLLBACK):
 
+                if not kubernetes_config:
                 # For AIO Case, VM goes into no state when Controller-0 becomes active
                 # after swact. nova clean up will fail the instance and restart
                 # nova-compute service
-                LOG.info("Calling nova cleanup")
-                with open(os.devnull, "w") as fnull:
-                    try:
-                        subprocess.check_call(["systemctl", "start", "nova-cleanup"],
-                                              stdout=fnull,
-                                              stderr=fnull)
-                    except subprocess.CalledProcessError:
-                        raise exception.SysinvException(_(
-                            "Failed to call nova cleanup during AIO abort"))
+                    LOG.info("Calling nova cleanup")
+                    with open(os.devnull, "w") as fnull:
+                        try:
+                            subprocess.check_call(["systemctl", "start", "nova-cleanup"],
+                                                  stdout=fnull,
+                                                  stderr=fnull)
+                        except subprocess.CalledProcessError:
+                            raise exception.SysinvException(_(
+                                "Failed to call nova cleanup during AIO abort"))
 
             try:
                 vim_api.set_vim_upgrade_state(controller_0, False)

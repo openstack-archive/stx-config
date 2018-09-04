@@ -8,7 +8,6 @@ from sysinv.common import constants
 
 from . import openstack
 
-
 class GnocchiPuppet(openstack.OpenstackBasePuppet):
     """Class to encapsulate puppet operations for gnocchi configuration"""
 
@@ -37,6 +36,7 @@ class GnocchiPuppet(openstack.OpenstackBasePuppet):
         ksuser = self._get_service_user_name(self.SERVICE_NAME)
 
         config = {
+            'gnocchi::api::enabled': self._enable_gnocchi_api(),
             'gnocchi::keystone::auth::region':
                 self._get_service_region_name(self.SERVICE_NAME),
             'gnocchi::keystone::auth::public_url': self.get_public_url(),
@@ -87,3 +87,9 @@ class GnocchiPuppet(openstack.OpenstackBasePuppet):
 
     def get_admin_url(self):
         return self._format_private_endpoint(self.SERVICE_PORT)
+
+    def _enable_gnocchi_api(self):
+        if self._kubernetes_enabled():
+            return False
+        else:
+            return True

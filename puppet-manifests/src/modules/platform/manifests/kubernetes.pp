@@ -262,6 +262,8 @@ class platform::kubernetes::worker::init
     logoutput => true,
     unless => 'test -f /etc/kubernetes/kubelet.conf',
   }
+
+
 }
 
 class platform::kubernetes::worker
@@ -275,5 +277,11 @@ class platform::kubernetes::worker
 
     Class['::platform::kubernetes::kubeadm'] ->
     Class['::platform::kubernetes::worker::init']
+  }
+  if $enabled {
+    file { "/var/run/.disable_compute_services":
+      ensure => file,
+      replace => no,
+    }
   }
 }
