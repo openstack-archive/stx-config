@@ -306,7 +306,7 @@ def create_iso(iso_name, archive_dir):
     tmpdir = None
     total_steps = 6
     step = 1
-    print ("\nCreating ISO:")
+    print("\nCreating ISO:")
 
     # Add the correct kick-start file to the image
     ks_file = "controller_ks.cfg"
@@ -475,7 +475,7 @@ def find_and_replace_in_file(target, find, replace):
                 fpat = r'\b' + find + r'\b'
                 line = re.sub(fpat, replace, line)
                 found = True
-            print line,
+            print(line,)
 
     except Exception as e:
         LOG.error("Failed to replace [{}] with [{}] in [{}]: {}"
