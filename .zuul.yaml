@@ -1,5 +1,7 @@
 ---
 - project:
+    templates:
+        - puppet-openstack-check-jobs
     check:
       jobs:
         - openstack-tox-linters:
