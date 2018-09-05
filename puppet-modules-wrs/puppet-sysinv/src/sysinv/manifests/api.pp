@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-#  
+#
 #  Nov 2017: rebase pike
 #  Aug 2016: rebase mitaka
 #  Jun 2016: rebase centos
@@ -122,18 +122,18 @@ class sysinv::api (
     Package['sysinv'] -> Sysinv_api_paste_ini<||>
     Package['sysinv'] -> Service['sysinv-api']
     package { 'sysinv':
-      ensure  => $package_ensure,
-      name    => $::sysinv::params::api_package,
+      ensure => $package_ensure,
+      name   => $::sysinv::params::api_package,
     }
   }
 
   sysinv_config {
-    "DEFAULT/sysinv_api_bind_ip": value => $bind_host;
+    'DEFAULT/sysinv_api_bind_ip': value => $bind_host;
   }
 
   if $pxeboot_host {
     sysinv_config {
-      "DEFAULT/sysinv_api_pxeboot_ip": value => $pxeboot_host;
+      'DEFAULT/sysinv_api_pxeboot_ip': value => $pxeboot_host;
     }
   }
 
@@ -236,9 +236,9 @@ class sysinv::api (
     # Only do the db sync if both controllers are running the same software
     # version. Avoids impacting mate controller during an upgrade.
     onlyif      => [
-                    "test $::controller_sw_versions_match = true",
-                    "systemctl status postgresql"
-                   ]
+                    "test ${::controller_sw_versions_match} = true",
+                    'systemctl status postgresql'
+                    ]
   }
 
 }

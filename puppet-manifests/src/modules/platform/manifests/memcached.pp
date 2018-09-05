@@ -1,13 +1,13 @@
 class platform::memcached::params(
- $package_ensure = 'present',
- $logfile = '/var/log/memcached.log',
- # set CACHESIZE in /etc/sysconfig/memcached
- $max_memory = false,
- $tcp_port = 11211,
- $udp_port = 11211,
- # set MAXCONN in /etc/sysconfig/memcached
- $max_connections = 8192,
- $service_restart = true,
+  $package_ensure = 'present',
+  $logfile = '/var/log/memcached.log',
+  # set CACHESIZE in /etc/sysconfig/memcached
+  $max_memory = false,
+  $tcp_port = 11211,
+  $udp_port = 11211,
+  # set MAXCONN in /etc/sysconfig/memcached
+  $max_connections = 8192,
+  $service_restart = true,
 ) {
   include ::platform::params
   $controller_0_hostname = $::platform::params::controller_0_hostname
@@ -23,6 +23,9 @@ class platform::memcached::params(
       }
       $controller_1_hostname: {
         $listen_ip = $::platform::network::mgmt::params::controller1_address
+      }
+      default: {
+        fail("Unsupported hostname: ${::hostname}")
       }
     }
   }
@@ -41,9 +44,9 @@ class platform::memcached
     max_connections => $max_connections,
     max_memory      => $max_memory,
     service_restart => $service_restart,
-  } ->
+  }
 
-  exec { 'systemctl enable memcached.service':
-    command => "/usr/bin/systemctl enable memcached.service",
+  -> exec { 'systemctl enable memcached.service':
+    command => '/usr/bin/systemctl enable memcached.service',
   }
 }

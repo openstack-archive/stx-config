@@ -1,0 +1,49 @@
+# Based on: https://github.com/openstack/puppet-openstack-integration/blob/master/playbooks/run-lint-tests.yaml
+#
+- hosts: all
+  tasks:
+    - shell:
+        cmd: |
+          export ORIGWD=$(pwd)
+          export FAILURES=0
+          for module_dir in $(find * -name Modulefile -o -name metadata.json | xargs --no-run-if-empty -n 1 dirname); do
+            echo "Entering: $module_dir"
+            cd $module_dir
+            if [ -f Modulefile -o -f metadata.json ]; then
+              if [ -f Modulefile ]; then
+                MODULE=$(awk '/^name/ {print $NF}' Modulefile |tr -d \"\')
+              elif [ -f metadata.json ]; then
+                MODULE=$(python -c 'import json;print json.load(open("metadata.json"))["name"]')
+              fi
+              if [ -z "$MODULE" ]; then
+                echo "Module name not defined in Modulefile or metadata.json"
+              else
+                mkdir -p "$MODULE"
+                rsync -a --exclude="$MODULE" --exclude ".*" . "$MODULE"
+                cd "$MODULE"
+              fi
+            fi
+            mkdir .bundled_gems
+            export GEM_HOME=`pwd`/.bundled_gems
+            if [ -f Gemfile ]; then
+              gem install bundler --no-rdoc --no-ri --verbose
+              $GEM_HOME/bin/bundle install --without system_tests --retry 3
+              $GEM_HOME/bin/bundle exec rake lint 2>&1 || let -i FAILURES++
+              if [ -f metadata.json ]; then
+                $GEM_HOME/bin/bundle exec rake metadata_lint 2>&1 || let -i FAILURES++
+              fi
+            else
+              gem install rake -n ./.bundled_gems/
+              gem install puppet-lint || let -i FAILURES++
+              gem install metadata-json-lint -n ./.bundled_gems/ --no-ri --no-rdoc || let -i FAILURES++
+              gem install puppetlabs_spec_helper
+              ./.bundled_gems/rake lint 2>&1
+              if [ -f metadata.json ]; then
+                ./.bundled_gems/metadata-json-lint || let -i FAILURES++
+              fi
+            fi
+            cd $ORIGWD
+          done
+          [ ${FAILURES} -eq 0 ]
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
