@@ -115,7 +115,7 @@ include ::openstack::ironic
 include ::openstack::ironic::api
 
 include ::platform::dcmanager
-include ::platform::dcmanager::manager 
+include ::platform::dcmanager::manager
 
 include ::platform::dcorch
 include ::platform::dcorch::engine

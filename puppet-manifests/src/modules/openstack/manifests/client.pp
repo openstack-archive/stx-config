@@ -15,22 +15,22 @@ class openstack::client
   include ::openstack::client::credentials::params
   $keyring_file = $::openstack::client::credentials::params::keyring_file
 
-  file {"/etc/nova/openrc":
-    ensure  => "present",
+  file {'/etc/nova/openrc':
+    ensure  => 'present',
     mode    => '0640',
     owner   => 'nova',
     group   => 'root',
     content => template('openstack/openrc.admin.erb'),
   }
 
-  file {"/etc/nova/ldap_openrc_template":
-    ensure  => "present",
+  file {'/etc/nova/ldap_openrc_template':
+    ensure  => 'present',
     mode    => '0644',
     content => template('openstack/openrc.ldap.erb'),
   }
 
-  file {"/etc/bash_completion.d/openstack":
-    ensure  => "present",
+  file {'/etc/bash_completion.d/openstack':
+    ensure  => 'present',
     mode    => '0644',
     content => generate('/usr/bin/openstack', 'complete'),
   }
@@ -46,25 +46,25 @@ class openstack::client::credentials::params (
 class openstack::client::credentials
   inherits ::openstack::client::credentials::params {
 
-  Class['::platform::drbd::platform'] ->
-  file { "${keyring_base}":
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0755',
-  } ->
-  file { "${keyring_directory}":
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0755',
-  } ->
-  file { "${keyring_file}":
+  Class['::platform::drbd::platform']
+  -> file { $keyring_base:
+    ensure => 'directory',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+  -> file { $keyring_directory:
+    ensure => 'directory',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+  -> file { $keyring_file:
     ensure  => 'file',
     owner   => 'root',
     group   => 'root',
     mode    => '0755',
-    content => "keyring get CGCS admin"
+    content => 'keyring get CGCS admin'
   }
 }
 

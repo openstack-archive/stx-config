@@ -26,8 +26,8 @@ define platform::vswitch::ovs::device(
   $pci_addr,
   $driver_type,
 ) {
-  exec { "ovs-bind-device: $title":
-    path => ["/usr/bin", "/usr/sbin", "/usr/share/openvswitch/scripts"],
+  exec { "ovs-bind-device: ${title}":
+    path    => ['/usr/bin', '/usr/sbin', '/usr/share/openvswitch/scripts'],
     command => "dpdk-devbind.py --bind=${driver_type} ${pci_addr}"
   }
 }
@@ -37,22 +37,22 @@ define platform::vswitch::ovs::bridge(
   $datapath_type = 'netdev',
 ) {
   exec { "ovs-add-br: ${title}":
-    command => template("platform/ovs.add-bridge.erb")
-  } ->
-  exec { "ovs-link-up: ${title}":
+    command => template('platform/ovs.add-bridge.erb')
+  }
+  -> exec { "ovs-link-up: ${title}":
     command => "ip link set ${name} up",
   }
 }
 
 
 define platform::vswitch::ovs::port(
-  $type = 'port',
   $bridge,
-  $attributes = [],
   $interfaces,
+  $type = 'port',
+  $attributes = [],
 ) {
   exec { "ovs-add-port: ${title}":
-    command => template("platform/ovs.add-port.erb"),
+    command   => template('platform/ovs.add-port.erb'),
     logoutput => true
   }
 }
@@ -81,9 +81,9 @@ class platform::vswitch::ovs(
   } elsif $::platform::params::vswitch_type == 'ovs-dpdk' {
     include ::vswitch::dpdk
 
-    Exec['vfio-iommu-mode'] ->
-    Platform::Vswitch::Ovs::Device<||> ->
-    Platform::Vswitch::Ovs::Bridge<||>
+    Exec['vfio-iommu-mode']
+    -> Platform::Vswitch::Ovs::Device<||>
+    -> Platform::Vswitch::Ovs::Bridge<||>
 
     create_resources('platform::vswitch::ovs::device', $devices, {
       driver_type => $driver_type,
@@ -108,13 +108,13 @@ class platform::vswitch::ovs(
   if $::platform::params::vswitch_type =~ '^ovs' {
 
     # clean bridges and ports before applying current configuration
-    exec { "ovs-clean":
-      command  => template("platform/ovs.clean.erb"),
+    exec { 'ovs-clean':
+      command  => template('platform/ovs.clean.erb'),
       provider => shell,
       require  => Service['openvswitch']
-    } ->
+    }
 
-    Platform::Vswitch::Ovs::Bridge<||> -> Platform::Vswitch::Ovs::Port<||>
+    -> Platform::Vswitch::Ovs::Bridge<||> -> Platform::Vswitch::Ovs::Port<||>
     Platform::Vswitch::Ovs::Bridge<||> -> Platform::Vswitch::Ovs::Address<||>
   }
 

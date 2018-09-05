@@ -1,0 +1,10 @@
+name    'puppet-nova_api_proxy'
+version '1.0.0'
+source  'https://github.com/openstack/stx-config'
+author  'Wind River'
+license 'Apache License 2.0'
+summary 'nova_api_proxy puppet module'
+description  'Puppet module for nova_api_proxy'
+
+dependency 'puppetlabs/inifile', '>=1.0.0 <2.0.0'
+dependency 'puppetlabs/stdlib', '>=2.5.0'

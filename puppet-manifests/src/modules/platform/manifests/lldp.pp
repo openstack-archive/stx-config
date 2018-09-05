@@ -12,11 +12,11 @@ class platform::lldp
   $system = $::platform::params::system_name
   $version = $::platform::params::software_version
 
-  file { "/etc/lldpd.conf":
-      ensure => 'present',
+  file { '/etc/lldpd.conf':
+      ensure  => 'present',
       replace => true,
       content => template('platform/lldp.conf.erb'),
-      notify => Service['lldpd'],
+      notify  => Service['lldpd'],
   }
 
   service { 'lldpd':

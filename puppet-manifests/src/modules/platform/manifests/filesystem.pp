@@ -24,46 +24,46 @@ define platform::filesystem (
     # use all available space
     $size = undef
     $fs_size_is_minsize = false
-  } 
-  
+  }
+
   # create logical volume
   logical_volume { $lv_name:
       ensure          => present,
       volume_group    => $vg_name,
       size            => $size,
       size_is_minsize => $fs_size_is_minsize,
-  } ->
+  }
 
   # create filesystem
-  filesystem { $device:
+  -> filesystem { $device:
     ensure  => present,
     fs_type => $fs_type,
     options => $fs_options,
-  } ->
+  }
 
-  file { $mountpoint:
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0750',
-  } ->
+  -> file { $mountpoint:
+    ensure => 'directory',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0750',
+  }
 
-  mount { $name:
-    name => "$mountpoint",
-    atboot => 'yes',
-    ensure => 'mounted',
-    device => "${device}",
+  -> mount { $name:
+    ensure  => 'mounted',
+    atboot  => 'yes',
+    name    => $mountpoint,
+    device  => $device,
     options => 'defaults',
-    fstype => $fs_type,
-  } ->
+    fstype  => $fs_type,
+  }
 
   # The above mount resource doesn't actually remount devices that were already present in /etc/fstab, but were
   # unmounted during manifest application. To get around this, we attempt to mount them again, if they are not
   # already mounted.
-  exec { "mount $device":
-    unless => "mount | awk '{print \$3}' | grep -Fxq $mountpoint",
-    command => "mount $mountpoint",
-    path => "/usr/bin"
+  -> exec { "mount ${device}":
+    unless  => "mount | awk '{print \$3}' | grep -Fxq ${mountpoint}",
+    command => "mount ${mountpoint}",
+    path    => '/usr/bin'
   }
 }
 
@@ -79,19 +79,19 @@ define platform::filesystem::resize(
   $device = "/dev/${vg_name}/${lv_name}"
 
   # TODO (rchurch): Fix this... Allowing return code 5 so that lvextends using the same size doesn't blow up
-  exec { "lvextend $device":
+  exec { "lvextend ${device}":
     command => "lvextend -L${lv_size}G ${device}",
     returns => [0, 5]
-  } ->
+  }
   # After a partition extend, make sure that there is no leftover drbd
   # type metadata from a previous install. Drbd writes its meta at the
   # very end of a block device causing confusion for blkid.
-  exec { "wipe end of device $device":
+  -> exec { "wipe end of device ${device}":
     command => "dd if=/dev/zero of=${device} bs=512 seek=$(($(blockdev --getsz ${device}) - 34)) count=34",
-    onlyif => "blkid ${device} | grep TYPE=\\\"drbd\\\"",
-  } ->
-  exec { "resize2fs $devmapper":
-    command => "resize2fs $devmapper"
+    onlyif  => "blkid ${device} | grep TYPE=\\\"drbd\\\"",
+  }
+  -> exec { "resize2fs ${devmapper}":
+    command => "resize2fs ${devmapper}"
   }
 }
 
@@ -109,10 +109,10 @@ class platform::filesystem::backup
   inherits ::platform::filesystem::backup::params {
 
   platform::filesystem { $lv_name:
-    lv_name => $lv_name,
-    lv_size => $lv_size,
+    lv_name    => $lv_name,
+    lv_size    => $lv_size,
     mountpoint => $mountpoint,
-    fs_type => $fs_type,
+    fs_type    => $fs_type,
     fs_options => $fs_options
   }
 }
@@ -130,10 +130,10 @@ class platform::filesystem::scratch
   inherits ::platform::filesystem::scratch::params {
 
   platform::filesystem { $lv_name:
-    lv_name => $lv_name,
-    lv_size => $lv_size,
+    lv_name    => $lv_name,
+    lv_size    => $lv_size,
     mountpoint => $mountpoint,
-    fs_type => $fs_type,
+    fs_type    => $fs_type,
     fs_options => $fs_options
   }
 }
@@ -151,10 +151,10 @@ class platform::filesystem::gnocchi
   inherits ::platform::filesystem::gnocchi::params {
 
   platform::filesystem { $lv_name:
-    lv_name => $lv_name,
-    lv_size => $lv_size,
+    lv_name    => $lv_name,
+    lv_size    => $lv_size,
     mountpoint => $mountpoint,
-    fs_type => $fs_type,
+    fs_type    => $fs_type,
     fs_options => $fs_options
   }
 }
@@ -176,10 +176,10 @@ class platform::filesystem::docker
 
   if $::platform::kubernetes::params::enabled {
     platform::filesystem { $lv_name:
-      lv_name => $lv_name,
-      lv_size => $lv_size,
+      lv_name    => $lv_name,
+      lv_size    => $lv_size,
       mountpoint => $mountpoint,
-      fs_type => $fs_type,
+      fs_type    => $fs_type,
       fs_options => $fs_options,
       fs_use_all => $fs_use_all
     }
@@ -217,8 +217,8 @@ class platform::filesystem::storage {
   if $::platform::kubernetes::params::enabled {
     class {'platform::filesystem::docker::params' :
       lv_size => 10
-    } ->
-    class {'platform::filesystem::docker' :
+    }
+    -> class {'platform::filesystem::docker' :
     }
 
     Class['::platform::lvm::vg::cgts_vg'] -> Class['::platform::filesystem::docker']
@@ -233,8 +233,8 @@ class platform::filesystem::compute {
   if $::platform::kubernetes::params::enabled {
     class {'platform::filesystem::docker::params' :
       fs_use_all => true
-    } ->
-    class {'platform::filesystem::docker' :
+    }
+    -> class {'platform::filesystem::docker' :
     }
 
     Class['::platform::lvm::vg::cgts_vg'] -> Class['::platform::filesystem::docker']
@@ -258,8 +258,8 @@ class platform::filesystem::backup::runtime {
   $devmapper = $::platform::filesystem::backup::params::devmapper
 
   platform::filesystem::resize { $lv_name:
-    lv_name => $lv_name,
-    lv_size => $lv_size,
+    lv_name   => $lv_name,
+    lv_size   => $lv_size,
     devmapper => $devmapper,
   }
 }
@@ -273,8 +273,8 @@ class platform::filesystem::scratch::runtime {
   $devmapper = $::platform::filesystem::scratch::params::devmapper
 
   platform::filesystem::resize { $lv_name:
-    lv_name => $lv_name,
-    lv_size => $lv_size,
+    lv_name   => $lv_name,
+    lv_size   => $lv_size,
     devmapper => $devmapper,
   }
 }
@@ -288,8 +288,8 @@ class platform::filesystem::gnocchi::runtime {
   $devmapper = $::platform::filesystem::gnocchi::params::devmapper
 
   platform::filesystem::resize { $lv_name:
-    lv_name => $lv_name,
-    lv_size => $lv_size,
+    lv_name   => $lv_name,
+    lv_size   => $lv_size,
     devmapper => $devmapper,
   }
 }
@@ -303,8 +303,8 @@ class platform::filesystem::docker::runtime {
   $devmapper = $::platform::filesystem::docker::params::devmapper
 
   platform::filesystem::resize { $lv_name:
-    lv_name => $lv_name,
-    lv_size => $lv_size,
+    lv_name   => $lv_name,
+    lv_size   => $lv_size,
     devmapper => $devmapper,
   }
 }

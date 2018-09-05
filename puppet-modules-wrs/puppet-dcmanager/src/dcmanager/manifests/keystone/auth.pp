@@ -14,8 +14,10 @@
 #
 class dcmanager::keystone::auth (
   $password,
-  $auth_name            = 'dcmanager',
   $auth_domain,
+  $admin_project_name,
+  $admin_project_domain,
+  $auth_name            = 'dcmanager',
   $email                = 'dcmanager@localhost',
   $tenant               = 'admin',
   $region               = 'SystemController',
@@ -28,8 +30,6 @@ class dcmanager::keystone::auth (
   $public_url           = 'http://127.0.0.1:8119/v1',
   $admin_url            = 'http://127.0.0.1:8119/v1',
   $internal_url         = 'http://127.0.0.1:8119/v1',
-  $admin_project_name,
-  $admin_project_domain,
 ) {
 
   $real_service_name = pick($service_name, $auth_name)
@@ -49,9 +49,9 @@ class dcmanager::keystone::auth (
     public_url          => $public_url,
     admin_url           => $admin_url,
     internal_url        => $internal_url,
-  } ->
+  }
 
-  keystone_user_role { "${auth_name}@${admin_project_name}":
+  -> keystone_user_role { "${auth_name}@${admin_project_name}":
     ensure         => present,
     user_domain    => $auth_domain,
     project_domain => $admin_project_domain,

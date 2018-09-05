@@ -12,8 +12,8 @@ class openstack::ceilometer {
   include ::openstack::ceilometer::params
 
   class { '::ceilometer':
-    rabbit_use_ssl => $::platform::amqp::params::ssl_enabled,
-    default_transport_url => $::platform::amqp::params::transport_url,
+    rabbit_use_ssl            => $::platform::amqp::params::ssl_enabled,
+    default_transport_url     => $::platform::amqp::params::transport_url,
     rabbit_qos_prefetch_count => 100,
   }
 
@@ -24,8 +24,8 @@ class openstack::ceilometer {
     if $::platform::params::distributed_cloud_role != 'systemcontroller' {
       include ::openstack::gnocchi::params
 
-      Keystone_endpoint["${::openstack::gnocchi::params::region_name}/gnocchi::metric"] ->
-      class { '::ceilometer::db::sync':
+      Keystone_endpoint["${::openstack::gnocchi::params::region_name}/gnocchi::metric"]
+      -> class { '::ceilometer::db::sync':
         extra_params => '--skip-metering-database'
       }
 
@@ -42,9 +42,9 @@ class openstack::ceilometer {
         $os_password = $::gnocchi::keystone::authtoken::password
         $os_interface = 'internalURL'
 
-        Class['::ceilometer::db::sync'] ->
-        exec { 'Creating vswitch resource types':
-          command => 'gnocchi resource-type create vswitch_engine \
+        Class['::ceilometer::db::sync']
+        -> exec { 'Creating vswitch resource types':
+          command     => 'gnocchi resource-type create vswitch_engine \
                         -a cpu_id:number:true:min=0 \
                         -a host:string:true:max_length=64;
                       gnocchi resource-type create vswitch_interface_and_port \
@@ -86,10 +86,10 @@ class openstack::ceilometer {
     include ::platform::memcached::params
 
     oslo::cache { 'ceilometer_config':
-      enabled => true,
-      backend => 'dogpile.cache.memcached',
+      enabled          => true,
+      backend          => 'dogpile.cache.memcached',
       memcache_servers => "'${::platform::memcached::params::listen_ip}:${::platform::memcached::params::tcp_port}'",
-      expiration_time => 86400,
+      expiration_time  => 86400,
     }
   }
 
@@ -102,8 +102,8 @@ class openstack::ceilometer {
     # skip the check if cinder region name has not been configured
     if ($::openstack::cinder::params::region_name != undef and
         $::openstack::cinder::params::region_name != $::platform::params::region_2_name) {
-      $shared_service_cinder = [$::openstack::cinder::params::service_type, 
-                                $::openstack::cinder::params::service_type_v2, 
+      $shared_service_cinder = [$::openstack::cinder::params::service_type,
+                                $::openstack::cinder::params::service_type_v2,
                                 $::openstack::cinder::params::service_type_v3]
     } else {
       $shared_service_cinder = []
@@ -126,41 +126,41 @@ class openstack::ceilometer::agent::notification {
   $ceilometer_directory_csv = "${ceilometer_directory}/csv"
   $ceilometer_directory_versioned = "${ceilometer_directory}/${::platform::params::software_version}"
 
-  file { "/etc/ceilometer/pipeline.yaml":
+  file { '/etc/ceilometer/pipeline.yaml':
     ensure  => 'present',
     content => template('openstack/pipeline.yaml.erb'),
     mode    => '0640',
     owner   => 'root',
     group   => 'ceilometer',
     tag     => 'ceilometer-yamls',
-  } ->
-  file { "${ceilometer_directory}":
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0755',
-  } ->
-  file { "${ceilometer_directory_csv}":
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0755',
-  } ->
-  file { "${ceilometer_directory_versioned}":
-    ensure  => 'directory',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0755',
-  } ->
-  file { "${ceilometer_directory_versioned}/pipeline.yaml":
+  }
+  -> file { $ceilometer_directory:
+    ensure => 'directory',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+  -> file { $ceilometer_directory_csv:
+    ensure => 'directory',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+  -> file { $ceilometer_directory_versioned:
+    ensure => 'directory',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+  -> file { "${ceilometer_directory_versioned}/pipeline.yaml":
+    ensure => 'file',
     source => '/etc/ceilometer/pipeline.yaml',
-    ensure  => 'file',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0640',
   }
 
-  file { "/etc/ceilometer/gnocchi_resources.yaml":
+  file { '/etc/ceilometer/gnocchi_resources.yaml':
     ensure  => 'present',
     content => template('openstack/gnocchi_resources.yaml.erb'),
     mode    => '0640',
@@ -180,7 +180,7 @@ class openstack::ceilometer::agent::notification {
 
   # FIXME(mpeters): generic parameter can be moved to the puppet module
   ceilometer_config {
-    'DEFAULT/csv_location': value => "${ceilometer_directory_csv}";
+    'DEFAULT/csv_location': value => $ceilometer_directory_csv;
     'DEFAULT/csv_location_strict': value => true;
     'notification/workers': value => $agent_workers_count;
     'notification/batch_size': value => 100;
@@ -198,53 +198,53 @@ class openstack::ceilometer::polling (
   $image_polling_interval          = 600,
   $volume_polling_interval         = 600,
 ) {
-   include ::platform::params
+  include ::platform::params
 
-   file { "/etc/ceilometer/polling.yaml":
-     ensure  => 'present',
-     content => template('openstack/polling.yaml.erb'),
-     mode    => '0640',
-     owner   => 'root',
-     group   => 'ceilometer',
-     tag     => 'ceilometer-yamls',
-   }
+  file { '/etc/ceilometer/polling.yaml':
+    ensure  => 'present',
+    content => template('openstack/polling.yaml.erb'),
+    mode    => '0640',
+    owner   => 'root',
+    group   => 'ceilometer',
+    tag     => 'ceilometer-yamls',
+  }
 
-   if $::personality == 'controller' {
-     $central_namespace = true
-   } else {
-     $central_namespace = false
-   }
+  if $::personality == 'controller' {
+    $central_namespace = true
+  } else {
+    $central_namespace = false
+  }
 
-   if str2bool($::disable_compute_services) {
-     $agent_enable = false
-     $compute_namespace = false
+  if str2bool($::disable_compute_services) {
+    $agent_enable = false
+    $compute_namespace = false
 
-     file { '/etc/pmon.d/ceilometer-polling.conf':
-        ensure  => absent,
-     }
-   } else {
-     $agent_enable = true
+    file { '/etc/pmon.d/ceilometer-polling.conf':
+      ensure  => absent,
+    }
+  } else {
+    $agent_enable = true
 
-     if str2bool($::is_compute_subfunction) {
-       $pmon_target = "/etc/ceilometer/ceilometer-polling-compute.conf.pmon"
-       $compute_namespace = true
-     } else {
-       $pmon_target = "/etc/ceilometer/ceilometer-polling.conf.pmon"
-       $compute_namespace = false
-     }
+    if str2bool($::is_compute_subfunction) {
+      $pmon_target = '/etc/ceilometer/ceilometer-polling-compute.conf.pmon'
+      $compute_namespace = true
+    } else {
+      $pmon_target = '/etc/ceilometer/ceilometer-polling.conf.pmon'
+      $compute_namespace = false
+    }
 
-     file { "/etc/pmon.d/ceilometer-polling.conf":
-       ensure => link,
-       target => $pmon_target,
-       owner   => 'root',
-       group   => 'root',
-       mode    => '0640',
-     }
-   }
+    file { '/etc/pmon.d/ceilometer-polling.conf':
+      ensure => link,
+      target => $pmon_target,
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0640',
+    }
+  }
 
-   class { '::ceilometer::agent::polling':
-     enabled => $agent_enable,
-     central_namespace => $central_namespace,
-     compute_namespace => $compute_namespace,
-   }
+  class { '::ceilometer::agent::polling':
+    enabled           => $agent_enable,
+    central_namespace => $central_namespace,
+    compute_namespace => $compute_namespace,
+  }
 }

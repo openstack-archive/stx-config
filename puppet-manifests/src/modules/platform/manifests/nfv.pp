@@ -36,9 +36,9 @@ class platform::nfv {
   include ::nfv::vim
 
   class { '::nfv::nfvi':
-    rabbit_host => $::platform::amqp::params::host,
-    rabbit_port => $::platform::amqp::params::port,
-    rabbit_userid => $::platform::amqp::params::auth_user,
+    rabbit_host     => $::platform::amqp::params::host,
+    rabbit_port     => $::platform::amqp::params::port,
+    rabbit_userid   => $::platform::amqp::params::auth_user,
     rabbit_password => $::platform::amqp::params::auth_password,
   }
 }
@@ -72,8 +72,8 @@ class platform::nfv::haproxy
   inherits ::platform::nfv::params {
 
   platform::haproxy::proxy { 'vim-restapi':
-    server_name => 's-vim-restapi',
-    public_port => $api_port,
+    server_name  => 's-vim-restapi',
+    public_port  => $api_port,
     private_port => $api_port,
   }
 }
