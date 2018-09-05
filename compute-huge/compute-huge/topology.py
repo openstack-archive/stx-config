@@ -171,7 +171,7 @@ class Topology(object):
         return None
 
     def _print_cpu_topology(self):
-        '''Print logical cpu topology enumeration as function of:
+        '''print(logical cpu topology enumeration as function of:
            socket_id, core_id, and thread_id.
 
         :param self
@@ -182,51 +182,51 @@ class Topology(object):
         cpu_list.sort()
         total_memory_GiB = self.total_memory_MiB/1024.0
 
-        print 'TOPOLOGY:'
-        print '%16s : %5d' % ('logical cpus',     self.num_cpus)
-        print '%16s : %5d' % ('sockets',          self.num_sockets)
-        print '%16s : %5d' % ('cores_per_pkg',    self.num_cores_per_pkg)
-        print '%16s : %5d' % ('threads_per_core', self.num_threads_per_core)
-        print '%16s : %5d' % ('numa_nodes',       self.num_nodes)
-        print '%16s : %5.2f %s' % ('total_memory', total_memory_GiB, 'GiB')
-        print '%16s :' % ('memory_per_node'),
+        print('TOPOLOGY:')
+        print('%16s : %5d' % ('logical cpus',     self.num_cpus))
+        print('%16s : %5d' % ('sockets',          self.num_sockets))
+        print('%16s : %5d' % ('cores_per_pkg',    self.num_cores_per_pkg))
+        print('%16s : %5d' % ('threads_per_core', self.num_threads_per_core))
+        print('%16s : %5d' % ('numa_nodes',       self.num_nodes))
+        print('%16s : %5.2f %s' % ('total_memory', total_memory_GiB, 'GiB'))
+        print('%16s :' % ('memory_per_node'),)
         for node in range(self.num_nodes):
             node_memory_GiB = self.total_memory_nodes_MiB[node]/1024.0
-            print '%5.2f' % (node_memory_GiB),
-        print '%s' % ('GiB')
-        print
+            print('%5.2f' % (node_memory_GiB),)
+        print('%s' % ('GiB'))
+        print("")
 
-        print 'LOGICAL CPU TOPOLOGY:'
-        print "%9s :" % 'cpu_id',
+        print('LOGICAL CPU TOPOLOGY:')
+        print("%9s :" % 'cpu_id',)
         for cpu in cpu_list:
-            print "%3d" % cpu,
-        print
-        print "%9s :" % 'socket_id',
+            print("%3d" % cpu,)
+        print("")
+        print("%9s :" % 'socket_id',)
         for cpu in cpu_list:
             socket_id = self.topology_idx[cpu]['s']
-            print "%3d" % socket_id,
-        print
-        print "%9s :" % 'core_id',
+            print("%3d" % socket_id,)
+        print("")
+        print("%9s :" % 'core_id',)
         for cpu in cpu_list:
             core_id = self.topology_idx[cpu]['c']
-            print "%3d" % core_id,
-        print
-        print "%9s :" % 'thread_id',
+            print("%3d" % core_id,)
+        print("")
+        print("%9s :" % 'thread_id',)
         for cpu in cpu_list:
             thread_id = self.topology_idx[cpu]['t']
-            print "%3d" % thread_id,
-        print
-        print
+            print("%3d" % thread_id,)
+        print("")
+        print("")
 
-        print 'CORE TOPOLOGY:'
-        print "%6s %9s %7s %9s %s" % ('cpu_id', 'socket_id', 'core_id', 'thread_id', 'affinity')
+        print('CORE TOPOLOGY:')
+        print("%6s %9s %7s %9s %s" % ('cpu_id', 'socket_id', 'core_id', 'thread_id', 'affinity'))
         for cpu in cpu_list:
             affinity  = 1<<cpu
             socket_id = self.topology_idx[cpu]['s']
             core_id   = self.topology_idx[cpu]['c']
             thread_id = self.topology_idx[cpu]['t']
-            print "%6d %9d %7d %9d 0x%x" \
-                % (cpu, socket_id, core_id, thread_id, affinity)
+            print("%6d %9d %7d %9d 0x%x" \
+                % (cpu, socket_id, core_id, thread_id, affinity))
 
         return None
 

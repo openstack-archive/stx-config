@@ -249,33 +249,33 @@ def configure_system(config_file):
     """Configure the system"""
 
     # Parse the system config file
-    print "Parsing system configuration file... ",
+    print("Parsing system configuration file... ",)
     system_config = parse_system_config(config_file)
-    print "DONE"
+    print("DONE")
 
     # Validate the system config file
-    print "Validating system configuration file... ",
+    print("Validating system configuration file... ",)
     try:
         create_cgcs_config_file(None, system_config, None, None, None,
                                 DEFAULT_CONFIG, validate_only=True)
     except ConfigParser.Error as e:
         raise ConfigFail("Error parsing configuration file %s: %s" %
                          (config_file, e))
-    print "DONE"
+    print("DONE")
 
     # Create cgcs_config file
-    print "Creating config apply file... ",
+    print("Creating config apply file... ",)
     try:
         create_cgcs_config_file(TEMP_CGCS_CONFIG_FILE, system_config,
                                 None, None, None, DEFAULT_CONFIG)
     except ConfigParser.Error as e:
         raise ConfigFail("Error parsing configuration file %s: %s" %
                          (config_file, e))
-    print "DONE"
+    print("DONE")
 
 
 def show_help():
-    print ("Usage: %s\n"
+    print("Usage: %s\n"
            "Perform system configuration\n"
            "\nThe default action is to perform the initial configuration for "
            "the system.\nThe following options are also available:\n"
@@ -299,7 +299,7 @@ def show_help():
 
 
 def show_help_lab_only():
-    print ("Usage: %s\n"
+    print("Usage: %s\n"
            "Perform initial configuration\n"
            "\nThe following options are for lab use only:\n"
            "--answerfile <file>  Apply the configuration from the specified "
@@ -352,14 +352,14 @@ def main():
             if arg < len(sys.argv):
                 answerfile = sys.argv[arg]
             else:
-                print "--answerfile option requires a file to be specified"
+                print("--answerfile option requires a file to be specified")
                 exit(1)
         elif sys.argv[arg] == "--backup":
             arg += 1
             if arg < len(sys.argv):
                 backup_name = sys.argv[arg]
             else:
-                print "--backup requires the name of the backup"
+                print("--backup requires the name of the backup")
                 exit(1)
             do_backup = True
         elif sys.argv[arg] == "--restore-system":
@@ -367,7 +367,7 @@ def main():
             if arg < len(sys.argv):
                 backup_name = sys.argv[arg]
             else:
-                print "--restore-system requires the filename of the backup"
+                print("--restore-system requires the filename of the backup")
                 exit(1)
             do_system_restore = True
         elif sys.argv[arg] == "--restore-images":
@@ -375,7 +375,7 @@ def main():
             if arg < len(sys.argv):
                 backup_name = sys.argv[arg]
             else:
-                print "--restore-images requires the filename of the backup"
+                print("--restore-images requires the filename of the backup")
                 exit(1)
             do_images_restore = True
         elif sys.argv[arg] == "--restore-complete":
@@ -385,14 +385,14 @@ def main():
             if arg < len(sys.argv):
                 archive_dir = sys.argv[arg]
             else:
-                print "--archive-dir requires a directory"
+                print("--archive-dir requires a directory")
                 exit(1)
         elif sys.argv[arg] == "--clone-iso":
             arg += 1
             if arg < len(sys.argv):
                 backup_name = sys.argv[arg]
             else:
-                print "--clone-iso requires the name of the image"
+                print("--clone-iso requires the name of the image")
                 exit(1)
             do_clone = True
         elif sys.argv[arg] == "--clone-status":
@@ -405,7 +405,7 @@ def main():
             if arg < len(sys.argv):
                 system_config_file = sys.argv[arg]
             else:
-                print "--config-file requires the filename of the config file"
+                print("--config-file requires the filename of the config file")
                 exit(1)
             do_non_interactive = True
         elif sys.argv[arg] in ["--help", "-h", "-?"]:
@@ -423,7 +423,7 @@ def main():
             # are stable, we will remove it and make kubernetes the default.
             options['kubernetes'] = True
         else:
-            print "Invalid option. Use --help for more information."
+            print("Invalid option. Use --help for more information.")
             exit(1)
         arg += 1
 
@@ -434,7 +434,7 @@ def main():
             do_clone,
             do_default_config,
             do_non_interactive].count(True) > 1:
-        print "Invalid combination of options selected"
+        print("Invalid combination of options selected")
         exit(1)
 
     if answerfile and [do_backup,
@@ -444,7 +444,7 @@ def main():
                        do_clone,
                        do_default_config,
                        do_non_interactive].count(True) > 0:
-        print "The --answerfile option cannot be used with the selected option"
+        print("The --answerfile option cannot be used with the selected option")
         exit(1)
 
     log.configure()
@@ -453,10 +453,10 @@ def main():
         # Check if that the command is being run from the console
         if utils.is_ssh_parent():
             if allow_ssh:
-                print textwrap.fill(constants.SSH_WARNING_MESSAGE, 80)
-                print
+                print(textwrap.fill(constants.SSH_WARNING_MESSAGE, 80))
+                print("")
             else:
-                print textwrap.fill(constants.SSH_ERROR_MESSAGE, 80)
+                print(textwrap.fill(constants.SSH_ERROR_MESSAGE, 80))
                 exit(1)
 
     # Reduce the printk console log level to avoid noise during configuration
@@ -471,18 +471,18 @@ def main():
     try:
         if do_backup:
             backup_restore.backup(backup_name, archive_dir)
-            print "\nBackup complete"
+            print("\nBackup complete")
         elif do_system_restore:
             backup_restore.restore_system(backup_name)
-            print "\nSystem restore complete"
+            print("\nSystem restore complete")
         elif do_images_restore:
             backup_restore.restore_images(backup_name)
-            print "\nImages restore complete"
+            print("\nImages restore complete")
         elif do_complete_restore:
             backup_restore.restore_complete()
         elif do_clone:
             clone.clone(backup_name, archive_dir)
-            print "\nCloning complete"
+            print("\nCloning complete")
         elif do_provision:
             assistant = ConfigAssistant(**options)
             assistant.provision(answerfile)
@@ -501,24 +501,24 @@ def main():
                 answerfile = TEMP_CGCS_CONFIG_FILE
             assistant = ConfigAssistant(**options)
             assistant.configure(answerfile, do_default_config)
-            print "\nConfiguration was applied\n"
-            print textwrap.fill(
+            print("\nConfiguration was applied\n")
+            print(textwrap.fill(
                 "Please complete any out of service commissioning steps "
-                "with system commands and unlock controller to proceed.", 80)
+                "with system commands and unlock controller to proceed.", 80))
             assistant.check_required_interfaces_status()
 
     except KeyboardInterrupt:
-        print "\nAborting configuration"
+        print("\nAborting configuration")
     except BackupFail as e:
-        print "\nBackup failed: {}".format(e)
+        print("\nBackup failed: {}".format(e))
     except RestoreFail as e:
-        print "\nRestore failed: {}".format(e)
+        print("\nRestore failed: {}".format(e))
     except ConfigFail as e:
-        print "\nConfiguration failed: {}".format(e)
+        print("\nConfiguration failed: {}".format(e))
     except CloneFail as e:
-        print "\nCloning failed: {}".format(e)
+        print("\nCloning failed: {}".format(e))
     except UserQuit:
-        print "\nAborted configuration"
+        print("\nAborted configuration")
     finally:
         if os.path.isfile(TEMP_CGCS_CONFIG_FILE):
             os.remove(TEMP_CGCS_CONFIG_FILE)
