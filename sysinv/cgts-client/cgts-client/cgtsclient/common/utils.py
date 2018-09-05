@@ -223,7 +223,7 @@ def _sort_for_list(objs, fields, formatters={}, sortby=0, reversesort=False):
 
 
 def default_printer(s):
-    print s
+    print(s)
 
 
 def pt_builder(field_labels, fields, formatters, paging, printer=default_printer):
@@ -408,7 +408,7 @@ def print_tuple_list(tuples, tuple_labels=[], formatters={}):
                     v = formatters[f](v)
                 pt.add_row([l, v])
 
-    print pt.get_string()
+    print(pt.get_string())
 
 
 def str_height(text):
@@ -463,7 +463,7 @@ def print_dict(d, dict_property="Property", wrap=0):
                 col1 = ''
         else:
             pt.add_row([k, v])
-    print pt.get_string()
+    print(pt.get_string())
 
 
 def find_resource(manager, name_or_id):
@@ -559,7 +559,7 @@ def dict_to_patch(values, op='replace'):
 
 def exit(msg=''):
     if msg:
-        print >> sys.stderr, msg
+        print(msg,file=sys.stderr)
     sys.exit(1)
 
 
@@ -575,14 +575,14 @@ def objectify(func):
     >>> obj = {'old_key': 'old_value'}
     >>> oobj = objectify(obj)
     >>> oobj['new_key'] = 'new_value'
-    >>> print oobj['old_key'], oobj['new_key'], oobj.old_key, oobj.new_key
+    >>> print(oobj['old_key'], oobj['new_key'], oobj.old_key, oobj.new_key)
 
     >>> @objectify
     ... def func():
          ...     return {'old_key': 'old_value'}
     >>> obj = func()
     >>> obj['new_key'] = 'new_value'
-    >>> print obj['old_key'], obj['new_key'], obj.old_key, obj.new_key
+    >>> print(obj['old_key'], obj['new_key'], obj.old_key, obj.new_key)
 
 
     """

@@ -338,14 +338,14 @@ def main():
         CgtsShell().main(sys.argv[1:])
 
     except KeyboardInterrupt as e:
-        print >> sys.stderr, ('caught: %r, aborting' % (e))
+        print(('caught: %r, aborting' % (e)),file=sys.stderr)
         sys.exit(0)
 
     except IOError as e:
         sys.exit(0)
 
     except Exception as e:
-        print >> sys.stderr, e
+        print(e,file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":

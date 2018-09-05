@@ -117,8 +117,8 @@ def backend_show(cc, backend_name_or_uuid):
 
 
 def _display_next_steps():
-    print "\nSystem configuration has changed.\nPlease follow the " \
-        "administrator guide to complete configuring the system.\n"
+    print("\nSystem configuration has changed.\nPlease follow the "
+        "administrator guide to complete configuring the system.\n")
 
 
 def backend_add(cc, backend, args):

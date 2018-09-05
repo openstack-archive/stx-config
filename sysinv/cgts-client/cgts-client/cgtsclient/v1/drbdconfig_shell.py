@@ -44,7 +44,7 @@ def do_drbdsync_show(cc, args):
 
     drbdconfigs = cc.drbdconfig.list()
     _print_drbdsync_show(drbdconfigs[0])
-    print
+    print("")
 
     ihosts = cc.ihost.list_personality(personality=CONTROLLER)
     _print_controller_config_show(ihosts)
@@ -72,7 +72,7 @@ def do_drbdsync_modify(cc, args):
     if len(attributes) > 0:
         attributes.append('action=apply')
     else:
-        print "No options provided."
+        print("No options provided.")
         return
 
     patch = utils.args_array_to_patch("replace", attributes)
@@ -90,9 +90,9 @@ def do_drbdsync_modify(cc, args):
     for ihost in ihosts:
         if ihost.config_target and ihost.config_applied != ihost.config_target:
             is_config = True
-            print ("host %s is configuring ..." % (ihost.hostname))
+            print("host %s is configuring ..." % (ihost.hostname))
     if is_config:
-        print "Cannot apply update while controller configuration in progress."
+        print("Cannot apply update while controller configuration in progress.")
         return
 
     try:
@@ -117,16 +117,16 @@ def do_drbdsync_modify(cc, args):
                 hosts.append(ihost.hostname)
         if do_wait:
             if x == 0:
-                print ("waiting for hosts: %s to finish configuring" %
+                print("waiting for hosts: %s to finish configuring" %
                        ', '.join(hosts)),
                 sys.stdout.flush()
             else:
-                print ".",
+                print(".",)
                 sys.stdout.flush()
             time.sleep(wait_interval)
         else:
-            print
-            print "DRBD configuration finished."
+            print("")
+            print("DRBD configuration finished.")
             break
     if do_wait:
-        print "DRBD configuration timed out."
+        print("DRBD configuration timed out.")
