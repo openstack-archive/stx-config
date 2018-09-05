@@ -6,6 +6,7 @@
             voting: false
         - sysinv-tox-unittest:
             voting: false
+        - stx-config-puppet-lint
     gate:
       jobs:
         - noop
@@ -22,3 +23,11 @@
     vars:
       tox_envlist: py27
       tox_extra_args: -c sysinv/sysinv/sysinv/tox.ini
+
+- job:
+    name: stx-config-puppet-lint
+    parent: tox
+    description: |
+      Run puppet lint
+    vars:
+      tox_envlist: puppetlint

@@ -1,0 +1,10 @@
+name    'puppet-manifests'
+version '1.0.0'
+source  'https://github.com/openstack/stx-config'
+author  'Wind River'
+license 'Apache License 2.0'
+summary 'puppet manifests'
+description  'Puppet manifests'
+
+dependency 'puppetlabs/inifile', '>=1.0.0 <2.0.0'
+dependency 'puppetlabs/stdlib', '>=2.5.0'

@@ -28,7 +28,7 @@ class platform::mtce
   include ::openstack::client::credentials::params
   $keyring_directory = $::openstack::client::credentials::params::keyring_directory
 
-  file { "/etc/mtc.ini":
+  file { '/etc/mtc.ini':
     ensure  => present,
     mode    => '0755',
     content => template('mtce/mtc_ini.erb'),
@@ -36,10 +36,10 @@ class platform::mtce
 
   $boot_device = $::boot_disk_device_path
 
-  file { "/etc/rmonfiles.d/static.conf":
-      ensure   => present,
-      mode     => '0644',
-      content  => template('mtce/static_conf.erb'),
+  file { '/etc/rmonfiles.d/static.conf':
+      ensure  => present,
+      mode    => '0644',
+      content => template('mtce/static_conf.erb'),
   }
 }
 
@@ -50,17 +50,17 @@ class platform::mtce::agent
   if $::platform::params::init_keystone {
     # configure a mtce keystone user
     keystone_user { $auth_username:
-      password => $auth_pw,
       ensure   => present,
+      password => $auth_pw,
       enabled  => true,
     }
 
     # assign an admin role for this mtce user on the services tenant
     keystone_user_role { "${auth_username}@${auth_project}":
-      ensure          => present,
-      user_domain     => $auth_user_domain,
-      project_domain  => $auth_project_domain,
-      roles           => ['admin'],
+      ensure         => present,
+      user_domain    => $auth_user_domain,
+      project_domain => $auth_project_domain,
+      roles          => ['admin'],
     }
   }
 }
@@ -68,19 +68,19 @@ class platform::mtce::agent
 
 class platform::mtce::reload {
   exec {'signal-mtc-agent':
-    command => "pkill -HUP mtcAgent",
+    command => 'pkill -HUP mtcAgent',
   }
   exec {'signal-hbs-agent':
-    command => "pkill -HUP hbsAgent",
+    command => 'pkill -HUP hbsAgent',
   }
 
   # mtcClient and hbsClient don't currently reload all configuration,
   # therefore they must be restarted.  Move to HUP if daemon updated.
   exec {'pmon-restart-hbs-client':
-    command => "pmon-restart hbsClient",
+    command => 'pmon-restart hbsClient',
   }
   exec {'pmon-restart-mtc-client':
-    command => "pmon-restart mtcClient",
+    command => 'pmon-restart mtcClient',
   }
 }
 

@@ -159,7 +159,7 @@ class sysinv (
 
   # Automatically add psycopg2 driver to postgresql (only does this if it is missing)
   $real_connection = regsubst($database_connection,'^postgresql:','postgresql+psycopg2:')
-      
+
   sysinv_config {
     'database/connection':    value => $real_connection, secret => true;
     'database/idle_timeout':  value => $database_idle_timeout;
@@ -171,7 +171,7 @@ class sysinv (
     'journal/journal_max_size':     value => $journal_max_size;
     'journal/journal_min_size':     value => $journal_min_size;
     'journal/journal_default_size': value => $journal_default_size;
- }
+  }
 
   if $use_syslog {
     sysinv_config {
@@ -200,7 +200,7 @@ class sysinv (
     'keystone_authtoken/magnum_region_name':  value => $magnum_region_name;
   }
 
- sysinv_api_paste_ini {
+  sysinv_api_paste_ini {
     'filter:authtoken/region_name': value => $region_name;
- }
+  }
 }

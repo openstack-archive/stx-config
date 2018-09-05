@@ -1,12 +1,13 @@
 class platform::drbd::params (
-  $automount     = false,
-  $ha_primary    = false,
-  $initial_setup = false,
-  $fs_type       = 'ext4',
   $link_speed,
   $link_util,
   $num_parallel,
   $rtt_ms,
+
+  $automount     = false,
+  $ha_primary    = false,
+  $initial_setup = false,
+  $fs_type       = 'ext4',
   $cpumask = false,
 ) {
   include ::platform::params
@@ -76,10 +77,10 @@ define platform::drbd::filesystem (
     volume_group    => $vg_name,
     size            => "${lv_size}G",
     size_is_minsize => true,
-  } ->
+  }
 
 
-  drbd::resource { $title:
+  -> drbd::resource { $title:
     disk          => "/dev/${vg_name}/${lv_name}",
     port          => $port,
     device        => $device,
@@ -111,13 +112,13 @@ define platform::drbd::filesystem (
     # NOTE: The DRBD file system can only be resized immediately if not peering,
     #       otherwise it must wait for the peer backing storage device to be
     #       resized before issuing the resize locally.
-    Drbd::Resource[$title] ->
+    Drbd::Resource[$title]
 
-    exec { "drbd resize ${title}":
+    -> exec { "drbd resize ${title}":
       command => "drbdadm -- --assume-peer-has-space resize ${title}",
-    } ->
+    }
 
-    exec { "resize2fs ${title}":
+    -> exec { "resize2fs ${title}":
       command => "resize2fs ${device}",
     }
   }
@@ -163,12 +164,12 @@ class platform::drbd::rabbit ()
   inherits ::platform::drbd::rabbit::params {
 
   platform::drbd::filesystem { $resource_name:
-    vg_name    => $vg_name,
-    lv_name    => $lv_name,
-    lv_size    => $lv_size,
-    port       => $port,
-    device     => $device,
-    mountpoint => $mountpoint,
+    vg_name      => $vg_name,
+    lv_name      => $lv_name,
+    lv_size      => $lv_size,
+    port         => $port,
+    device       => $device,
+    mountpoint   => $mountpoint,
     resync_after => 'drbd-pgsql',
   }
 }
@@ -188,12 +189,12 @@ class platform::drbd::platform ()
   inherits ::platform::drbd::platform::params {
 
   platform::drbd::filesystem { $resource_name:
-    vg_name    => $vg_name,
-    lv_name    => $lv_name,
-    lv_size    => $lv_size,
-    port       => $port,
-    device     => $device,
-    mountpoint => $mountpoint,
+    vg_name      => $vg_name,
+    lv_name      => $lv_name,
+    lv_size      => $lv_size,
+    port         => $port,
+    device       => $device,
+    mountpoint   => $mountpoint,
     resync_after => 'drbd-rabbit',
   }
 }
@@ -213,12 +214,12 @@ class platform::drbd::cgcs ()
   inherits ::platform::drbd::cgcs::params {
 
   platform::drbd::filesystem { $resource_name:
-    vg_name    => $vg_name,
-    lv_name    => $lv_name,
-    lv_size    => $lv_size,
-    port       => $port,
-    device     => $device,
-    mountpoint => $mountpoint,
+    vg_name      => $vg_name,
+    lv_name      => $lv_name,
+    lv_size      => $lv_size,
+    port         => $port,
+    device       => $device,
+    mountpoint   => $mountpoint,
     resync_after => 'drbd-platform',
   }
 }
@@ -251,12 +252,12 @@ class platform::drbd::extension (
   }
 
   platform::drbd::filesystem { $resource_name:
-    vg_name    => $vg_name,
-    lv_name    => $lv_name,
-    lv_size    => $lv_size,
-    port       => $port,
-    device     => $device,
-    mountpoint => $mountpoint,
+    vg_name      => $vg_name,
+    lv_name      => $lv_name,
+    lv_size      => $lv_size,
+    port         => $port,
+    device       => $device,
+    mountpoint   => $mountpoint,
     resync_after => $resync_after,
   }
 }
@@ -289,17 +290,17 @@ class platform::drbd::patch_vault (
 
   if $service_enabled {
     platform::drbd::filesystem { $resource_name:
-      vg_name    => $vg_name,
-      lv_name    => $lv_name,
-      lv_size    => $lv_size,
-      port       => $port,
-      device     => $device,
-      mountpoint => $mountpoint,
-      resync_after => 'drbd-extension',
-      manage_override => $drbd_manage,
-      ha_primary_override => $drbd_primary,
+      vg_name                => $vg_name,
+      lv_name                => $lv_name,
+      lv_size                => $lv_size,
+      port                   => $port,
+      device                 => $device,
+      mountpoint             => $mountpoint,
+      resync_after           => 'drbd-extension',
+      manage_override        => $drbd_manage,
+      ha_primary_override    => $drbd_primary,
       initial_setup_override => $drbd_initial,
-      automount_override => $drbd_automount,
+      automount_override     => $drbd_automount,
     }
   }
 }
@@ -335,17 +336,17 @@ class platform::drbd::etcd (
 
   if $::platform::kubernetes::params::enabled {
     platform::drbd::filesystem { $resource_name:
-      vg_name    => $vg_name,
-      lv_name    => $lv_name,
-      lv_size    => $lv_size,
-      port       => $port,
-      device     => $device,
-      mountpoint => $mountpoint,
-      resync_after => undef,
-      manage_override => $drbd_manage,
-      ha_primary_override => $drbd_primary,
+      vg_name                => $vg_name,
+      lv_name                => $lv_name,
+      lv_size                => $lv_size,
+      port                   => $port,
+      device                 => $device,
+      mountpoint             => $mountpoint,
+      resync_after           => undef,
+      manage_override        => $drbd_manage,
+      ha_primary_override    => $drbd_primary,
       initial_setup_override => $drbd_initial,
-      automount_override => $drbd_automount,
+      automount_override     => $drbd_automount,
     }
   }
 }
@@ -379,17 +380,17 @@ class platform::drbd::dockerdistribution ()
 
   if $::platform::kubernetes::params::enabled {
     platform::drbd::filesystem { $resource_name:
-      vg_name    => $vg_name,
-      lv_name    => $lv_name,
-      lv_size    => $lv_size,
-      port       => $port,
-      device     => $device,
-      mountpoint => $mountpoint,
-      resync_after => undef,
-      manage_override => $drbd_manage,
-      ha_primary_override => $drbd_primary,
+      vg_name                => $vg_name,
+      lv_name                => $lv_name,
+      lv_size                => $lv_size,
+      port                   => $port,
+      device                 => $device,
+      mountpoint             => $mountpoint,
+      resync_after           => undef,
+      manage_override        => $drbd_manage,
+      ha_primary_override    => $drbd_primary,
       initial_setup_override => $drbd_initial,
-      automount_override => $drbd_automount,
+      automount_override     => $drbd_automount,
     }
   }
 }
@@ -429,9 +430,9 @@ class platform::drbd(
   include ::platform::drbd::dockerdistribution
 
   # network changes need to be applied prior to DRBD resources
-  Anchor['platform::networking'] ->
-  Drbd::Resource <| |> ->
-  Anchor['platform::services']
+  Anchor['platform::networking']
+  -> Drbd::Resource <| |>
+  -> Anchor['platform::services']
 }
 
 
@@ -444,9 +445,9 @@ class platform::drbd::bootstrap {
 
   # override the defaults to initialize and activate the file systems
   class { '::platform::drbd::params':
-    ha_primary => true,
+    ha_primary    => true,
     initial_setup => true,
-    automount => true,
+    automount     => true,
   }
 
   include ::platform::drbd::pgsql

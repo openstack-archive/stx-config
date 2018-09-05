@@ -86,7 +86,7 @@ class openstack::cinder::params (
       $is_initial_cinder_ceph = false
       $is_node_cinder_ceph = false
     }
-    
+
     # Cinder needs to be running on initial configuration of either Ceph or LVM
     if str2bool($::is_controller_active) and ($is_initial_cinder_lvm or $is_initial_cinder_ceph) {
       $enable_cinder_service = true
@@ -148,32 +148,32 @@ class openstack::cinder
   }
 
   if $service_enabled {
-    file { "${cinder_directory}":
+    file { $cinder_directory:
       ensure => 'directory',
       owner  => 'root',
       group  => 'root',
       mode   => '0755',
-    } ->
-    file { "${cinder_image_conversion_dir}":
+    }
+    -> file { $cinder_image_conversion_dir:
       ensure => 'directory',
       owner  => 'root',
       group  => 'root',
       mode   => '0755',
-    } ->
-    file { "${cinder_directory}/data":
+    }
+    -> file { "${cinder_directory}/data":
       ensure => 'directory',
       owner  => 'root',
       group  => 'root',
       mode   => '0755',
     }
   } else {
-    file { "${cinder_directory}":
+    file { $cinder_directory:
       ensure => 'directory',
       owner  => 'root',
       group  => 'root',
       mode   => '0755',
-    } ->
-    file { "${cinder_directory}/data":
+    }
+    -> file { "${cinder_directory}/data":
       ensure => 'directory',
       owner  => 'root',
       group  => 'root',
@@ -299,24 +299,24 @@ class openstack::cinder::lvm::filesystem::drbd (
     $ha_primary = true
     $initial_setup = true
     $service_enable = true
-    $service_ensure = "running"
+    $service_ensure = 'running'
   } else {
     $ha_primary = false
     $initial_setup = false
     $service_enable = false
-    $service_ensure = "stopped"
+    $service_ensure = 'stopped'
   }
 
   if $is_node_cinder_lvm {
 
     # prepare disk for drbd
     file { '/etc/udev/mount.blacklist':
-      ensure  => present,
-      mode    => '0644',
-      owner   => 'root',
-      group   => 'root',
-    } ->
-    file_line { 'blacklist ${cinder_disk} automount':
+      ensure => present,
+      mode   => '0644',
+      owner  => 'root',
+      group  => 'root',
+    }
+    -> file_line { "blacklist ${cinder_disk} automount":
       ensure => present,
       line   => $cinder_disk,
       path   => '/etc/udev/mount.blacklist',
@@ -362,33 +362,33 @@ class openstack::cinder::lvm::filesystem::drbd (
     # Note: Cinder disk replacement is triggered from sysinv by removing
     # the checkpoint file behind is_node_cinder_lvm.
     physical_volume { $device:
-      ensure => present,
+      ensure  => present,
       require => Drbd::Resource[$drbd_resource]
-    } ->
-    volume_group { $vg_name:
+    }
+    -> volume_group { $vg_name:
       ensure           => present,
       physical_volumes => $device,
-    } ->
+    }
     # Create an initial LV, because the LVM ocf resource does not work with
     # an empty VG.
-    logical_volume { 'anchor-lv':
+    -> logical_volume { 'anchor-lv':
       ensure          => present,
       volume_group    => $vg_name,
       size            => '1M',
       size_is_minsize => true,
-    } ->
+    }
     # Deactivate the VG now. If this isn't done, it prevents DRBD from
     # being stopped later by the SM.
-    exec { 'Deactivate VG':
+    -> exec { 'Deactivate VG':
       command => "vgchange -a ln ${vg_name}",
-    } ->
+    }
     # Make sure the primary resource is in the correct state so that on swact to
     # controller-1 sm has the resource in an acceptable state to become managed
     # and primary. But, if this primary is a single controller we will restart
     # SM so keep it primary
 
     # TODO (rchurch): fix up the drbd_handoff logic.
-    exec { 'Set $drbd_resource role':
+    -> exec { 'Set $drbd_resource role':
       command => str2bool($drbd_handoff) ? {true => "drbdadm secondary ${drbd_resource}", default => '/bin/true'},
       unless  => "drbdadm role ${drbd_resource} | egrep '^Secondary'",
     }
@@ -425,8 +425,8 @@ class openstack::cinder::lvm(
     group   => 'root',
     mode    => '0755',
     require => File[$cinder_directory],
-  } ->
-  file { "${cinder_directory}/iscsi-target/saveconfig.json":
+  }
+  -> file { "${cinder_directory}/iscsi-target/saveconfig.json":
     ensure  => 'present',
     owner   => 'root',
     group   => 'root',
@@ -439,39 +439,40 @@ class openstack::cinder::lvm(
   }
 
   if $lvm_type == 'thin' {
-       $iscsi_lvm_config = {
-         'lvm/iscsi_target_flags' => {'value' => 'direct'},
-         'lvm/lvm_type' => {'value' => 'thin'},
-         'DEFAULT/max_over_subscription_ratio' => {'value' => 1.0}
-       }
+    $iscsi_lvm_config = {
+      'lvm/iscsi_target_flags' => {'value' => 'direct'},
+      'lvm/lvm_type' => {'value' => 'thin'},
+      'DEFAULT/max_over_subscription_ratio' => {'value' => 1.0}
+    }
   } else {
-      $iscsi_lvm_config = {
-          'lvm/iscsi_target_flags' => {'value' => 'direct'},
-          'lvm/lvm_type' => {'value' => 'default'},
-          'lvm/volume_clear' => {'value' => 'none'}
-        }
+    $iscsi_lvm_config = {
+      'lvm/iscsi_target_flags' => {'value' => 'direct'},
+      'lvm/lvm_type' => {'value' => 'default'},
+      'lvm/volume_clear' => {'value' => 'none'}
+    }
   }
 
   cinder::backend::iscsi { 'lvm':
     iscsi_ip_address => $iscsi_ip_address,
-    extra_options =>  $iscsi_lvm_config ,
-    volumes_dir => "${cinder_directory}/data/volumes",
+    extra_options    =>  $iscsi_lvm_config ,
+    volumes_dir      => "${cinder_directory}/data/volumes",
   }
 }
 
 define openstack::cinder::backend::ceph(
-  $backend_enabled = false,
   $backend_name,
-  $rbd_user = 'cinder',
   $rbd_pool,
+
+  $backend_enabled = false,
+  $rbd_user = 'cinder',
   $rbd_ceph_conf = '/etc/ceph/ceph.conf'
 ) {
 
   if $backend_enabled {
     cinder::backend::rbd {$backend_name:
-      backend_host => '$host',
-      rbd_pool => $rbd_pool,
-      rbd_user => $rbd_user,
+      backend_host  => '$host',
+      rbd_pool      => $rbd_pool,
+      rbd_user      => $rbd_user,
       rbd_ceph_conf => $rbd_ceph_conf,
     }
   } else {
@@ -560,7 +561,7 @@ class openstack::cinder::firewall
   if $service_enabled {
     platform::firewall::rule { 'cinder-api':
       service_name => 'cinder',
-      ports => $api_port,
+      ports        => $api_port,
     }
   }
 }
@@ -571,8 +572,8 @@ class openstack::cinder::haproxy
 
   if $service_enabled {
     platform::haproxy::proxy { 'cinder-restapi':
-      server_name => 's-cinder',
-      public_port => $api_port,
+      server_name  => 's-cinder',
+      public_port  => $api_port,
       private_port => $api_port,
     }
   }
@@ -580,9 +581,10 @@ class openstack::cinder::haproxy
 
 
 define openstack::cinder::api::backend(
-  $type_enabled = false,
   $type_name,
-  $backend_name
+  $backend_name,
+
+  $type_enabled = false,
 ) {
   # Run it on the active controller, otherwise the prefetch step tries to query
   # cinder and can fail
@@ -643,10 +645,10 @@ class openstack::cinder::api
   }
 
   class { '::cinder::api':
-    bind_host           => $api_host,
-    service_workers     => $api_workers,
-    sync_db             => $::platform::params::init_database,
-    enabled             => str2bool($enable_cinder_service)
+    bind_host       => $api_host,
+    service_workers => $api_workers,
+    sync_db         => $::platform::params::init_database,
+    enabled         => str2bool($enable_cinder_service)
   }
 
   if $::openstack::cinder::params::configure_endpoint {
@@ -671,7 +673,7 @@ class openstack::cinder::pre {
   if $::platform::params::distributed_cloud_role =='systemcontroller' and $enabled {
     # need to enable cinder-api-proxy in order to apply the cinder manifest
     exec { 'Enable Dcorch Cinder API Proxy':
-      command => "systemctl enable dcorch-cinder-api-proxy; systemctl start dcorch-cinder-api-proxy",
+      command => 'systemctl enable dcorch-cinder-api-proxy; systemctl start dcorch-cinder-api-proxy',
     }
   }
 }
@@ -716,14 +718,14 @@ class openstack::cinder::post
   # To allow for the transition it must be explicitly stopped. Once puppet
   # can directly handle SM managed services, then this can be removed.
   exec { 'Disable OpenStack - Cinder API':
-    command => "systemctl stop openstack-cinder-api; systemctl disable openstack-cinder-api",
+    command => 'systemctl stop openstack-cinder-api; systemctl disable openstack-cinder-api',
     require => Class['openstack::cinder'],
   }
 
   if $::platform::params::distributed_cloud_role =='systemcontroller' {
     # stop and disable the cinder api proxy to allow SM to manage the service
     exec { 'Disable Dcorch Cinder API Proxy':
-      command => "systemctl stop dcorch-cinder-api-proxy; systemctl disable dcorch-cinder-api-proxy",
+      command => 'systemctl stop dcorch-cinder-api-proxy; systemctl disable dcorch-cinder-api-proxy',
       require => Class['openstack::cinder'],
     }
   }

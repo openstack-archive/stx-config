@@ -42,17 +42,17 @@ class platform::ceph
 
   if $service_enabled or $configure_ceph_mon_info {
     class { '::ceph':
-      fsid => $cluster_uuid,
+      fsid                => $cluster_uuid,
       authentication_type => $authentication_type,
-    } ->
-    ceph_config {
+    }
+    -> ceph_config {
       "mon.${mon_0_host}/host":      value => $mon_0_host;
       "mon.${mon_0_host}/mon_addr":  value => $mon_0_addr;
       "mon.${mon_1_host}/host":      value => $mon_1_host;
       "mon.${mon_1_host}/mon_addr":  value => $mon_1_addr;
       "mon.${mon_2_host}/host":      value => $mon_2_host;
       "mon.${mon_2_host}/mon_addr":  value => $mon_2_addr;
-      "mon/mon clock drift allowed": value => ".1";
+      'mon/mon clock drift allowed': value => '.1';
     }
   }
 
@@ -66,11 +66,11 @@ class platform::ceph::post {
   include ::platform::ceph::params
   # Enable ceph process recovery after all configuration is done
   file { $::platform::ceph::params::ceph_config_ready_path:
-    ensure => present,
+    ensure  => present,
     content => '',
-    owner => 'root',
-    group => 'root',
-    mode => '0644',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
   }
 }
 
@@ -80,13 +80,13 @@ class platform::ceph::monitor
 
   if $service_enabled {
     file { '/var/lib/ceph':
-      ensure  => 'directory',
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0755',
-    } ->
+      ensure => 'directory',
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
+    }
 
-    platform::filesystem { $mon_lv_name:
+    -> platform::filesystem { $mon_lv_name:
       lv_name    => $mon_lv_name,
       lv_size    => $mon_lv_size,
       mountpoint => $mon_mountpoint,
@@ -94,12 +94,12 @@ class platform::ceph::monitor
       fs_options => $mon_fs_options,
     } -> Class['::ceph']
 
-    file { "/etc/pmon.d/ceph.conf":
-      ensure  => link,
-      target  => "/etc/ceph/ceph.conf.pmon",
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0640',
+    file { '/etc/pmon.d/ceph.conf':
+      ensure => link,
+      target => '/etc/ceph/ceph.conf.pmon',
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0640',
     }
 
     # ensure configuration is complete before creating monitors
@@ -109,9 +109,9 @@ class platform::ceph::monitor
     # allow in-service configuration.
     # TODO(oponcea): Remove the pmon flag file created by systemctl start ceph
     if str2bool($::is_controller_active) {
-      $service_ensure = "running"
+      $service_ensure = 'running'
     } else {
-      $service_ensure = "stopped"
+      $service_ensure = 'stopped'
     }
 
     # default configuration for all ceph monitor resources
@@ -157,16 +157,16 @@ define platform_ceph_osd(
   }
   file { "/var/lib/ceph/osd/ceph-${osd_id}":
     ensure => 'directory',
-    owner => 'root',
-    group => 'root',
-    mode => '0755',
-  } ->
-  ceph::osd { $disk_path:
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+  -> ceph::osd { $disk_path:
     uuid => $osd_uuid,
-  } ->
-  exec { "configure journal location ${name}":
+  }
+  -> exec { "configure journal location ${name}":
     logoutput => true,
-    command => template('platform/ceph.journal.location.erb')
+    command   => template('platform/ceph.journal.location.erb')
   }
 }
 
@@ -177,7 +177,7 @@ define platform_ceph_journal(
 ) {
   exec { "configure journal partitions ${name}":
     logoutput => true,
-    command => template('platform/ceph.journal.partitions.erb')
+    command   => template('platform/ceph.journal.partitions.erb')
   }
 }
 
@@ -191,8 +191,8 @@ class platform::ceph::storage(
   Class['::platform::partitions'] -> Class[$name]
 
   file { '/var/lib/ceph/osd':
-    path   => '/var/lib/ceph/osd',
     ensure => 'directory',
+    path   => '/var/lib/ceph/osd',
     owner  => 'root',
     group  => 'root',
     mode   => '0755',
@@ -277,12 +277,12 @@ class platform::ceph::rgw
 
     ceph_config {
       # increase limit for single operation uploading to 50G (50*1024*1024*1024)
-      "client.$rgw_client_name/rgw_max_put_size": value => $rgw_max_put_size;
+      "client.${rgw_client_name}/rgw_max_put_size": value => $rgw_max_put_size;
       # increase frequency and scope of garbage collection
-      "client.$rgw_client_name/rgw_gc_max_objs": value => $rgw_gc_max_objs;
-      "client.$rgw_client_name/rgw_gc_obj_min_wait": value => $rgw_gc_obj_min_wait;
-      "client.$rgw_client_name/rgw_gc_processor_max_time": value => $rgw_gc_processor_max_time;
-      "client.$rgw_client_name/rgw_gc_processor_period": value => $rgw_gc_processor_period;
+      "client.${rgw_client_name}/rgw_gc_max_objs": value => $rgw_gc_max_objs;
+      "client.${rgw_client_name}/rgw_gc_obj_min_wait": value => $rgw_gc_obj_min_wait;
+      "client.${rgw_client_name}/rgw_gc_processor_max_time": value => $rgw_gc_processor_max_time;
+      "client.${rgw_client_name}/rgw_gc_processor_period": value => $rgw_gc_processor_period;
     }
   }
 

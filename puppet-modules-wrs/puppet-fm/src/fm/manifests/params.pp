@@ -1,3 +1,6 @@
+#
+# fm parameters
+#
 class fm::params {
 
   case $::osfamily {
