@@ -6,6 +6,7 @@
             voting: false
         - sysinv-tox-unittest:
             voting: false
+        - stx-config-puppet-lint
 
 - job:
     name: sysinv-tox-unittest
@@ -19,3 +20,15 @@
     vars:
       tox_envlist: py27
       tox_extra_args: -c sysinv/sysinv/sysinv/tox.ini
+
+- job:
+    name: stx-config-puppet-lint
+    parent: puppet-openstack-module-base
+    run: playbooks/run-lint-tests.yaml
+    irrelevant-files:
+      - ^doc/.*$
+      - ^etc/.*$
+      - ^releasenotes/.*$
+      - ^requirements.txt$
+      - ^test-requirements.txt$
+
