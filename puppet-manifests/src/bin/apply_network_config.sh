@@ -31,29 +31,29 @@ if [ ! -d /var/run/network-scripts.puppet/ ] ; then
     exit 1
 fi
 
-function log_it() {
+function log_it {
     logger "${0} ${1}"
 }
 
-function do_if_up() {
+function do_if_up {
     local iface=$1
     log_it "Bringing $iface up"
     /sbin/ifup $iface
 }
 
-function do_if_down() {
+function do_if_down {
     local iface=$1
     log_it "Bringing $iface down"
     /sbin/ifdown $iface
 }
 
-function do_rm() {
+function do_rm {
     local theFile=$1
     log_it "Removing $theFile"
     /bin/rm  $theFile
 }
 
-function do_cp() {
+function do_cp {
     local srcFile=$1
     local dstFile=$2
     log_it "copying network cfg $srcFile to $dstFile"
@@ -76,7 +76,7 @@ array_diff () {
     echo  ${result[@]}
 }
 
-function normalized_cfg_attr_value() {
+function normalized_cfg_attr_value {
     local cfg=$1
     local attr_name=$2
     local attr_value=$(cat $cfg | grep $attr_name= | awk -F "=" {'print $2'})
@@ -139,7 +139,7 @@ function normalized_cfg_attr_value() {
 #
 # returns $(true) if cfg file ( $1 ) has property propName ( $2 ) with a value of propValue ( $3 )
 #
-function cfg_has_property_with_value() {
+function cfg_has_property_with_value {
     local cfg=$1
     local propname=$2
     local propvalue=$3
@@ -154,7 +154,7 @@ function cfg_has_property_with_value() {
 #
 # returns $(true) if cfg file is configured as a slave
 #
-function is_slave() {
+function is_slave {
     cfg_has_property_with_value $1 "SLAVE" "yes"
     return $?
 }
@@ -162,14 +162,14 @@ function is_slave() {
 #
 # returns $(true) if cfg file is configured for DHCP
 #
-function is_dhcp() {
+function is_dhcp {
     cfg_has_property_with_value $1 "BOOTPROTO" "dhcp"
 }
 
 #
 # returns $(true) if cfg file is configured as a VLAN interface
 #
-function is_vlan() {
+function is_vlan {
     cfg_has_property_with_value $1 "VLAN" "yes"
     return $?
 }
@@ -180,7 +180,7 @@ function is_vlan() {
 # a vlan or a slave.  This includes both regular ethernet interfaces and bonded
 # interfaces.
 #
-function is_ethernet() {
+function is_ethernet {
     if ! is_vlan $1; then
         if ! is_slave $1; then
             return $(true)
@@ -192,7 +192,7 @@ function is_ethernet() {
 #
 # returns $(true) if cfg file represents an interface of the specified type.
 #
-function iftype_filter() {
+function iftype_filter {
     local iftype=$1
 
     return $(is_$iftype $2)
@@ -202,7 +202,7 @@ function iftype_filter() {
 # returns $(true) if ifcfg files have the same number of VFs
 #
 #
-function is_eq_sriov_numvfs() {
+function is_eq_sriov_numvfs {
    local cfg_1=$1
    local cfg_2=$2
 
@@ -226,12 +226,11 @@ function is_eq_sriov_numvfs() {
 # Warning:  Only compares against cfg file attributes:
 #            BOOTPROTO DEVICE IPADDR NETMASK GATEWAY MTU BONDING_OPTS SRIOV_NUMVFS
 #
-function is_eq_ifcfg() {
+function is_eq_ifcfg {
    local cfg_1=$1
    local cfg_2=$2
 
-   for attr in BOOTPROTO DEVICE IPADDR NETMASK GATEWAY MTU BONDING_OPTS
-   do
+   for attr in BOOTPROTO DEVICE IPADDR NETMASK GATEWAY MTU BONDING_OPTS; do
       local attr_value1=$(normalized_cfg_attr_value $cfg_1 $attr)
       local attr_value2=$(normalized_cfg_attr_value $cfg_2 $attr)
       if [[ "${attr_value1}" != "${attr_value2}"  ]]; then
@@ -245,7 +244,7 @@ function is_eq_ifcfg() {
 }
 
 # Synchronize with sysinv-agent audit (ifup/down to query link speed).
-function sysinv_agent_lock() {
+function sysinv_agent_lock {
    case $1 in
    $ACQUIRE_LOCK)
       local lock_file="/var/run/apply_network_config.lock"
@@ -255,12 +254,12 @@ function sysinv_agent_lock() {
       local n=1
       LOCK_FD=0
       exec {LOCK_FD}>$lock_file
-      while [[ $n -le $max ]]
-      do
+      while [[ $n -le $max ]]; do
+
           flock -w $lock_timeout $LOCK_FD && break
           log_it "Failed to get lock($LOCK_FD) after $lock_timeout seconds ($n/$max), will retry"
           sleep 1
-          ((n++))
+          n=$(($n+1))
       done
       if [[ $n -gt $max ]]; then
          log_it "Failed to acquire lock($LOCK_FD) even after $max retries"

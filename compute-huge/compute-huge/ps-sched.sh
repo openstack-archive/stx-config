@@ -12,8 +12,7 @@
 
 printf "%6s %6s %6s %1c %2s %4s %6s %4s %-24s %2s %-16s %s\n" "PID" "TID" "PPID" "S" "PO" "NICE" "RTPRIO" "PR" "AFFINITY" "P" "COMM" "COMMAND"
 ps -eL -o pid=,lwp=,ppid=,state=,class=,nice=,rtprio=,priority=,psr=,comm=,command= | \
-  while read pid tid ppid state policy nice rtprio priority psr comm command
-do
+  while read pid tid ppid state policy nice rtprio priority psr comm command; do
   bitmask=$(taskset -p $tid 2>/dev/null)
   aff=${bitmask##*: }
   if [ -z "${aff}" ]; then
