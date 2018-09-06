@@ -21,18 +21,15 @@ LOG_PRIORITY=info
 TMPLOG=/tmp/${WHOAMI}.log
 
 # LOG() - generates log and puts in temporary file
-function LOG()
-{
+function LOG {
    logger -t "${0##*/}[$$]" -p ${LOG_FACILITY}.${LOG_PRIORITY} "$@"
    echo "${0##*/}[$$]" "$@" >> ${TMPLOG}
 }
-function INFO()
-{
+function INFO {
    MSG="INFO"
    LOG "${MSG} $@"
 }
-function ERROR()
-{
+function ERROR {
    MSG="ERROR"
    LOG "${MSG} $@"
 }

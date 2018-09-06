@@ -36,8 +36,7 @@ KERNEL=`uname -a`
 ################################################################################
 # Check if a given core is one of the platform cores
 ################################################################################
-function is_platform_core()
-{
+function is_platform_core {
   local core=$1
   for CPU in ${PLATFORM_CPULIST}; do
     if [ $core -eq $CPU ]; then
@@ -50,8 +49,7 @@ function is_platform_core()
 ################################################################################
 # Check if a given core is one of the vswitch cores
 ################################################################################
-function is_vswitch_core()
-{
+function is_vswitch_core {
   local core=$1
   for CPU in ${VSWITCH_CPULIST}; do
     if [ $core -eq $CPU ]; then
@@ -64,8 +62,7 @@ function is_vswitch_core()
 ################################################################################
 # An audit and corrective action following a swact
 ################################################################################
-function audit_and_reaffine()
-{
+function audit_and_reaffine {
   local mask=$1
   local cmd_str=""
   local tasklist
@@ -93,8 +90,7 @@ function audit_and_reaffine()
 # The induced tasks migration should be done after all VMs have been restored
 # following a host reboot in AIO, hence the delay.
 ################################################################################
-function move_inactive_threads_to_platform_cores()
-{
+function move_inactive_threads_to_platform_cores {
   local tasklist
   local cmd_str=""
 
@@ -129,8 +125,7 @@ function move_inactive_threads_to_platform_cores()
 # The following function is called by affine-platform.sh to affine tasks to
 # all available cores during initial startup and subsequent host reboots.
 ################################################################################
-function affine_tasks_to_all_cores()
-{
+function affine_tasks_to_all_cores {
   local pidlist
   local rc=0
 
@@ -170,8 +165,7 @@ function affine_tasks_to_all_cores()
 #
 # Kernel, vswitch and VM related tasks are untouched.
 ################################################################################
-function affine_tasks_to_idle_cores()
-{
+function affine_tasks_to_idle_cores {
   local cpulist
   local cpuocc_list
   local vswitch_pid
@@ -198,7 +192,7 @@ function affine_tasks_to_idle_cores()
   for idle_value in ${cpuocc_list[@]}; do
     is_vswitch_core $cpu
     if [ $? -eq 1 ]; then
-      ((cpu++))
+      cpu=$(($cpu+1))
       continue
     fi
 
@@ -210,7 +204,7 @@ function affine_tasks_to_idle_cores()
       # Non platform core is added to the idle list if it is more than 95% idle
       [[ $(echo "$idle_value > ${IDLE_MARK}"|bc) -eq 1 ]] && idle_cpulist=$idle_cpulist$cpu","
     fi
-    ((cpu++))
+    cpu=$(($cpu+1))
   done
 
   idle_cpulist=$(echo $idle_cpulist|sed 's/.$//')
@@ -248,8 +242,7 @@ function affine_tasks_to_idle_cores()
 # b) sm at the end of swact sequence
 # to re-affine management tasks back to the platform cores.
 ################################################################################
-function affine_tasks_to_platform_cores()
-{
+function affine_tasks_to_platform_cores {
   local cpulist
   local pidlist
   local rc=0
@@ -274,7 +267,7 @@ function affine_tasks_to_platform_cores()
     # tasks were not affined previously so they should have different affinity
     # mask(s).
     if [ "${pid_affinity_mask}" == "${affinity_mask}" ]; then
-      ((count++))
+      count=$(($count+1))
       # log_debug "Affining pid $pid to platform cores..." 
       taskset --all-tasks --pid --cpu-list ${PLATFORM_CPUS} $pid &> /dev/null
       rc=$?
@@ -298,8 +291,7 @@ function affine_tasks_to_platform_cores()
 ################################################################################
 # The following function can be leveraged by cron tasks
 ################################################################################
-function get_most_idle_core()
-{
+function get_most_idle_core {
   local cpuocc_list
   local cpu=0
   local most_idle_value=${IDLE_MARK}
@@ -315,7 +307,7 @@ function get_most_idle_core()
   for idle_value in ${cpuocc_list[@]}; do
     is_vswitch_core $cpu
     if [ $? -eq 1 ]; then
-      ((cpu++))
+      cpu=$(($cpu+1))
       continue
     fi
 
@@ -323,7 +315,7 @@ function get_most_idle_core()
       most_idle_value=$idle_value
       most_idle_cpu=$cpu
     fi
-    ((cpu++))
+    cpu=$(($cpu+1))
   done
 
   echo $most_idle_cpu

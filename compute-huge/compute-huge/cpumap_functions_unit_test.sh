@@ -13,8 +13,7 @@ if [ ! -z ${1} ]; then
     NR_CPUS_LIST=(${1//,/ })
 fi
 
-function test_cpumap_to_cpulist()
-{
+function test_cpumap_to_cpulist {
     local NR_CPUS=$1
     declare -A CPULISTS
 
@@ -85,8 +84,7 @@ function test_cpumap_to_cpulist()
     printf "\n"
 }
 
-function test_cpulist_to_cpumap()
-{
+function test_cpulist_to_cpumap {
     local NR_CPUS=$1
     declare -A CPUMAPS
 
@@ -152,8 +150,7 @@ function test_cpulist_to_cpumap()
     printf "\n"
 }
 
-function test_invert_cpumap()
-{
+function test_invert_cpumap {
     local NR_CPUS=$1
     declare -A INVERSES
 
@@ -204,7 +201,7 @@ function test_invert_cpumap()
         INVERSES["FFFFFFFFFFFFFFFE"]="FFFFFFFFFFFFFFFF0000000000000001" 
         INVERSES["8000000000000001"]="FFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFE" 
     fi
-    if [ ${NR_CPUS} -ge 128 ]; then 
+    if [ ${NR_CPUS} -ge 128 ]; then
         INVERSES["11111111111111111111111111111111"]="EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
         INVERSES["0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F"]="F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0"
         INVERSES["F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0"]="0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F"
