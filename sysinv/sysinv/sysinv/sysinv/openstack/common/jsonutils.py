@@ -52,7 +52,7 @@ _nasty_type_tests = [inspect.ismodule, inspect.isclass, inspect.ismethod,
                      inspect.iscode, inspect.isbuiltin, inspect.isroutine,
                      inspect.isabstract]
 
-_simple_types = (types.NoneType, int, basestring, bool, float, long)
+_simple_types = (types.NoneType, six.integer_types, basestring, bool, float)
 
 
 def to_primitive(value, convert_instances=False, convert_datetime=True,
@@ -73,7 +73,6 @@ def to_primitive(value, convert_instances=False, convert_datetime=True,
     # handle obvious types first - order of basic types determined by running
     # full tests on nova project, resulting in the following counts:
     # 572754 <type 'NoneType'>
-    # 460353 <type 'int'>
     # 379632 <type 'unicode'>
     # 274610 <type 'str'>
     # 199918 <type 'dict'>
@@ -82,7 +81,6 @@ def to_primitive(value, convert_instances=False, convert_datetime=True,
     #  26164 <type 'list'>
     #   6491 <type 'float'>
     #    283 <type 'tuple'>
-    #     19 <type 'long'>
     if isinstance(value, _simple_types):
         return value
 
