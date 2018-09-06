@@ -26,8 +26,7 @@ LOG_DEBUG=1
 ################################################################################
 # Affine all running tasks to the CPULIST provided in the first parameter. 
 ################################################################################
-function affine_tasks 
-{
+function affine_tasks {
     local CPULIST=$1
     local PIDLIST
     local RET=0
@@ -73,20 +72,17 @@ function affine_tasks
        # On low latency compute reassign the per cpu threads rcuc, ksoftirq,
        # ktimersoftd to FIFO along with the specified priority
        PIDLIST=$( ps -e -p 2 |grep rcuc | awk '{ print $1; }')
-       for PID in ${PIDLIST[@]}
-       do
+       for PID in ${PIDLIST[@]}; do
           chrt -p -f 4 ${PID}  2>/dev/null
        done
 
        PIDLIST=$( ps -e -p 2 |grep ksoftirq | awk '{ print $1; }')
-       for PID in ${PIDLIST[@]}
-       do
+       for PID in ${PIDLIST[@]}; do
           chrt -p -f 2 ${PID} 2>/dev/null
        done
 
        PIDLIST=$( ps -e -p 2 |grep ktimersoftd | awk '{ print $1; }')
-       for PID in ${PIDLIST[@]}
-       do
+       for PID in ${PIDLIST[@]}; do
           chrt -p -f 3 ${PID} 2>/dev/null
        done
     
@@ -98,8 +94,7 @@ function affine_tasks
 ################################################################################
 # Start Action
 ################################################################################
-function start 
-{
+function start {
     local RET=0
 
     echo -n "Starting ${scriptname}: "
@@ -129,8 +124,7 @@ function start
 ################################################################################
 # Stop Action - don't do anything
 ################################################################################
-function stop
-{
+function stop {
     local RET=0
     echo -n "Stopping ${scriptname}: "
     print_status ${RET}
@@ -140,7 +134,7 @@ function stop
 ################################################################################
 # Restart Action
 ################################################################################
-function restart() {
+function restart {
     stop
     start
 }
