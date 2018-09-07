@@ -267,6 +267,11 @@ DEFAULT_PATCH_VAULT_STOR_SIZE = 8
 DEFAULT_ETCD_STORE_SIZE = 1
 DEFAULT_GNOCCHI_STOR_SIZE = 5
 
+# The threshhold between small and large disks is 240GiB
+DEFAULT_SMALL_DISK_SIZE = 240
+# The minimum disk size needed to create all partitions
+MINIMUM_DISK_SIZE = 121
+
 # Docker lv size when Kubernetes is configured
 KUBERNETES_DOCKER_STOR_SIZE = 10
 ETCD_STOR_SIZE = 5
