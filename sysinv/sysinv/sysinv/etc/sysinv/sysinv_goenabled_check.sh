@@ -30,7 +30,7 @@ do
         exit 0
     fi
     sleep 1
-    (( count++ ))
+    count=$(($ count+1))
 done
 
 echo "SysInv goenabled iterations FAIL $count"

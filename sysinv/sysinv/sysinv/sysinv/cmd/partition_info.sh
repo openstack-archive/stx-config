@@ -33,7 +33,8 @@ wlog() {
         return
     fi
 
-    local head="$(date "+%Y-%m-%d %H:%M:%S.%3N") $0 $1"
+    local head
+    head="$(date "+%Y-%m-%d %H:%M:%S.%3N") $0 $1"
     echo "$head $2: $3" >> $LOG_FILE
     if [ "$4" = "print_trace" ]; then
         # Print out the stack trace

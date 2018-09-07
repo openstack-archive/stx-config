@@ -58,16 +58,15 @@ cp /etc/puppet/hieradata/${PERSONALITY}.yaml ${PUPPET_TMP}/hieradata/personality
 # the grub. At this time, copying the host file failed due to a timing issue that
 # has not yet been fully understood. Subsequent retries worked. 
 if [ "${PERSONALITY}" = "compute" ]; then
-  n=0
-  until [ $n -ge 3 ]
-  do
-    cp -f ${HIERADATA}/${HOST}.yaml ${PUPPET_TMP}/hieradata/host.yaml && break
-    n=$[$n+1]
-    logger -t $0 "Failed to copy /etc/puppet/hieradata/${HOST}.yaml"
-    sleep 15
-  done
+    n=0
+    until [ $n -ge 3 ]; do
+        cp -f ${HIERADATA}/${HOST}.yaml ${PUPPET_TMP}/hieradata/host.yaml && break
+        n=$(($n+1))
+        logger -t $0 "Failed to copy /etc/puppet/hieradata/${HOST}.yaml"
+        sleep 15
+    done
 else
-  cp -f ${HIERADATA}/${HOST}.yaml ${PUPPET_TMP}/hieradata/host.yaml
+    cp -f ${HIERADATA}/${HOST}.yaml ${PUPPET_TMP}/hieradata/host.yaml
 fi
 cp -f ${HIERADATA}/system.yaml \
     ${HIERADATA}/secure_system.yaml \

@@ -89,7 +89,7 @@ function condense_sequence() {
 # number but without the leading "0x" characters.
 #
 ################################################################################
-function cpulist_to_cpumap 
+function cpulist_to_cpumap
 {
     local CPULIST=$1
     local NR_CPUS=$2
@@ -117,9 +117,9 @@ function cpulist_to_cpumap
 # characters. 
 #
 ################################################################################
-function cpumap_to_cpulist 
-{
-    local CPUMAP=$(echo "obase=10;ibase=16;$1" | bc -l)
+function cpumap_to_cpulist {
+    local CPUMAP
+    CPUMAP=$(echo "obase=10;ibase=16;$1" | bc -l)
     local NR_CPUS=$2
     local list=()
     local cpulist=""
@@ -146,9 +146,9 @@ function cpumap_to_cpulist
 # returned as a hexidecimal value but without the leading "0x" characters
 #
 ################################################################################
-function invert_cpumap 
-{
-    local CPUMAP=$(echo "obase=10;ibase=16;$1" | bc -l)
+function invert_cpumap {
+    local CPUMAP
+    CPUMAP=$(echo "obase=10;ibase=16;$1" | bc -l)
     local NR_CPUS=$2
     local INVERSE_CPUMAP=0
 
@@ -159,7 +159,7 @@ function invert_cpumap
         if [ "${ISSET}" -eq 1 ]; then
             continue
         fi
-        
+
         INVERSE_CPUMAP=$(echo "${INVERSE_CPUMAP} + (2^${CPUID})" | bc -l)
     done
 
@@ -171,11 +171,12 @@ function invert_cpumap
 # Builds the complement representation of a CPULIST
 #
 ################################################################################
-function invert_cpulist 
+function invert_cpulist
 {
     local CPULIST=$1
     local NR_CPUS=$2
-    local CPUMAP=$(cpulist_to_cpumap ${CPULIST} ${NR_CPUS})
+    local CPUMAP
+    CPUMAP=$(cpulist_to_cpumap ${CPULIST} ${NR_CPUS})
     cpumap_to_cpulist $(invert_cpumap ${CPUMAP} ${NR_CPUS}) ${NR_CPUS}
     return 0
 }
@@ -193,7 +194,8 @@ function in_list() {
     local list="$2"
 
     # expand list format 0-3,8-11 to a full sequence {0..3} {8..11}
-    local exp_list=$(echo ${list} | \
+    local exp_list
+    exp_list=$(echo ${list} | \
         sed -e 's#,# #g' -e 's#\([0-9]*\)-\([0-9]*\)#{\1\.\.\2}#g')
 
     local e
@@ -268,7 +270,8 @@ function get_platform_cpu_list() {
     if [ "$nodetype" = "controller" ]; then
         ((PLATFORM_CORES+=1))
     fi
-    local PLATFORM_CPULIST=$(topology_to_cpulist ${PLATFORM_SOCKET} ${PLATFORM_START} ${PLATFORM_CORES})
+    local PLATFORM_CPULIST
+    PLATFORM_CPULIST=$(topology_to_cpulist ${PLATFORM_SOCKET} ${PLATFORM_START} ${PLATFORM_CORES})
     echo ${PLATFORM_CPULIST}
 }
 
@@ -287,7 +290,8 @@ function get_vswitch_cpu_list() {
         fi
     fi
 
-    local N_CORES_IN_PKG=$(cat /proc/cpuinfo 2>/dev/null | \
+    local N_CORES_IN_PKG
+    N_CORES_IN_PKG=$(cat /proc/cpuinfo 2>/dev/null | \
         awk '/^cpu cores/ {n = $4} END { print (n>0) ? n : 1 }')
     # engineer platform cores
     local PLATFORM_CORES=1
@@ -302,7 +306,8 @@ function get_vswitch_cpu_list() {
     if [ ${N_CORES_IN_PKG} -gt 4 ]; then
         ((AVP_CORES+=1))
     fi
-    local AVP_CPULIST=$(topology_to_cpulist ${AVP_SOCKET} ${AVP_START} ${AVP_CORES})
+    local AVP_CPULIST
+    AVP_CPULIST=$(topology_to_cpulist ${AVP_SOCKET} ${AVP_START} ${AVP_CORES})
     echo ${AVP_CPULIST}
 }
 
@@ -319,16 +324,14 @@ function vswitch_expanded_cpu_list() {
     for e in $vswitch_cpulist
     do
        # claim hyperthread siblings if SMT enabled
-       SIBLINGS_CPULIST=$(cat /sys/devices/system/cpu/cpu${e}/topology/thread_siblings_list 2>/dev/null)
-       siblings_cpulist=$(expand_sequence ${SIBLINGS_CPULIST} " ")
-       for s in $siblings_cpulist
-       do
-          in_list ${s} ${cpulist}
-          if [ $? -eq 1 ]
-          then
-              cpulist=$(append_list ${s} ${cpulist})
-          fi
-       done
+        SIBLINGS_CPULIST=$(cat /sys/devices/system/cpu/cpu${e}/topology/thread_siblings_list 2>/dev/null)
+        siblings_cpulist=$(expand_sequence ${SIBLINGS_CPULIST} " ")
+        for s in $siblings_cpulist; do
+            in_list ${s} ${cpulist}
+            if [ $? -eq 1 ]; then
+                cpulist=$(append_list ${s} ${cpulist})
+            fi
+        done
     done
 
     echo "$cpulist"
@@ -348,16 +351,14 @@ function platform_expanded_cpu_list() {
     for e in $platform_cpulist
     do
        # claim hyperthread siblings if SMT enabled
-       SIBLINGS_CPULIST=$(cat /sys/devices/system/cpu/cpu${e}/topology/thread_siblings_list 2>/dev/null)
-       siblings_cpulist=$(expand_sequence ${SIBLINGS_CPULIST} " ")
-       for s in $siblings_cpulist
-       do
-          in_list ${s} ${cpulist}
-          if [ $? -eq 1 ]
-          then
-              cpulist=$(append_list ${s} ${cpulist})
-          fi
-       done
+        SIBLINGS_CPULIST=$(cat /sys/devices/system/cpu/cpu${e}/topology/thread_siblings_list 2>/dev/null)
+        siblings_cpulist=$(expand_sequence ${SIBLINGS_CPULIST} " ")
+        for s in $siblings_cpulist; do
+            in_list ${s} ${cpulist}
+            if [ $? -eq 1 ]; then
+                cpulist=$(append_list ${s} ${cpulist})
+            fi
+        done
     done
 
     echo "$cpulist"
@@ -372,28 +373,29 @@ function topology_to_cpulist() {
     local SOCKET=$1
     local CORE_START=$2
     local NUM_CORES=$3
-    local CPULIST=$(cat /proc/cpuinfo 2>/dev/null | perl -sne \
+    local CPULIST
+    CPULIST=$(cat /proc/cpuinfo 2>/dev/null | perl -sne \
 'BEGIN { %T = {}; %H = {}; $L = $P = $C = $S = 0; }
 {
-  if (/processor\s+:\s+(\d+)/) { $L = $1; }
-  if (/physical id\s+:\s+(\d+)/) { $P = $1; }
-  if (/core id\s+:\s+(\d+)/) {
-    $C = $1;
-    $T{$P}{$C}++;
-    $S = $T{$P}{$C};
-    $H{$P}{$C}{$S} = $L;
-  }
+    if (/processor\s+:\s+(\d+)/) { $L = $1; }
+    if (/physical id\s+:\s+(\d+)/) { $P = $1; }
+    if (/core id\s+:\s+(\d+)/) {
+        $C = $1;
+        $T{$P}{$C}++;
+        $S = $T{$P}{$C};
+        $H{$P}{$C}{$S} = $L;
+    }
 }
 END {
-  @cores = sort { $a <=> $b } keys $T{$socket};
-  @sel_cores = splice @cores, $core_start, $num_cores;
-  @lcpus = ();
-  for $C (@sel_cores) {
-    for $S (sort {$a <=> $b } keys %{ $H{$socket}{$C} }) {
-      push @lcpus, $H{$socket}{$C}{$S};
+    @cores = sort { $a <=> $b } keys $T{$socket};
+    @sel_cores = splice @cores, $core_start, $num_cores;
+    @lcpus = ();
+    for $C (@sel_cores) {
+        for $S (sort {$a <=> $b } keys %{ $H{$socket}{$C} }) {
+            push @lcpus, $H{$socket}{$C}{$S};
+        }
     }
-  }
-  printf "%s\n", join(",", @lcpus);
+    printf "%s\n", join(",", @lcpus);
 }' -- -socket=${SOCKET} -core_start=${CORE_START} -num_cores=${NUM_CORES})
-  echo ${CPULIST}
+    echo ${CPULIST}
 }

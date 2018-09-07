@@ -26,7 +26,7 @@ LOG_DEBUG=1
 ################################################################################
 # Affine all running tasks to the CPULIST provided in the first parameter. 
 ################################################################################
-function affine_tasks 
+function affine_tasks
 {
     local CPULIST=$1
     local PIDLIST
@@ -40,11 +40,11 @@ function affine_tasks
     RET=$?
     if [ $RET -ne 0 ]; then
         log_error "Some tasks failed to be affined to all cores."
-    fi 
+    fi
 
     # Get number of logical cpus
     N_CPUS=$(cat /proc/cpuinfo 2>/dev/null | \
-      awk '/^[pP]rocessor/ { n +=1 } END { print (n>0) ? n : 1}')
+        awk '/^[pP]rocessor/ { n +=1 } END { print (n>0) ? n : 1}')
 
     # Calculate platform cores cpumap
     PLATFORM_COREMASK=$(cpulist_to_cpumap ${CPULIST} ${N_CPUS})
@@ -67,29 +67,25 @@ function affine_tasks
     done
     if [[ "$subfunction" == *"compute,lowlatency" ]]; then
        # Affine work queues to platform cores
-       echo ${PLATFORM_COREMASK} > /sys/devices/virtual/workqueue/cpumask
-       echo ${PLATFORM_COREMASK} > /sys/bus/workqueue/devices/writeback/cpumask
+        echo ${PLATFORM_COREMASK} > /sys/devices/virtual/workqueue/cpumask
+        echo ${PLATFORM_COREMASK} > /sys/bus/workqueue/devices/writeback/cpumask
 
-       # On low latency compute reassign the per cpu threads rcuc, ksoftirq,
-       # ktimersoftd to FIFO along with the specified priority
-       PIDLIST=$( ps -e -p 2 |grep rcuc | awk '{ print $1; }')
-       for PID in ${PIDLIST[@]}
-       do
-          chrt -p -f 4 ${PID}  2>/dev/null
-       done
+        # On low latency compute reassign the per cpu threads rcuc, ksoftirq,
+        # ktimersoftd to FIFO along with the specified priority
+        PIDLIST=$( ps -e -p 2 |grep rcuc | awk '{ print $1; }')
+        for PID in ${PIDLIST[@]}; do
+            chrt -p -f 4 ${PID}  2>/dev/null
+        done
 
-       PIDLIST=$( ps -e -p 2 |grep ksoftirq | awk '{ print $1; }')
-       for PID in ${PIDLIST[@]}
-       do
-          chrt -p -f 2 ${PID} 2>/dev/null
-       done
+        PIDLIST=$( ps -e -p 2 |grep ksoftirq | awk '{ print $1; }')
+        for PID in ${PIDLIST[@]}; do
+            chrt -p -f 2 ${PID} 2>/dev/null
+        done
 
-       PIDLIST=$( ps -e -p 2 |grep ktimersoftd | awk '{ print $1; }')
-       for PID in ${PIDLIST[@]}
-       do
-          chrt -p -f 3 ${PID} 2>/dev/null
-       done
-    
+        PIDLIST=$( ps -e -p 2 |grep ktimersoftd | awk '{ print $1; }')
+        for PID in ${PIDLIST[@]}; do
+            chrt -p -f 3 ${PID} 2>/dev/null
+        done
     fi
 
     return 0
@@ -98,7 +94,7 @@ function affine_tasks
 ################################################################################
 # Start Action
 ################################################################################
-function start 
+function start
 {
     local RET=0
 

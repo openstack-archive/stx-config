@@ -39,7 +39,7 @@ function log
 # Utility function to print the status of a command result
 #
 ################################################################################
-function print_status() 
+function print_status()
 {
     if [ "$1" -eq "0" ]; then
         echo "[  OK  ]"
