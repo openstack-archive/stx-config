@@ -6,9 +6,12 @@
             voting: false
         - sysinv-tox-unittest:
             voting: false
+        - controllerconfig-tox-unittest
+        - configutilities-tox-unittest
     gate:
       jobs:
-        - noop
+        - controllerconfig-tox-unittest
+        - configutilities-tox-unittest
 
 - job:
     name: sysinv-tox-unittest
@@ -22,3 +25,22 @@
     vars:
       tox_envlist: py27
       tox_extra_args: -c sysinv/sysinv/sysinv/tox.ini
+
+- job:
+    name: controllerconfig-tox-unittest
+    parent: tox
+    description: Run unit tests for controllerconfig
+    required-projects:
+      - openstack/stx-update
+      - openstack/stx-fault
+    vars:
+      tox_envlist: flake8, py27, pylint
+      tox_extra_args: -c controllerconfig/controllerconfig/tox.ini
+
+- job:
+    name: configutilities-tox-unittest
+    parent: tox
+    description: Run unit tests for configutilities
+    vars:
+      tox_envlist: flake8
+      tox_extra_args: -c configutilities/configutilities/tox.ini
