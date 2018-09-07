@@ -1721,3 +1721,29 @@ def read_filtered_directory_content(dirpath, *filters):
 
         content_dict[filename] = content
     return content_dict
+
+
+def get_disk_capacity_mib(device_node):
+    # Run command
+    fdisk_command = 'fdisk -l %s | grep "^Disk %s:"' % (
+        device_node, device_node)
+    fdisk_process = subprocess.Popen(
+        fdisk_command, stdout=subprocess.PIPE, shell=True)
+    fdisk_output = fdisk_process.stdout.read()
+
+    fdisk_process.communicate()
+
+    if fdisk_process.returncode != 0:
+        LOG.error("Error running fdisk command: %s" %
+                  fdisk_command)
+        return 0
+
+    # Parse output
+    second_half = fdisk_output.split(',')[1]
+    size_bytes = second_half.split()[0].strip()
+
+    # Convert bytes to MiB (1 MiB = 1024*1024 bytes)
+    int_size = int(size_bytes)
+    size_mib = int_size / (1024**2)
+
+    return int(size_mib)
