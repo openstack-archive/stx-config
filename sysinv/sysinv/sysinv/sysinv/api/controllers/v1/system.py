@@ -23,6 +23,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 import jsonpatch
 import six
+import socket
 import os
 
 import pecan
@@ -586,6 +587,13 @@ class SystemController(rest.RestController):
 
     @wsme_pecan.wsexpose(int)
     def mgmtvlan(self):
-        mgmt_network = pecan.request.dbapi.network_get_by_type(
-            constants.NETWORK_TYPE_MGMT)
-        return mgmt_network.vlan_id if mgmt_network.vlan_id else 0
+        local_hostname = socket.gethostname()
+        controller = pecan.request.dbapi.ihost_get(local_hostname)
+        host_id = controller['id']
+        interface_list = pecan.request.dbapi.iinterface_get_by_ihost(host_id)
+        for interface in interface_list:
+            if interface['networktype'] == constants.NETWORK_TYPE_MGMT:
+                if 'vlan_id' not in interface:
+                    return 0
+                else:
+                    return interface['vlan_id']
