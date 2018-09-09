@@ -1229,9 +1229,19 @@ class ConductorManager(service.PeriodicService):
         port_list = self.dbapi.port_get_all(host_id)
         ports = dict((p['interface_id'], p) for p in port_list)
         for interface in interface_list:
-            iface_network_type = cutils.get_primary_network_type(interface)
-            if iface_network_type == network_type:
+            if interface.networktype == network_type:
                 return cutils.get_interface_os_ifname(interface, ifaces, ports)
+
+    def _find_local_mgmt_interface_vlan_id(self):
+        """Lookup the local interface name for a given network type."""
+        host_id = self.get_my_host_id()
+        interface_list = self.dbapi.iinterface_get_all(host_id, expunge=True)
+        for interface in interface_list:
+            if interface.networktype == constants.NETWORK_TYPE_MGMT:
+                if 'vlan_id' not in interface:
+                    return 0
+                else:
+                    return interface['vlan_id']
 
     def _remove_leases_by_mac_address(self, mac_address):
         """Remove any leases that were added without a CID that we were not
@@ -1719,20 +1729,19 @@ class ConductorManager(service.PeriodicService):
             if i.networktype == constants.NETWORK_TYPE_MGMT:
                 break
 
-        mgmt_network = self.dbapi.network_get_by_type(
-            constants.NETWORK_TYPE_MGMT)
-
         cloning = False
         for inic in inic_dict_array:
             LOG.debug("Processing inic %s" % inic)
             interface_exists = False
             networktype = None
+            ifclass = None
             bootp = None
             create_tagged_interface = False
             new_interface = None
             set_address_interface = False
             mtu = constants.DEFAULT_MTU
             port = None
+            vlan_id = self._find_local_mgmt_interface_vlan_id()
             # ignore port if no MAC address present, this will
             # occur for data port after they are configured via DPDK driver
             if not inic['mac']:
@@ -1747,16 +1756,16 @@ class ConductorManager(service.PeriodicService):
                         if ihost['hostname'] != hostname:
                             # auto create management/pxeboot network for all
                             # nodes but the active controller
-                            if mgmt_network.vlan_id:
+                            if vlan_id:
                                 create_tagged_interface = True
                                 networktype = constants.NETWORK_TYPE_PXEBOOT
                                 ifname = 'pxeboot0'
                             else:
                                 networktype = constants.NETWORK_TYPE_MGMT
                                 ifname = 'mgmt0'
+                            ifclass = constants.INTERFACE_CLASS_PLATFORM
                             set_address_interface = True
                         bootp = 'True'
-                        mtu = mgmt_network.mtu
 
                 clone_mac_updated = False
                 for interface in iinterfaces:
@@ -1819,6 +1828,7 @@ class ConductorManager(service.PeriodicService):
                                       'imac': inic['mac'],
                                       'imtu': mtu,
                                       'iftype': 'ethernet',
+                                      'ifclass': ifclass,
                                       'networktype': networktype
                                       }
 
@@ -1834,6 +1844,21 @@ class ConductorManager(service.PeriodicService):
                             {'interface_id': new_interface['id'],
                              'bootp': bootp
                              })
+                        if networktype in [constants.NETWORK_TYPE_MGMT,
+                                           constants.NETWORK_TYPE_PXEBOOT]:
+                            network = self.dbapi.network_get_by_type(networktype)
+                            # create interface network association
+                            ifnet_dict = {
+                                'interface_id': new_interface['id'],
+                                'network_id': network['id']
+                            }
+                            try:
+                                self.dbapi.interface_network_create(ifnet_dict)
+                            except Exception:
+                                LOG.exception(
+                                    "Failed to create interface %s "
+                                    "network %s association" %
+                                    (new_interface['id'], network['id']))
                     except Exception:
                         LOG.exception("Failed to create new interface %s" %
                                       inic['mac'])
@@ -1845,11 +1870,12 @@ class ConductorManager(service.PeriodicService):
                             'forihostid': ihost['id'],
                             'ifname': 'mgmt0',
                             'imac': inic['mac'],
-                            'imtu': mgmt_network.mtu,
+                            'imtu': constants.DEFAULT_MTU,
                             'iftype': 'vlan',
+                            'ifclass': constants.INTERFACE_CLASS_PLATFORM,
                             'networktype': constants.NETWORK_TYPE_MGMT,
                             'uses': [ifname],
-                            'vlan_id': mgmt_network.vlan_id,
+                            'vlan_id': vlan_id,
                         }
 
                         try:
@@ -1858,6 +1884,21 @@ class ConductorManager(service.PeriodicService):
                             new_interface = self.dbapi.iinterface_create(
                                 ihost['id'], interface_dict
                             )
+                            network = self.dbapi.network_get_by_type(
+                                constants.NETWORK_TYPE_MGMT
+                            )
+                            # create interface network association
+                            ifnet_dict = {
+                                'interface_id': new_interface['id'],
+                                'network_id': network['id']
+                            }
+                            try:
+                                self.dbapi.interface_network_create(ifnet_dict)
+                            except Exception:
+                                LOG.exception(
+                                    "Failed to create interface %s "
+                                    "network %s association" %
+                                    (new_interface['id'], network['id']))
                         except Exception:
                             LOG.exception(
                                 "Failed to create new vlan interface %s" %
@@ -7914,7 +7955,7 @@ class ConductorManager(service.PeriodicService):
 
         if nettype:
             iinterfaces[:] = [i for i in iinterfaces if
-                              cutils.get_primary_network_type(i) == nettype]
+                              i.networktype == nettype]
         return iinterfaces
 
     def mgmt_ip_set_by_ihost(self,
@@ -10191,3 +10232,24 @@ class ConductorManager(service.PeriodicService):
         }
         body['metadata']['labels'].update(label_dict)
         self._kube.kube_patch_node(host.hostname, body)
+
+    def update_interface_network_config(self, context, host_uuid):
+        """Update the interface network configuration"""
+        LOG.info("update_interface_network_config")
+
+        host = self.dbapi.ihost_get(host_uuid)
+
+        personalities = [host.personality]
+
+        config_uuid = self._config_update_hosts(context, personalities,
+                                                host_uuids=[host_uuid])
+
+        # Apply configuration to the active controller
+        config_dict = {
+            'personalities': personalities,
+            'host_uuids': [host_uuid],
+            'classes': ['platform::network::runtime']
+        }
+
+        self._config_apply_runtime_manifest(context, config_uuid, config_dict,
+                                            host_uuids=[host_uuid])
