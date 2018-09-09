@@ -362,7 +362,7 @@ class Interfaces(Base):
     iftype = Column(String(255))
 
     ifname = Column(String(255))
-    #ifclass = Column(String(255))
+    ifclass = Column(String(255))
     networktype = Column(String(255))  # e.g. mgmt, data, ext, api
     ifcapabilities = Column(JSONEncodedDict)
     farend = Column(JSONEncodedDict)
@@ -1154,10 +1154,6 @@ class Networks(Base):
     name = Column(String(255), unique=True)
     type = Column(String(255), unique=True)
     dynamic = Column(Boolean, nullable=False)
-	#remove
-    link_capacity = Column(Integer)
-    mtu = Column(Integer, nullable=False)
-    vlan_id = Column(Integer)
 
     address_pool_id = Column(Integer,
                              ForeignKey('address_pools.id',

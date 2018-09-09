@@ -1645,3 +1645,13 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
                          self.make_msg('update_kubernetes_label',
                                        host_uuid=host_uuid,
                                        label_dict=label_dict))
+
+    def update_interface_network_config(self, context, host_uuid):
+        """Sychronously, have the conductor ....
+
+        :param context: request context.
+        :param host_uuid: host id
+        """
+        return self.call(context,
+                         self.make_msg('update_interface_network_config',
+                                       host_uuid=host_uuid))
