@@ -512,7 +512,7 @@ ironic::db::postgresql::encoding: 'UTF8'
 ironic::logging::debug: false
 ironic::api::enabled: false
 ironic::conductor::enabled: false
-ironic::conductor::enabled_drivers: ['pxe_ipmitool','pxe_ipmitool_socat']
+ironic::conductor::enabled_drivers: ['pxe_ipmitool', 'pxe_ipmitool_socat']
 ironic::conductor::automated_clean: true
 ironic::conductor::default_boot_option: 'local'
 ironic::drivers::pxe::images_path: '/opt/img-conversions/ironic/images/'
@@ -536,4 +536,3 @@ fm::db::sync::user: 'root'
 fm::database_idle_timeout: 60
 fm::database_max_overflow: 20
 fm::database_max_pool_size: 1
-
