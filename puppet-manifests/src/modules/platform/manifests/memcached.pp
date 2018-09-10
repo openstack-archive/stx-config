@@ -26,6 +26,8 @@ class platform::memcached::params(
       }
     }
   }
+
+  $listen_ip_inet_version = $::platform::network::mgmt::params::subnet_version
 }
 
 
