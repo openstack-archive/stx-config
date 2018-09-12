@@ -8975,9 +8975,11 @@ class ConductorManager(service.PeriodicService):
         health_util = health.Health(self.dbapi)
 
         if upgrade is True:
-            return health_util.get_system_health_upgrade(force=force)
+            return health_util.get_system_health_upgrade(force=force,
+                                                         context=context)
         else:
-            return health_util.get_system_health(force=force)
+            return health_util.get_system_health(force=force,
+                                                 context=context)
 
     def _get_cinder_address_name(self, network_type):
         ADDRESS_FORMAT_ARGS = (constants.CONTROLLER_HOSTNAME,
