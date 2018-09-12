@@ -5,7 +5,7 @@
         - openstack-tox-linters
         - sysinv-tox-py27
         - sysinv-tox-flake8:
-            voting: false
+            voting: true
         - controllerconfig-tox-flake8
         - controllerconfig-tox-py27
         - controllerconfig-tox-pylint
@@ -14,6 +14,7 @@
       jobs:
         - openstack-tox-linters
         - sysinv-tox-py27
+        - sysinv-tox-flake8
         - controllerconfig-tox-flake8
         - controllerconfig-tox-py27
         - controllerconfig-tox-pylint
