@@ -1,5 +1,5 @@
-# clean provider network ports and bridges
-for bridge in $(ovs-vsctl --timeout 10 list-br|grep '^br-phy'); do
+# clean provider and lldp network ports and bridges
+for bridge in $(ovs-vsctl --timeout 10 list-br|grep '^br-phy\|^br-lldp'); do
     for port in $(ovs-vsctl --timeout 10 list-ports $bridge); do
         ovs-vsctl --timeout 10 del-port $bridge $port
     done

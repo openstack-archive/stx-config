@@ -33,6 +33,7 @@ class OVSPuppet(base.BasePuppet):
         ovs_bridges = {}
         ovs_ports = {}
         ovs_addresses = {}
+        ovs_flows = {}
 
         index = 0
         for iface in sorted(self.context['interfaces'].values(),
@@ -40,7 +41,9 @@ class OVSPuppet(base.BasePuppet):
             if interface.is_data_network_type(iface):
                 # create a separate bridge for every configured data interface
                 brname = 'br-phy%d' % index
-                ovs_bridges[brname] = {}
+                ovs_bridges[brname] = {
+                    'attributes': ["other-config:forward-bpdu=true"]
+                }
 
                 # save the associated bridge for provider network mapping
                 iface['_ovs_bridge'] = brname
@@ -60,6 +63,37 @@ class OVSPuppet(base.BasePuppet):
 
                 ovs_ports.update({port['name']: port})
                 ovs_devices.update({d['pci_addr']: d for d in devices})
+
+                if iface['iftype'] == constants.INTERFACE_TYPE_ETHERNET:
+                    # A separate bridge for LLDP interfaces is created to
+                    # prevent neutron from cleaning up the LLDP flows in
+                    # it's managed bridges.
+                    lldp_bridge = self._get_lldp_bridge(index)
+
+                    # The actual port LLDP traffic will be directed to.
+                    lldp_port = self._get_lldp_port(iface, lldp_bridge['name'])
+                    ovs_ports.update({lldp_port['name']: lldp_port})
+
+                    # Patch ports to/from the phy/lldp bridge
+                    port_name = '{}-{}'.format('phy', lldp_bridge['name'])
+                    peer_name = '{}-{}'.format('lldp', brname)
+                    lldp_patch1 = self._get_lldp_patch_port(brname,
+                                                            port_name,
+                                                            peer_name)
+                    ovs_ports.update({lldp_patch1['name']: lldp_patch1})
+
+                    port_name = '{}-{}'.format('lldp', brname)
+                    peer_name = '{}-{}'.format('phy', lldp_bridge['name'])
+                    lldp_patch2 = self._get_lldp_patch_port(
+                        lldp_bridge['name'], port_name, peer_name)
+                    ovs_ports.update({lldp_patch2['name']: lldp_patch2})
+
+                    # A flow to direct traffic in the LLDP bridge
+                    lldp_flow = self._get_lldp_flow(
+                        lldp_bridge['name'], lldp_patch2, lldp_port)
+
+                    ovs_bridges.update({lldp_bridge['name']: lldp_bridge})
+                    ovs_flows.update({port['name']: lldp_flow})
 
                 index += 1
 
@@ -83,6 +117,7 @@ class OVSPuppet(base.BasePuppet):
             'platform::vswitch::ovs::bridges': ovs_bridges,
             'platform::vswitch::ovs::ports': ovs_ports,
             'platform::vswitch::ovs::addresses': ovs_addresses,
+            'platform::vswitch::ovs::flows': ovs_flows,
         }
 
     def _get_ethernet_device(self, iface):
@@ -146,6 +181,105 @@ class OVSPuppet(base.BasePuppet):
         }
 
         return port, devices
+
+    def _get_lldp_bridge(self, index):
+        attributes = []
+
+
+        brname = 'br-lldp%d' % index
+        attributes.append("other-config:forward-bpdu=true")
+
+        return {
+            'name': brname,
+            'datapath_type': 'netdev',
+            'attributes': attributes
+        }
+
+    def _get_lldp_interface(self, ifname):
+        attributes = []
+
+        iftype = 'internal'
+
+        return {
+            'name': ifname,
+            'type': iftype,
+            'attributes': attributes,
+        }
+
+    def _get_lldp_patch_interface(self, ifname, peer_name):
+        attributes = []
+
+        iftype = 'patch'
+        attributes.append("options:peer={}".format(peer_name))
+
+        return {
+            'name': ifname,
+            'type': iftype,
+            'attributes': attributes,
+        }
+
+    def _get_lldp_port(self, iface, lldp_brname):
+        interfaces = []
+
+        port = interface.get_interface_port(self.context, iface)
+
+        # Limit port name length to the maximum supported by ovs-ofctl to
+        # reference a port with a name rather than ofport number
+        # when creating flows.
+
+        port_name_len = constants.LLDP_OVS_PORT_NAME_LEN
+        uuid_len = port_name_len - len(constants.LLDP_OVS_PORT_PREFIX)
+
+        port_name = '{}{}'.format(constants.LLDP_OVS_PORT_PREFIX,
+            port.uuid[:uuid_len])
+        interfaces.append(self._get_lldp_interface(port_name))
+
+        port = {
+            'name': port_name,
+            'bridge': lldp_brname,
+            'interfaces': interfaces,
+        }
+
+        return port
+
+    def _get_lldp_patch_port(self, brname, port_name, peer_name):
+        interfaces = []
+
+        interfaces.append(self._get_lldp_patch_interface(port_name, peer_name))
+
+        patch_port = {
+            'name': port_name,
+            'bridge': brname,
+            'interfaces': interfaces,
+        }
+
+        return patch_port
+
+    def _get_lldp_flow(self, bridge, in_port, out_port):
+        actions = []
+
+        attributes = {
+            'idle_timeout': 0,
+            'hard_timeout': 0,
+            'in_port': in_port['name'],
+            'dl_dst': constants.LLDP_MULTICAST_ADDRESS,
+            'dl_type': constants.LLDP_ETHER_TYPE
+        }
+
+        action = {
+            'type': 'output',
+            'value': out_port['name']
+        }
+
+        actions.append(action)
+
+        flow = {
+            'bridge': bridge,
+            'attributes': attributes,
+            'actions': actions
+        }
+
+        return flow
 
     def _get_bond_port(self, host, iface, bridge, index):
         devices = []
