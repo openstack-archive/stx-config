@@ -194,6 +194,10 @@ class sysinv (
   }
 
   sysinv_config {
+    'lldp/drivers':                   value => 'lldpd';
+  }
+
+  sysinv_config {
     'keystone_authtoken/region_name':  value => $region_name;
     'keystone_authtoken/neutron_region_name':  value => $neutron_region_name;
     'keystone_authtoken/cinder_region_name':  value => $cinder_region_name;
