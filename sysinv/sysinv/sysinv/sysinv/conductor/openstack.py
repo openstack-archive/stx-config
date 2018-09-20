@@ -200,7 +200,11 @@ class OpenStackOperator(object):
 
         client = self._get_neutronclient()
 
-        hosts = client.list_hosts()
+        try:
+            hosts = client.list_hosts()
+        except Exception as e:
+            LOG.error("Failed to access Neutron client: %s" % e)
+            hosts = None
 
         if not hosts:
             return ""
@@ -221,7 +225,11 @@ class OpenStackOperator(object):
                          'name': name,
                          'availability': availability
                          }}
-        client.create_host(body=body)
+        try:
+            client.create_host(body=body)
+        except Exception as e:
+            LOG.error("Failed to access Neutron client: %s" % e)
+            return False
         return True
 
     def delete_neutron_host(self, context, host_uuid):
@@ -273,7 +281,11 @@ class OpenStackOperator(object):
                 aggregates = self._get_novaclient().aggregates.list()
             except Exception:
                 self.nova_client = None  # password may have updated
-                aggregates = self._get_novaclient().aggregates.list()
+                try:
+                    aggregates = self._get_novaclient().aggregates.list()
+                except Exception as e:
+                    LOG.error("Failed to access Nova client: %s" % e)
+                    return
 
         nova_aggset_provider = set()
         for aggregate in aggregates:
