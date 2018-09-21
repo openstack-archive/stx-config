@@ -780,7 +780,7 @@ def _set_defaults(interface):
                 network = pecan.request.dbapi.network_get_by_id(network_id)
                 interface['networktype'] = network.type
                 break
-        elif interface['networktype']:
+        elif interface['networktype'] in VALID_NETWORK_TYPES:
             network = pecan.request.dbapi.network_get_by_type(
                 interface['networktype']
             )
@@ -985,8 +985,8 @@ def _check_network_type_and_host_type(ihost, networktypelist):
 
 def _check_network_type_and_interface_type(interface, networktypelist):
     if interface['iftype'] == 'vlan':
-        if not networktypelist or constants.NETWORK_TYPE_NONE in networktypelist:
-            msg = _("VLAN interfaces cannot have a network type of '%s'." %
+        if constants.NETWORK_TYPE_NONE in networktypelist:
+            msg = _("VLAN interfaces cannot have an interface class of %s." %
                     constants.NETWORK_TYPE_NONE)
             raise wsme.exc.ClientSideError(msg)
 
