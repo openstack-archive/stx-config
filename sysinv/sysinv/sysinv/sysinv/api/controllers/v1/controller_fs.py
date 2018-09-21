@@ -350,7 +350,7 @@ def _check_relative_controller_fs(controller_fs_new, controller_fs_list):
                                           )))
 
 
-def _check_controller_state():
+def _check_controller_state(context):
     """
     This function verifies the administrative, operational, availability of
     each controller.
@@ -369,6 +369,7 @@ def _check_controller_state():
             # as the resize itself will clear the degrade.
             health_helper = health.Health(pecan.request.dbapi)
             degrade_alarms = health_helper.get_alarms_degrade(
+                context,
                 alarm_ignore_list=[fm_constants.FM_ALARM_ID_FS_USAGE],
                 entity_instance_id_filter="controller-")
             allowed_resize = False
@@ -876,7 +877,7 @@ class ControllerFsController(rest.RestController):
                                controller_fs_list_new,
                                modified_fs)
 
-        if _check_controller_state():
+        if _check_controller_state(pecan.request.context):
             _check_controller_multi_fs(controller_fs_list_new,
                                        cgtsvg_growth_gib=cgtsvg_growth_gib)
             for fs in controller_fs_list_new:
