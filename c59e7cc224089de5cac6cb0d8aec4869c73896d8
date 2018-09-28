@@ -1,0 +1,10 @@
+Code-Review+1: Abraham Arce <abraham.arce.moreno@intel.com>
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Code-Review+2: Al Bailey <al.bailey@windriver.com>
+Workflow+1: Al Bailey <al.bailey@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 28 Sep 2018 18:00:22 +0000
+Reviewed-on: https://review.openstack.org/605254
+Project: openstack/stx-config
+Branch: refs/heads/master
