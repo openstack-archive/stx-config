@@ -1,0 +1,9 @@
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Code-Review+2: Saul Wold <sgw@linux.intel.com>
+Workflow+1: Saul Wold <sgw@linux.intel.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 28 Sep 2018 23:45:57 +0000
+Reviewed-on: https://review.openstack.org/606165
+Project: openstack/stx-config
+Branch: refs/heads/r/2018.10
