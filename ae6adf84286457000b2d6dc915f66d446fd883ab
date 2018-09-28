@@ -1,0 +1,9 @@
+Code-Review+2: Dean Troyer <dtroyer@gmail.com>
+Workflow+1: Dean Troyer <dtroyer@gmail.com>
+Code-Review+1: Bruce Jones <bruce.e.jones@intel.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 28 Sep 2018 04:13:50 +0000
+Reviewed-on: https://review.openstack.org/605873
+Project: openstack/stx-config
+Branch: refs/heads/master
