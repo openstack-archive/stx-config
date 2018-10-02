@@ -13,7 +13,8 @@ class MtcePuppet(openstack.OpenstackBasePuppet):
     """Class to encapsulate puppet operations for mtce configuration"""
 
     SERVICE_NAME = 'mtce'
-
+    SERVICE_PORT__SM_SERVER = 2124
+    SERVICE_PORT__SM_CLIENT = 2224
     def get_static_config(self):
         return {
             'platform::mtce::params::auth_username': self.SERVICE_NAME,
@@ -54,6 +55,10 @@ class MtcePuppet(openstack.OpenstackBasePuppet):
                 self._get_ceilometer_port(),
             'platform::mtce::params::mtce_multicast':
                 multicast_address.address,
+            'platform::mtce::params::sm_client_port':
+                self.SERVICE_PORT__SM_CLIENT,
+            'platform::mtce::params::sm_server_port':
+                self.SERVICE_PORT__SM_SERVER,
         }
         return config
 
