@@ -2140,6 +2140,10 @@ class HostController(rest.RestController):
             LOG.info("host %s %s patch" % (ihost_obj.hostname,
                                            log_end))
 
+        if hostupdate.notify_action_lock or \
+           hostupdate.notify_action_lock_force:
+            pecan.request.rpcapi.update_host_memory(pecan.request.context,
+                                                    ihost_obj['uuid'])
         return Host.convert_with_links(ihost_obj)
 
     def _vim_host_add(self, ihost):
