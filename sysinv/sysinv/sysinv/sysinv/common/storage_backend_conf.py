@@ -161,15 +161,17 @@ class StorageBackendConfig(object):
                 if backend.state == constants.SB_STATE_CONFIGURED and \
                        backend.backend == target:
                     configured = True
-                    break
 
-        # Supplementary semantics
-        if configured:
-            if check_only_defaults and \
-                    backend.name != constants.SB_DEFAULT_NAMES[target]:
-                configured = False
-            if service and service not in backend.services:
-                configured = False
+                # Supplementary semantics
+                if configured:
+                    if check_only_defaults and \
+                            backend.name != constants.SB_DEFAULT_NAMES[target]:
+                        configured = False
+                    if service and service not in backend.services:
+                        configured = False
+
+                if configured:
+                    break
 
         return configured
 
