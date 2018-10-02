@@ -148,7 +148,6 @@ class StorageBackendConfig(object):
         # send a rpc to conductor which sends a query to the primary
         system = dbapi.isystem_get_one()
         shared_services = system.capabilities.get('shared_services', None)
-        configured = False
         if (shared_services is not None and
                 constants.SERVICE_TYPE_VOLUME in shared_services and
                 target == constants.SB_TYPE_CEPH and
@@ -158,20 +157,26 @@ class StorageBackendConfig(object):
         else:
             backend_list = dbapi.storage_backend_get_list()
             for backend in backend_list:
+                configured = False
                 if backend.state == constants.SB_STATE_CONFIGURED and \
                        backend.backend == target:
                     configured = True
-                    break
 
-        # Supplementary semantics
-        if configured:
-            if check_only_defaults and \
-                    backend.name != constants.SB_DEFAULT_NAMES[target]:
-                configured = False
-            if service and service not in backend.services:
-                configured = False
+                # Do further checkings if required
+                if configured:
+                    # Check if the backend name matches the default name
+                    if check_only_defaults and \
+                            backend.name != constants.SB_DEFAULT_NAMES[target]:
+                        continue
 
-        return configured
+                    # Check if a specific service is configured on the
+                    # backend.
+                    if service and service not in backend.services:
+                        continue
+
+                    return True
+
+        return False 
 
     @staticmethod
     def has_backend(api, target):
