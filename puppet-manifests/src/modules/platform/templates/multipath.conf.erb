@@ -1,0 +1,20 @@
+defaults {
+    user_friendly_names yes
+    find_multipaths yes
+}
+
+blacklist {
+    devnode "^nbd[0-9]*"
+    device {
+        vendor "Ceph"
+    }
+}
+
+blacklist_exceptions {
+    device {
+        vendor "LIO-ORG"
+    }
+    device {
+        vendor "3PARdata"
+    }
+}
