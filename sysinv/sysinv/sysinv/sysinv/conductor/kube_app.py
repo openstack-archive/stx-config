@@ -123,12 +123,12 @@ class AppOperator(object):
         self._kube = kubernetes.KubeOperator(self._dbapi)
         self._lock = threading.Lock()
 
-    def _cleanup(self, app):
+    def _cleanup(self, context, app):
         """" Remove application directories and override files """
         try:
             if (app.status != constants.APP_UPLOAD_FAILURE and
                     os.path.exists(os.path.join(app.path, 'metadata.yaml'))):
-                self._process_node_labels(app, op=constants.LABEL_REMOVE_OP)
+                self._process_node_labels(context, app, op=constants.LABEL_REMOVE_OP)
             if app.system_app and app.status != constants.APP_UPLOAD_FAILURE:
                 self._remove_chart_overrides(app.armada_mfile_abs)
 
@@ -538,16 +538,16 @@ class AppOperator(object):
                 return False
         return True
 
-    def _update_kubernetes_labels(self, hostname, label_dict):
+    def _update_kubernetes_labels(self, context, hostname, label_dict):
         body = {
             'metadata': {
                 'labels': {}
             }
         }
         body['metadata']['labels'].update(label_dict)
-        self._kube.kube_patch_node(hostname, body)
+        self._kube.kube_patch_node(context, hostname, body)
 
-    def _assign_host_labels(self, hosts, labels):
+    def _assign_host_labels(self, context, hosts, labels):
         for host in hosts:
             for label_str in labels:
                 k, v = label_str.split('=')
@@ -559,7 +559,7 @@ class AppOperator(object):
                 except exception.HostLabelAlreadyExists:
                     pass
             label_dict = {k: v for k, v in (i.split('=') for i in labels)}
-            self._update_kubernetes_labels(host.hostname, label_dict)
+            self._update_kubernetes_labels(context, host.hostname, label_dict)
 
     def _find_label(self, host_uuid, label_str):
         host_labels = self._dbapi.label_get_by_host(host_uuid)
@@ -568,7 +568,7 @@ class AppOperator(object):
                 return label_obj
         return None
 
-    def _remove_host_labels(self, hosts, labels):
+    def _remove_host_labels(self, context, hosts, labels):
         for host in hosts:
             null_labels = {}
             for label_str in labels:
@@ -578,9 +578,9 @@ class AppOperator(object):
                     key = lbl_obj.label_key
                     null_labels[key] = None
             if null_labels:
-                self._update_kubernetes_labels(host.hostname, null_labels)
+                self._update_kubernetes_labels(context, host.hostname, null_labels)
 
-    def _process_node_labels(self, app, op=constants.LABEL_ASSIGN_OP):
+    def _process_node_labels(self, context, app, op=constants.LABEL_ASSIGN_OP):
         # Node labels are host personality based and are defined in
         # metadata.yaml file in the following format:
         # labels:
@@ -649,19 +649,19 @@ class AppOperator(object):
             # AIO system
             labels = controller_labels_set.union(compute_labels_set)
             if op == constants.LABEL_ASSIGN_OP:
-                self._assign_host_labels(controller_hosts, labels)
+                self._assign_host_labels(context, controller_hosts, labels)
             elif op == constants.LABEL_REMOVE_OP:
-                self._remove_host_labels(controller_hosts, labels)
+                self._remove_host_labels(context, controller_hosts, labels)
         else:
             # Standard system
             compute_hosts =\
                 self._dbapi.ihost_get_by_personality(constants.WORKER)
             if op == constants.LABEL_ASSIGN_OP:
-                self._assign_host_labels(controller_hosts, controller_labels_set)
-                self._assign_host_labels(compute_hosts, compute_labels_set)
+                self._assign_host_labels(context, controller_hosts, controller_labels_set)
+                self._assign_host_labels(context, compute_hosts, compute_labels_set)
             elif op == constants.LABEL_REMOVE_OP:
-                self._remove_host_labels(controller_hosts, controller_labels_set)
-                self._remove_host_labels(compute_hosts, compute_labels_set)
+                self._remove_host_labels(context, controller_hosts, controller_labels_set)
+                self._remove_host_labels(context, compute_hosts, compute_labels_set)
 
     def _get_list_of_charts(self, manifest_file):
         charts = []
@@ -712,7 +712,7 @@ class AppOperator(object):
                 self._helm.remove_helm_chart_overrides(chart.name,
                                                        chart.namespace)
 
-    def _make_armada_request_with_monitor(self, app, request, overrides_str=None):
+    def _make_armada_request_with_monitor(self, context, app, request, overrides_str=None):
         """Initiate armada request with monitoring
 
         This method delegates the armada request to docker helper and starts
@@ -797,7 +797,7 @@ class AppOperator(object):
         monitor = greenthread.spawn_after(1, _check_progress, mqueue, app,
                                           pattern, logfile)
         rc = self._docker.make_armada_request(request, app.armada_mfile,
-                                              overrides_str, logfile)
+                                              context, overrides_str, logfile)
         mqueue.put('done')
         monitor.kill()
         return rc
@@ -862,7 +862,7 @@ class AppOperator(object):
             LOG.exception(e)
             self._abort_operation(app, constants.APP_UPLOAD_OP)
 
-    def perform_app_apply(self, rpc_app):
+    def perform_app_apply(self, context, rpc_app):
         """Process application install request
 
         This method processes node labels per configuration and invokes
@@ -885,11 +885,10 @@ class AppOperator(object):
         app = AppOperator.Application(rpc_app)
         LOG.info("Application (%s) apply started." % app.name)
 
-        self._process_node_labels(app)
-
         overrides_str = ''
         ready = True
         try:
+            self._process_node_labels(context, app)
             app.charts = self._get_list_of_charts(app.armada_mfile_abs)
             if app.system_app:
                 self._update_app_status(
@@ -921,7 +920,7 @@ class AppOperator(object):
             if ready:
                 self._update_app_status(
                     app, new_progress=constants.APP_PROGRESS_APPLY_MANIFEST)
-                if self._make_armada_request_with_monitor(app,
+                if self._make_armada_request_with_monitor(context, app,
                                                           constants.APP_APPLY_OP,
                                                           overrides_str):
                     self._update_app_status(app,
@@ -935,7 +934,7 @@ class AppOperator(object):
         self._abort_operation(app, constants.APP_APPLY_OP)
         return False
 
-    def perform_app_remove(self, rpc_app):
+    def perform_app_remove(self, context, rpc_app):
         """Process application remove request
 
         This method invokes Armada to delete the application manifest.
@@ -952,7 +951,7 @@ class AppOperator(object):
         self._update_app_status(
             app, new_progress=constants.APP_PROGRESS_DELETE_MANIFEST)
 
-        if self._make_armada_request_with_monitor(app, constants.APP_DELETE_OP):
+        if self._make_armada_request_with_monitor(context, app, constants.APP_DELETE_OP):
             if app.system_app:
                 try:
                     # TODO convert these kubectl commands to use the k8s api
@@ -1000,7 +999,7 @@ class AppOperator(object):
 
         return False
 
-    def perform_app_delete(self, rpc_app):
+    def perform_app_delete(self, context, rpc_app):
         """Process application remove request
 
         This method removes the application entry from the database and
@@ -1013,7 +1012,7 @@ class AppOperator(object):
         app = AppOperator.Application(rpc_app)
         try:
             self._dbapi.kube_app_destroy(app.name)
-            self._cleanup(app)
+            self._cleanup(context, app)
             LOG.info("Application (%s) has been purged from the system." %
                      app.name)
             msg = None
@@ -1132,13 +1131,17 @@ class DockerHelper(object):
                 os.unlink(kube_config)
             return None
 
-    def make_armada_request(self, request, manifest_file, overrides_str='',
+    def make_armada_request(self, request, manifest_file, context=None,
+                            overrides_str='',
                             logfile=None):
 
         if logfile is None:
             logfile = request + '.log'
 
         rc = True
+
+        if context:
+            bearertoken = str(context.auth_token) + " "
 
         try:
             client = docker.from_env(timeout=INSTALLATION_TIMEOUT)
@@ -1160,8 +1163,8 @@ class DockerHelper(object):
                             LOG.error("Failed to validate application manifest "
                                       "%s: %s." % (manifest_file, exec_logs))
                 elif request == constants.APP_APPLY_OP:
-                    cmd = "/bin/bash -c 'armada apply --debug " + manifest_file +\
-                          overrides_str + " | tee " + logfile + "'"
+                    cmd = "/bin/bash -c 'armada apply --debug --bearer-token " + bearertoken +\
+                            manifest_file + overrides_str + " | tee " + logfile + "'"
                     LOG.info("Armada apply command = %s" % cmd)
                     (exit_code, exec_logs) = armada_svc.exec_run(cmd)
                     if exit_code == 0:
@@ -1183,7 +1186,8 @@ class DockerHelper(object):
                             LOG.error("Failed to apply application manifest %s: "
                                       "%s." % (manifest_file, exec_logs))
                 elif request == constants.APP_DELETE_OP:
-                    cmd = "/bin/bash -c 'armada delete --debug --manifest " +\
+                    cmd = "/bin/bash -c 'armada delete --debug --bearer-token " +\
+                          bearertoken + " --manifest " +\
                           manifest_file + " | tee " + logfile + "'"
                     (exit_code, exec_logs) = armada_svc.exec_run(cmd)
                     if exit_code == 0:

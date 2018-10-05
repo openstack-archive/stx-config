@@ -1,0 +1,75 @@
+    [{
+            "resource": {
+                "verbs": ["get", "list", "watch", "create", "update", "delete", "patch", "proxy"],
+                "resources": ["*"],
+                "version": "*",
+                "namespace": "*"
+            },
+            "match": [{
+                    "type": "role",
+                    "values": ["admin"]
+                },
+                {
+                    "type": "project",
+                    "values": ["admin"]
+                }
+            ]
+        },
+        {
+            "resource": {
+                "verbs": ["get", "list", "watch", "create", "update", "delete", "patch", "proxy"],
+                "apiGroups": ["*"],
+                "resources": ["*"],
+                "version": "*",
+                "namespace": "*"
+            },
+            "match": [{
+                    "type": "role",
+                    "values": ["admin"]
+                },
+                {
+                    "type": "project",
+                    "values": ["admin"]
+                }
+            ]
+        },
+    	{
+    		"resource": {
+    			"verbs": ["get", "list", "watch"],
+    			"resources": ["*"],
+    			"version": "*",
+    			"namespace": "*"
+    		},
+    		"match": [{
+    				"type": "role",
+    				"values": ["_member_"]
+    			}
+    		]
+        },
+	{
+    		"resource": {
+    			"verbs": ["get", "list", "watch", "create", "update", "delete", "patch"],
+    			"resources": ["*"],
+    			"version": "*",
+    			"namespace": "*"
+    		},
+    		"match": [{
+    				"type": "group",
+    				"values": ["system:serviceaccounts:kube-system","system:serviceaccounts"]
+    			}
+    		]
+    	},
+	{
+    		"resource": {
+    			"verbs": ["get", "list", "watch", "create", "update", "delete", "patch"],
+    			"resources": ["*"],
+    			"version": "*",
+    			"namespace": "*"
+    		},
+    		"match": [{
+    				"type": "user",
+    				"values": ["system:kube-controller-manager","system:kube-scheduler"]
+    			}
+    		]
+    	}    
+    ]

@@ -30,23 +30,35 @@ class KubeOperator(object):
     def __init__(self, dbapi):
         self._dbapi = dbapi
         self._kube_client = None
+        self._configuration = None
 
-    def _get_kubernetesclient(self):
-        if not self._kube_client:
+
+    def _get_kubernetesclient(self, token):
+        if not self._configuration:
             config.load_kube_config('/etc/kubernetes/admin.conf')
+            configuration = client.Configuration()
+            configuration.verify_ssl = False
+            # Add a Bearer Tag to the token for all external kubeApi calls
+            configuration.api_key_prefix['authorization'] = 'Bearer'
+            configuration.logger_file = "/var/log/kubeclient.log"
+            self._configuration = configuration
 
-            # Workaround: Turn off SSL/TLS verification
-            c = Configuration()
-            c.verify_ssl = False
-            Configuration.set_default(c)
+        # Pass a new token with every request
+        self._configuration.api_key['authorization'] = token
 
-            self._kube_client = client.CoreV1Api()
+        if not self._kube_client:
+            kubeapi_config = client.ApiClient(self._configuration)
+            self._kube_client = client.CoreV1Api(kubeapi_config)
+
         return self._kube_client
 
-    def kube_patch_node(self, name, body):
+
+    def kube_patch_node(self, context, name, body):
         try:
-            api_response = self._get_kubernetesclient().patch_node(name, body)
+            api_token = str(context.auth_token)
+            api_response = self._get_kubernetesclient(api_token)
             LOG.debug("Response: %s" % api_response)
+            core_api_response = api_response.patch_node(name, body)
         except ApiException as e:
             if e.status == httplib.UNPROCESSABLE_ENTITY:
                 reason = json.loads(e.body).get('message', "")
