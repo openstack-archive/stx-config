@@ -39,6 +39,8 @@ class SystemInventoryPuppet(openstack.OpenstackBasePuppet):
             'sysinv::keystone::auth::password': kspass,
 
             'sysinv::api::keystone_password': kspass,
+
+            'sysinv::api::openstack_keystone_password': kspass,
         }
 
     def get_system_config(self):
@@ -79,6 +81,16 @@ class SystemInventoryPuppet(openstack.OpenstackBasePuppet):
             'openstack::sysinv::params::region_name': self.get_region_name(),
             'platform::sysinv::params::service_create':
                 self._to_create_services(),
+
+            'sysinv::api::openstack_keystone_auth_uri': self._keystone_auth_uri(),
+            'sysinv::api::openstack_keystone_identity_uri':
+                self._keystone_identity_uri(),
+            'sysinv::api::openstack_keystone_tenant': self._get_service_project_name(),
+            'sysinv::api::openstack_keystone_user_domain':
+                self._get_service_user_domain_name(),
+            'sysinv::api::openstack_keystone_project_domain':
+                self._get_service_project_domain_name(),
+            'sysinv::api::openstack_keystone_user': ksuser,
         }
 
     def get_secure_system_config(self):

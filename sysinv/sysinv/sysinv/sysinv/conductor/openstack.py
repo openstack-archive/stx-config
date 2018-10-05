@@ -60,6 +60,53 @@ keystone_opts = [
     cfg.StrOpt('region_name',
                default='RegionOne',
                help=_("Region Name")),
+    cfg.StrOpt('username',
+               default='sysinv',
+               help=_("Sysinv keystone user name")),
+    cfg.StrOpt('password',
+               default='sysinv',
+               help=_("Sysinv keystone user password")),
+    cfg.StrOpt('project_name',
+               default='services',
+               help=_("Sysinv keystone user project name")),
+    cfg.StrOpt('user_domain_name',
+               default='Default',
+               help=_("Sysinv keystone user domain name")),
+    cfg.StrOpt('project_domain_name',
+               default='Default',
+               help=_("Sysinv keystone user project domain name"))
+]
+
+
+openstack_keystone_opts = [
+    cfg.StrOpt('auth_host',
+               default='controller',
+               help=_("Authentication host server")),
+    cfg.IntOpt('auth_port',
+               default=5000,
+               help=_("Authentication host port number")),
+    cfg.StrOpt('auth_protocol',
+               default='http',
+               help=_("Authentication protocol")),
+    cfg.StrOpt('admin_user',
+               default='admin',
+               help=_("Admin user")),
+    cfg.StrOpt('admin_password',
+               default='admin',   # this is usually some value
+               help=_("Admin password"),
+               secret=True),
+    cfg.StrOpt('admin_tenant_name',
+               default='services',
+               help=_("Admin tenant name")),
+    cfg.StrOpt('auth_uri',
+               default='http://192.168.204.2:5000/',
+               help=_("Authentication URI")),
+    cfg.StrOpt('auth_url',
+               default='http://127.0.0.1:5000/',
+               help=_("Admin Authentication URI")),
+    cfg.StrOpt('region_name',
+               default='RegionOne',
+               help=_("Region Name")),
     cfg.StrOpt('neutron_region_name',
                default='RegionOne',
                help=_("Neutron Region Name")),
@@ -90,7 +137,11 @@ keystone_opts = [
 ]
 
 # Register the configuration options
-cfg.CONF.register_opts(keystone_opts, "KEYSTONE_AUTHTOKEN")
+PLATFORM_CONFIG = 'KEYSTONE_AUTHTOKEN'
+OPENSTACK_CONFIG = 'OPENSTACK_KEYSTONE_AUTHTOKEN'
+
+cfg.CONF.register_opts(keystone_opts, PLATFORM_CONFIG)
+cfg.CONF.register_opts(openstack_keystone_opts, OPENSTACK_CONFIG)
 
 
 class OpenStackOperator(object):
@@ -105,7 +156,14 @@ class OpenStackOperator(object):
         self.nova_client = None
         self.neutron_client = None
         self._neutron_extension_list = []
-        self.auth_url = cfg.CONF.KEYSTONE_AUTHTOKEN.auth_url + "/v3"
+        self.auth_url = cfg.CONF[PLATFORM_CONFIG].auth_url + "/v3"
+        self.openstack_auth_url = cfg.CONF[OPENSTACK_CONFIG].auth_url + "/v3"
+
+    def _get_auth_url(self, service_config):
+        if service_config == PLATFORM_CONFIG:
+            return self.auth_url
+        else:
+            return self.openstack_auth_url
 
     #################
     # NEUTRON
@@ -116,10 +174,10 @@ class OpenStackOperator(object):
             # neutronclient doesn't yet support v3 keystone auth
             # use keystoneauth.session
             self.neutron_client = neutron_client_v2_0.Client(
-                session=self._get_keystone_session(),
-                auth_url=self.auth_url,
+                session=self._get_keystone_session(OPENSTACK_CONFIG),
+                auth_url=self._get_auth_url(OPENSTACK_CONFIG),
                 endpoint_type='internalURL',
-                region_name=cfg.CONF.KEYSTONE_AUTHTOKEN.neutron_region_name)
+                region_name=cfg.CONF[OPENSTACK_CONFIG].neutron_region_name)
         return self.neutron_client
 
     def get_providernetworksdict(self, pn_names=None, quiet=False):
@@ -243,11 +301,11 @@ class OpenStackOperator(object):
             # novaclient doesn't yet support v3 keystone auth
             # use keystoneauth.session
             self.nova_client = nova_client_v2.Client(
-                session=self._get_keystone_session(),
-                auth_url=self.auth_url,
+                session=self._get_keystone_session(OPENSTACK_CONFIG),
+                auth_url=self._get_auth_url(OPENSTACK_CONFIG),
                 endpoint_type='internalURL',
                 direct_use=False,
-                region_name=cfg.CONF.KEYSTONE_AUTHTOKEN.nova_region_name)
+                region_name=cfg.CONF[OPENSTACK_CONFIG].nova_region_name)
         return self.nova_client
 
     def try_interface_get_by_host(self, host_uuid):
@@ -639,38 +697,38 @@ class OpenStackOperator(object):
     #################
     # Keystone
     #################
-    def _get_keystone_session(self):
+    def _get_keystone_session(self, service_config):
         if not self.keystone_session:
-            auth = v3.Password(auth_url=self.auth_url,
-                               username=cfg.CONF.KEYSTONE_AUTHTOKEN.username,
-                               password=cfg.CONF.KEYSTONE_AUTHTOKEN.password,
-                               user_domain_name=cfg.CONF.KEYSTONE_AUTHTOKEN.
+            auth = v3.Password(auth_url=self._get_auth_url(service_config),
+                               username=cfg.CONF[service_config].username,
+                               password=cfg.CONF[service_config].password,
+                               user_domain_name=cfg.CONF[service_config].
                                user_domain_name,
-                               project_name=cfg.CONF.KEYSTONE_AUTHTOKEN.
+                               project_name=cfg.CONF[service_config].
                                project_name,
-                               project_domain_name=cfg.CONF.KEYSTONE_AUTHTOKEN.
+                               project_domain_name=cfg.CONF[service_config].
                                project_domain_name)
             self.keystone_session = session.Session(auth=auth)
         return self.keystone_session
 
-    def _get_keystoneclient(self):
+    def _get_keystoneclient(self, service_config):
         if not self.keystone_client:  # should not cache this forever
             self.keystone_client = keystone_client.Client(
-                username=cfg.CONF.KEYSTONE_AUTHTOKEN.username,
-                user_domain_name=cfg.CONF.KEYSTONE_AUTHTOKEN.user_domain_name,
-                project_name=cfg.CONF.KEYSTONE_AUTHTOKEN.project_name,
-                project_domain_name=cfg.CONF.KEYSTONE_AUTHTOKEN
+                username=cfg.CONF[service_config].username,
+                user_domain_name=cfg.CONF[service_config].user_domain_name,
+                project_name=cfg.CONF[service_config].project_name,
+                project_domain_name=cfg.CONF[service_config]
                 .project_domain_name,
-                password=cfg.CONF.KEYSTONE_AUTHTOKEN.password,
-                auth_url=self.auth_url,
-                region_name=cfg.CONF.KEYSTONE_AUTHTOKEN.region_name)
+                password=cfg.CONF[service_config].password,
+                auth_url=self._get_auth_url(service_config),
+                region_name=cfg.CONF[service_config].region_name)
         return self.keystone_client
 
     def _get_identity_id(self):
         try:
             LOG.debug("Search service id for : (%s)" %
                       constants.SERVICE_TYPE_IDENTITY)
-            service = self._get_keystoneclient().services.find(
+            service = self._get_keystoneclient(OPENSTACK_CONFIG).services.find(
                 type=constants.SERVICE_TYPE_IDENTITY)
         except identity_exc.NotFound:
             LOG.error("Could not find service id for (%s)" %
@@ -692,10 +750,10 @@ class OpenStackOperator(object):
             region1_name = get_region_name('region_1_name')
             if region1_name is None:
                 region1_name = 'RegionOne'
-            service_list = self._get_keystoneclient().services.list()
+            service_list = self._get_keystoneclient(OPENSTACK_CONFIG).services.list()
             for s in service_list:
                 if s.name.find(constants.SERVICE_TYPE_CINDER) != -1:
-                    endpoint_list += self._get_keystoneclient().endpoints.list(
+                    endpoint_list += self._get_keystoneclient(OPENSTACK_CONFIG).endpoints.list(
                                      service=s, region=region1_name)
         except Exception:
             LOG.error("Failed to get keystone endpoints for cinder.")
@@ -704,10 +762,10 @@ class OpenStackOperator(object):
     def _get_cinderclient(self):
         if not self.cinder_client:
             self.cinder_client = cinder_client_v2.Client(
-                session=self._get_keystone_session(),
-                auth_url=self.auth_url,
+                session=self._get_keystone_session(OPENSTACK_CONFIG),
+                auth_url=self._get_auth_url(OPENSTACK_CONFIG),
                 endpoint_type='internalURL',
-                region_name=cfg.CONF.KEYSTONE_AUTHTOKEN.cinder_region_name)
+                region_name=cfg.CONF[OPENSTACK_CONFIG].cinder_region_name)
 
         return self.cinder_client
 
@@ -817,7 +875,7 @@ class OpenStackOperator(object):
         region1_name = get_region_name('region_1_name')
         if region1_name is None:
             region1_name = 'RegionOne'
-        auth_ref = self._get_keystoneclient().auth_ref
+        auth_ref = self._get_keystoneclient(PLATFORM_CONFIG).auth_ref
         if auth_ref is None:
             raise exception.SysinvException(_("Unable to get auth ref "
                                             "from keystone client"))
@@ -830,7 +888,7 @@ class OpenStackOperator(object):
         version = 1
         return cgts_client.Client(version=version,
                                   endpoint=endpoint['url'],
-                                  auth_url=self.auth_url,
+                                  auth_url=self._get_auth_url(PLATFORM_CONFIG),
                                   token=auth_token['id'])
 
     def get_ceph_mon_info(self):
@@ -879,11 +937,11 @@ class OpenStackOperator(object):
             # because neutron and nova client doesn't
             # and I shamelessly copied them
             self.magnum_client = magnum_client_v1.Client(
-                session=self._get_keystone_session(),
-                auth_url=self.auth_url,
+                session=self._get_keystone_session(OPENSTACK_CONFIG),
+                auth_url=self._get_auth_url(OPENSTACK_CONFIG),
                 endpoint_type='internalURL',
                 direct_use=False,
-                region_name=cfg.CONF.KEYSTONE_AUTHTOKEN.magnum_region_name)
+                region_name=cfg.CONF[OPENSTACK_CONFIG].magnum_region_name)
         return self.magnum_client
 
     def get_magnum_cluster_count(self):

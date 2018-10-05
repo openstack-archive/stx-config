@@ -103,6 +103,19 @@ class sysinv::api (
   $keystone_user_domain       = 'Default',
   $keystone_project_domain    = 'Default',
   $auth_type                  = 'password',
+  $openstack_keystone_password,
+  $openstack_keystone_tenant  = 'services',
+  $openstack_keystone_user    = 'sysinv',
+  $openstack_keystone_auth_host         = 'localhost',
+  $openstack_keystone_auth_port         = '5000',
+  $openstack_keystone_auth_protocol     = 'http',
+  $openstack_keystone_auth_admin_prefix = false,
+  $openstack_keystone_auth_uri          = false,
+  $openstack_keystone_auth_version      = false,
+  $openstack_keystone_identity_uri      = false,
+  $openstack_keystone_user_domain       = 'Default',
+  $openstack_keystone_project_domain    = 'Default',
+  $openstack_auth_type        = 'password',
   $service_port               = '5000',
   $package_ensure             = 'latest',
   $bind_host                  = '0.0.0.0',
@@ -145,6 +158,12 @@ class sysinv::api (
     sysinv_api_paste_ini { 'filter:authtoken/auth_url': value => "${keystone_auth_protocol}://${keystone_auth_host}:5000/"; }
   }
 
+  if $openstack_keystone_identity_uri {
+    sysinv_config { 'openstack_keystone_authtoken/auth_url': value => $openstack_keystone_identity_uri; }
+  } else {
+    sysinv_config { 'openstack_keystone_authtoken/auth_url': value => "${openstack_keystone_auth_protocol}://${openstack_keystone_auth_host}:5000/"; }
+  }
+
   if $keystone_auth_uri {
     sysinv_config { 'keystone_authtoken/auth_uri': value => $keystone_auth_uri; }
     sysinv_api_paste_ini { 'filter:authtoken/auth_uri': value => $keystone_auth_uri; }
@@ -157,12 +176,26 @@ class sysinv::api (
     }
   }
 
+  if $openstack_keystone_auth_uri {
+    sysinv_config { 'openstack_keystone_authtoken/auth_uri': value => $openstack_keystone_auth_uri; }
+  } else {
+    sysinv_config {
+      'openstack_keystone_authtoken/auth_uri': value => "${openstack_keystone_auth_protocol}://${openstack_keystone_auth_host}:5000/";
+    }
+  }
+
   if $keystone_auth_version {
     sysinv_config { 'keystone_authtoken/auth_version': value => $keystone_auth_version; }
     sysinv_api_paste_ini { 'filter:authtoken/auth_version': value => $keystone_auth_version; }
   } else {
     sysinv_config { 'keystone_authtoken/auth_version': ensure => absent; }
     sysinv_api_paste_ini { 'filter:authtoken/auth_version': ensure => absent; }
+  }
+
+  if $openstack_keystone_auth_version {
+    sysinv_config { 'openstack_keystone_authtoken/auth_version': value => $openstack_keystone_auth_version; }
+  } else {
+    sysinv_config { 'openstack_keystone_authtoken/auth_version': ensure => absent; }
   }
 
   if $keystone_enabled {
@@ -176,6 +209,14 @@ class sysinv::api (
       'keystone_authtoken/password':     value => $keystone_password, secret=> true;
       'keystone_authtoken/user_domain_name':  value => $keystone_user_domain;
       'keystone_authtoken/project_domain_name':  value => $keystone_project_domain;
+    }
+    sysinv_config {
+      'openstack_keystone_authtoken/auth_type':    value => $openstack_auth_type;
+      'openstack_keystone_authtoken/project_name': value => $openstack_keystone_tenant;
+      'openstack_keystone_authtoken/username':     value => $openstack_keystone_user;
+      'openstack_keystone_authtoken/password':     value => $openstack_keystone_password, secret=> true;
+      'openstack_keystone_authtoken/user_domain_name':  value => $openstack_keystone_user_domain;
+      'openstack_keystone_authtoken/project_domain_name':  value => $openstack_keystone_project_domain;
     }
 
     sysinv_api_paste_ini {
@@ -202,6 +243,18 @@ class sysinv::api (
         'filter:authtoken/auth_admin_prefix': ensure => absent;
       }
     }
+
+    if $openstack_keystone_auth_admin_prefix {
+      validate_re($openstack_keystone_auth_admin_prefix, '^(/.+[^/])?$')
+      sysinv_config {
+        'openstack_keystone_authtoken/auth_admin_prefix': value => $openstack_keystone_auth_admin_prefix;
+      }
+    } else {
+      sysinv_config {
+        'openstack_keystone_authtoken/auth_admin_prefix': ensure => absent;
+      }
+    }
+
   }
   else
   {
