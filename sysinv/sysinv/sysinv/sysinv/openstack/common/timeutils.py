@@ -174,6 +174,17 @@ def delta_seconds(before, after):
                 float(delta.microseconds) / (10 ** 6))
 
 
+def is_expired(token):
+    """Determines if a token object has expired."""
+    end = iso8601.parse_date(token['expires'])
+    expiry = normalize_time(end)
+    now = utcnow()
+    if expiry > now:
+        return False
+    else:
+        return True
+
+
 def is_soon(dt, window):
     """
     Determines if time is going to happen in the next window seconds.

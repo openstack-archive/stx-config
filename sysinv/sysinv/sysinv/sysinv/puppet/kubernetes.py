@@ -20,6 +20,7 @@ LOG = logging.getLogger(__name__)
 class KubernetesPuppet(base.BasePuppet):
     """Class to encapsulate puppet operations for kubernetes configuration"""
     ETCD_SERVICE_PORT = '2379'
+    WEBHOOK_PORT = '8443'
 
     def get_system_config(self):
         config = {}
@@ -38,6 +39,8 @@ class KubernetesPuppet(base.BasePuppet):
                      self._get_dns_service_domain(),
                  'platform::kubernetes::params::dns_service_ip':
                      self._get_dns_service_ip(),
+                 'platform::kubernetes::params::webhook_url':
+                     self._get_webhook_service_url(),
                  })
 
         return config
@@ -131,3 +134,9 @@ class KubernetesPuppet(base.BasePuppet):
     def _get_dns_service_ip(self):
         # Setting this to a constant for now. Will be configurable later
         return constants.DEFAULT_DNS_SERVICE_IP
+
+    def _get_webhook_service_url(self):
+        addr = self._format_url_address(self._get_cluster_host_address())
+        protocol = "https"
+        webhook_url = "%s://%s:%s/webhook" % (protocol, str(addr), str(self.WEBHOOK_PORT))
+        return webhook_url

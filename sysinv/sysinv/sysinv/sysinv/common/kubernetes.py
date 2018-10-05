@@ -16,7 +16,6 @@ import json
 
 from kubernetes import config
 from kubernetes import client
-from kubernetes.client import Configuration
 from kubernetes.client.rest import ApiException
 from six.moves import http_client as httplib
 from sysinv.common import exception
@@ -30,22 +29,30 @@ class KubeOperator(object):
     def __init__(self, dbapi):
         self._dbapi = dbapi
         self._kube_client = None
+        self._configuration = None
 
-    def _get_kubernetesclient(self):
-        if not self._kube_client:
+    def _get_kubernetesclient(self, token_id):
+        if not self._configuration:
             config.load_kube_config('/etc/kubernetes/admin.conf')
+            configuration = client.Configuration()
+            configuration.verify_ssl = False
+            # Add a Bearer Tag to the token for all external kubeApi calls
+            configuration.api_key_prefix['authorization'] = 'Bearer'
+            self._configuration = configuration
 
-            # Workaround: Turn off SSL/TLS verification
-            c = Configuration()
-            c.verify_ssl = False
-            Configuration.set_default(c)
+        # Pass a new token with every request
+        self._configuration.api_key['authorization'] = token_id
 
-            self._kube_client = client.CoreV1Api()
+        if not self._kube_client:
+            kubeapi_config = client.ApiClient(self._configuration)
+            self._kube_client = client.CoreV1Api(kubeapi_config)
+
         return self._kube_client
 
-    def kube_patch_node(self, name, body):
+    def kube_patch_node(self, context, name, body):
         try:
-            api_response = self._get_kubernetesclient().patch_node(name, body)
+            api_token = context.auth_token
+            api_response = self._get_kubernetesclient(api_token).patch_node(name, body)
             LOG.debug("Response: %s" % api_response)
         except ApiException as e:
             if e.status == httplib.UNPROCESSABLE_ENTITY:
@@ -59,9 +66,10 @@ class KubeOperator(object):
             LOG.error("Kubernetes exception in kube_patch_node: %s" % e)
             raise
 
-    def kube_get_nodes(self):
+    def kube_get_nodes(self, token):
         try:
-            api_response = self._get_kubernetesclient().list_node()
+            api_token = token['id']
+            api_response = self._get_kubernetesclient(api_token).list_node()
             LOG.debug("Response: %s" % api_response)
             return api_response.items
         except Exception as e:

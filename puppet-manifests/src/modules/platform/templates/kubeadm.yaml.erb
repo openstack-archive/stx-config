@@ -21,6 +21,14 @@ controllerManagerExtraArgs:
   node-monitor-period: "2s"
   node-monitor-grace-period: "20s"
   pod-eviction-timeout: "30s"
+apiServerExtraVolumes:
+  - name: k8s-config
+    hostPath: /etc/kubernetes
+    mountPath: /etc/kubernetes
+apiServerExtraArgs:
+  authentication-token-webhook-config-file: "/etc/kubernetes/webhook_authz.conf"
+  authorization-webhook-config-file: "/etc/kubernetes/webhook_authz.conf"
+  authorization-mode: "Node,Webhook,RBAC"
 ---
 kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1

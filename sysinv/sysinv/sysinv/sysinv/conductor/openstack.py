@@ -736,6 +736,14 @@ class OpenStackOperator(object):
     # Primary Region Sysinv
     # Region specific methods
     #########################
+    def req_admin_token(self):
+        auth_ref = self._get_keystoneclient(OPENSTACK_CONFIG).auth_ref
+        if auth_ref is None:
+            raise exception.SysinvException(_("Unable to get auth ref "
+                                            "from keystone client"))
+        auth_token = auth_ref.service_catalog.get_token()
+        return auth_token
+
     def _get_primary_cgtsclient(self):
         # import the module in the function that uses it
         # as the cgtsclient is only installed on the controllers

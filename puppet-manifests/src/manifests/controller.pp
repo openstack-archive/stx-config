@@ -35,6 +35,7 @@ include ::platform::etcd
 include ::platform::docker
 include ::platform::dockerdistribution
 include ::platform::kubernetes::master
+include ::platform::k8s_keystone_auth
 include ::platform::helm
 
 include ::platform::patching
