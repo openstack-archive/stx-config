@@ -4950,7 +4950,7 @@ class ConductorManager(service.PeriodicService):
         self._audit_install_states(hosts)
 
         # Audit kubernetes node labels
-        self._audit_kubernetes_labels(hosts)
+        self._audit_kubernetes_labels(context, hosts)
 
         for host in hosts:
             # only audit configured hosts
@@ -4958,14 +4958,14 @@ class ConductorManager(service.PeriodicService):
                 continue
             self._audit_ihost_action(host)
 
-    def _audit_kubernetes_labels(self, hosts):
+    def _audit_kubernetes_labels(self, context, hosts):
         if not utils.is_kubernetes_config(self.dbapi):
             LOG.debug("_audit_kubernetes_labels skip")
             return
 
         LOG.debug("Starting kubernetes label audit")
         sysinv_labels = self.dbapi.label_get_all()
-        nodes = self._kube.kube_get_nodes()
+        nodes = self._kube.kube_get_nodes(context)
 
         for host in hosts:
             try:
@@ -4983,7 +4983,7 @@ class ConductorManager(service.PeriodicService):
                                         'labels': {host_label.label_key: host_label.label_value}
                                     }
                                 }
-                                self._kube.kube_patch_node(host.hostname, body)
+                                self._kube.kube_patch_node(context, host.hostname, body)
             except Exception as e:
                 LOG.warning("Failed to sync kubernetes label to host %s: %s" %
                             (host.hostname, e))
@@ -10604,7 +10604,7 @@ class ConductorManager(service.PeriodicService):
         }
         body['metadata']['labels'].update(label_dict)
         try:
-            self._kube.kube_patch_node(host.hostname, body)
+            self._kube.kube_patch_node(context, host.hostname, body)
         except exception.K8sNodeNotFound:
             LOG.info("Host %s does not exist in kubernetes yet, label will "
                      "be added after node's unlock by audit" % host.hostname)
@@ -10645,7 +10645,7 @@ class ConductorManager(service.PeriodicService):
         :param tarfile: location of the application tarfile to be exracted
 
         """
-        self._app.perform_app_upload(rpc_app, tarfile)
+        self._app.perform_app_upload(context, rpc_app, tarfile)
 
     def perform_app_apply(self, context, rpc_app):
         """Handling of application install request (via AppOperator)
@@ -10654,7 +10654,7 @@ class ConductorManager(service.PeriodicService):
         :param rpc_app: data object provided in the rpc request
 
         """
-        app_installed = self._app.perform_app_apply(rpc_app)
+        app_installed = self._app.perform_app_apply(context, rpc_app)
         if app_installed:
             # Update the VIM configuration as it may need to manage the newly
             # installed application.
@@ -10669,7 +10669,7 @@ class ConductorManager(service.PeriodicService):
         :param rpc_app: data object provided in the rpc request
 
         """
-        app_removed = self._app.perform_app_remove(rpc_app)
+        app_removed = self._app.perform_app_remove(context, rpc_app)
         if app_removed:
             # Update the VIM configuration.
             self._update_vim_config(context)
@@ -10683,4 +10683,4 @@ class ConductorManager(service.PeriodicService):
         :param rpc_app: data object provided in the rpc request
 
         """
-        return self._app.perform_app_delete(rpc_app)
+        return self._app.perform_app_delete(context, rpc_app)
