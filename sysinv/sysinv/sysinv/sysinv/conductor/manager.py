@@ -10538,7 +10538,7 @@ class ConductorManager(service.PeriodicService):
             }
         }
         body['metadata']['labels'].update(label_dict)
-        self._kube.kube_patch_node(host.hostname, body)
+        self._kube.kube_patch_node(context, host.hostname, body)
 
     def update_host_memory(self, context, host_uuid):
         try:
@@ -10585,7 +10585,7 @@ class ConductorManager(service.PeriodicService):
         :param rpc_app: data object provided in the rpc request
 
         """
-        app_installed = self._app.perform_app_apply(rpc_app)
+        app_installed = self._app.perform_app_apply(context, rpc_app)
         if app_installed:
             # Update the VIM configuration as it may need to manage the newly
             # installed application.
@@ -10600,7 +10600,7 @@ class ConductorManager(service.PeriodicService):
         :param rpc_app: data object provided in the rpc request
 
         """
-        app_removed = self._app.perform_app_remove(rpc_app)
+        app_removed = self._app.perform_app_remove(context, rpc_app)
         if app_removed:
             # Update the VIM configuration.
             self._update_vim_config(context)
@@ -10614,4 +10614,4 @@ class ConductorManager(service.PeriodicService):
         :param rpc_app: data object provided in the rpc request
 
         """
-        return self._app.perform_app_delete(rpc_app)
+        return self._app.perform_app_delete(context, rpc_app)

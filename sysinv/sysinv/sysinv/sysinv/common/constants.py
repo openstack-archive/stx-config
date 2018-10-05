@@ -1498,3 +1498,7 @@ SRIOV_LABEL = 'sriov=enabled'
 # Default DNS service domain
 DEFAULT_DNS_SERVICE_DOMAIN = 'cluster.local'
 DEFAULT_DNS_SERVICE_IP = '10.96.0.10'
+
+# Kubernetes service ports
+ETCD_SERVICE_PORT = 2379
+WEBHOOK_PORT = 8443
