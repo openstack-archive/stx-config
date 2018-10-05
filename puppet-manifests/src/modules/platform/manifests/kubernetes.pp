@@ -10,6 +10,7 @@ class platform::kubernetes::params (
   $ca_key = undef,
   $sa_key = undef,
   $sa_pub = undef,
+  $webhook_url = undef,
 ) { }
 
 class platform::kubernetes::kubeadm {
@@ -53,6 +54,14 @@ class platform::kubernetes::master::init
   inherits ::platform::kubernetes::params {
 
   include ::platform::params
+  include ::platform::network::mgmt::params
+  include ::openstack::keystone::params
+
+  $mgmt_ip_float  = $::platform::network::mgmt::params::controller_address
+
+  $keystone_api_version  = $::openstack::keystone::params::api_version
+  $keystone_identity_uri = $::openstack::keystone::params::identity_uri
+  $keystone_auth_url = "${keystone_identity_uri}/${keystone_api_version}"
 
   if str2bool($::is_initial_config_primary) {
     # For initial controller install, configure kubernetes from scratch.
@@ -71,6 +80,32 @@ class platform::kubernetes::master::init
       content => template('platform/kubeadm.yaml.erb'),
     }
 
+    # Configure the node to deploy Webhook k8s-keystone-auth
+    -> file {'kube_pki_dir':
+      ensure => directory,
+      path   => '/etc/kubernetes/pki',
+    }
+    # Create the Webhookpolicy file
+    -> file { 'webhookpolicy.json':
+      ensure  => file,
+      path    => '/etc/kubernetes/pki/webhookpolicy.json',
+      content => template('platform/webhookpolicy.json.erb'),
+      mode    => '0755',
+    }
+    -> file { 'webhook_authz.conf':
+      ensure  => file,
+      path    => '/etc/kubernetes/webhook_authz.conf',
+      content => template('platform/webhook_authz.conf.erb'),
+    }
+    # Create the k8s-keystone-auth static pod manifest
+    -> file { 'k8s-keystone-auth':
+      ensure  => file,
+      path    => '/etc/kubernetes/manifests/k8s-keystone-auth.yaml',
+      content => template('platform/k8s-keystone-auth.yaml.erb'),
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+    }
     -> exec { 'configure master node':
       command   => 'kubeadm init --config=/etc/kubernetes/kubeadm.yaml',
       logoutput => true,
@@ -177,7 +212,27 @@ class platform::kubernetes::master::init
         ensure  => file,
         content => template('platform/kubeadm.yaml.erb'),
       }
-
+      # Create the Webhookpolicy file
+      -> file { 'webhookpolicy.json':
+        ensure  => file,
+        path    => '/etc/kubernetes/pki/webhookpolicy.json',
+        content => template('platform/webhookpolicy.json.erb'),
+        mode    => '0755',
+      }
+      -> file { 'webhook_authz.conf':
+        ensure  => file,
+        path    => '/etc/kubernetes/webhook_authz.conf',
+        content => template('platform/webhook_authz.conf.erb'),
+      }
+      # Create the k8s-keystone-auth static pod manifest
+      -> file { 'k8s-keystone-auth':
+        ensure  => file,
+        path    => '/etc/kubernetes/manifests/k8s-keystone-auth.yaml',
+        content => template('platform/k8s-keystone-auth.yaml.erb'),
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+      }
       -> exec { 'configure master node':
         command   => 'kubeadm init --config=/etc/kubernetes/kubeadm.yaml',
         logoutput => true,
