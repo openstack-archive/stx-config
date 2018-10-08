@@ -694,7 +694,7 @@ def do_host_downgrade(cc, args):
             'Only proceed once the system data has been copied to another '
             'system.\n'
             'Are you absolutely sure you want to continue?  [yes/N]: ')
-        confirm = raw_input(warning_message)
+        confirm = input(warning_message)
         if confirm != 'yes':
             print "Operation cancelled."
             return
@@ -723,7 +723,7 @@ def do_host_upgrade(cc, args):
             'Only proceed once the system data has been copied to another '
             'system.\n'
             'Are you absolutely sure you want to continue?  [yes/N]: ')
-        confirm = raw_input(warning_message)
+        confirm = input(warning_message)
         if confirm != 'yes':
             print "Operation cancelled."
             return

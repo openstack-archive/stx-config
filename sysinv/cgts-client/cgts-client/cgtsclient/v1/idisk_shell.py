@@ -103,7 +103,7 @@ def do_host_disk_wipe(cc, args):
             ("WARNING: This operation is irreversible and all data on the "
              "specified disk will be lost.\n"
              "Continue [yes/N]: ")
-        confirm = raw_input(warning_message)
+        confirm = input(warning_message)
         if confirm != 'yes':
             print "Operation cancelled."
             return

@@ -277,7 +277,7 @@ def pt_builder(field_labels, fields, formatters, paging, printer=default_printer
                 if self.terminal_lines_left > 0:
                     printer("\n" * (self.terminal_lines_left - 1))
 
-                s = raw_input("Press Enter to continue or 'q' to exit...")
+                s = input("Press Enter to continue or 'q' to exit...")
                 if s == 'q':
                     self.quit = True
                     return False

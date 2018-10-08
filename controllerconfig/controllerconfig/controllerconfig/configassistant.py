@@ -59,7 +59,7 @@ def timestamped(dname, fmt='{dname}_%Y-%m-%d-%H-%M-%S'):
 def prompt_for(prompt_text, default_input, validator):
     valid = False
     while not valid:
-        user_input = raw_input(prompt_text)
+        user_input = input(prompt_text)
         if user_input.lower() == 'q':
             raise UserQuit
         elif user_input == "":
@@ -545,7 +545,7 @@ class ConfigAssistant():
                now.strftime(date_format))
 
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "\nIs the current date and time correct? [y/n]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -559,7 +559,7 @@ class ConfigAssistant():
 
         new_time = None
         while True:
-            user_input = raw_input("\nEnter new system date and time (UTC) " +
+            user_input = input("\nEnter new system date and time (UTC) " +
                                    "in YYYY-MM-DD HH:MM:SS format: \n")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -600,7 +600,7 @@ class ConfigAssistant():
         print
 
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "Please input the timezone[" + self.timezone + "]:")
 
             if user_input == 'Q' or user_input == 'q':
@@ -797,7 +797,7 @@ class ConfigAssistant():
 
         while True:
             print
-            user_input = raw_input(
+            user_input = input(
                 "Configure a separate PXEBoot network [y/N]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -815,7 +815,7 @@ class ConfigAssistant():
 
         if self.separate_pxeboot_network:
             while True:
-                user_input = raw_input("PXEBoot subnet [" +
+                user_input = input("PXEBoot subnet [" +
                                        str(self.pxeboot_subnet) + "]: ")
                 if user_input.lower() == 'q':
                     raise UserQuit
@@ -891,7 +891,7 @@ class ConfigAssistant():
                     "interface link aggregation, for All-in-one duplex-direct."
                 )
             print
-            user_input = raw_input(
+            user_input = input(
                 "Management interface link aggregation [y/N]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -911,7 +911,7 @@ class ConfigAssistant():
             if self.lag_management_interface:
                 self.management_interface = self.get_next_lag_name()
 
-            user_input = raw_input("Management interface [" +
+            user_input = input("Management interface [" +
                                    str(self.management_interface) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -943,7 +943,7 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = raw_input("Management interface MTU [" +
+            user_input = input("Management interface MTU [" +
                                    str(self.management_mtu) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -958,7 +958,7 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "Management interface link capacity Mbps [" +
                 str(self.management_link_capacity) + "]: ")
             if user_input.lower() == 'q':
@@ -983,7 +983,7 @@ class ConfigAssistant():
             print "  1) 802.3ad (LACP) policy"
             print "  2) Active-backup policy"
 
-            user_input = raw_input(
+            user_input = input(
                 "\nManagement interface bonding policy [" +
                 str(self.lag_management_interface_policy) + "]: ")
             if user_input.lower() == 'q':
@@ -1012,7 +1012,7 @@ class ConfigAssistant():
                 "management interface.", 80)
             print
 
-            user_input = raw_input(
+            user_input = input(
                 "First management interface member [" +
                 str(self.lag_management_interface_member0) + "]: ")
             if user_input.lower() == 'q':
@@ -1035,7 +1035,7 @@ class ConfigAssistant():
                 self.lag_management_interface_member0 = ""
                 continue
 
-            user_input = raw_input(
+            user_input = input(
                 "Second management interface member [" +
                 str(self.lag_management_interface_member1) + "]: ")
             if user_input.lower() == 'q':
@@ -1060,7 +1060,7 @@ class ConfigAssistant():
             else:
                 print "Interface does not exist"
                 self.lag_management_interface_member1 = ""
-                user_input = raw_input(
+                user_input = input(
                     "Do you want a single physical member in the bond "
                     "interface [y/n]: ")
                 if user_input.lower() == 'q':
@@ -1078,7 +1078,7 @@ class ConfigAssistant():
             print
 
             while True:
-                user_input = raw_input(
+                user_input = input(
                     "Management VLAN Identifier [" +
                     str(self.management_vlan) + "]: ")
                 if user_input.lower() == 'q':
@@ -1094,7 +1094,7 @@ class ConfigAssistant():
 
         min_addresses = 8
         while True:
-            user_input = raw_input("Management subnet [" +
+            user_input = input("Management subnet [" +
                                    str(self.management_subnet) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1117,7 +1117,7 @@ class ConfigAssistant():
                           "This will not allow you to provision a Cinder LVM" \
                           " or Ceph backend." % self.management_subnet.size
                     while True:
-                        user_input = raw_input(
+                        user_input = input(
                             "Do you want to continue with the current "
                             "configuration? [Y/n]: ")
                         if user_input.lower() == 'q' or \
@@ -1135,7 +1135,7 @@ class ConfigAssistant():
         if (self.system_dc_role !=
                 sysinv_constants.DISTRIBUTED_CLOUD_ROLE_SYSTEMCONTROLLER):
             while True:
-                user_input = raw_input(
+                user_input = input(
                     "Use entire management subnet [Y/n]: ")
                 if user_input.lower() == 'q':
                     raise UserQuit
@@ -1163,7 +1163,7 @@ class ConfigAssistant():
                 self.management_start_address = self.management_subnet[2]
                 self.management_end_address = self.management_subnet[-2]
                 while True:
-                    user_input = raw_input(
+                    user_input = input(
                         "Management network start address [" +
                         str(self.management_start_address) + "]: ")
                     if user_input.lower() == 'q':
@@ -1179,7 +1179,7 @@ class ConfigAssistant():
                         print ("Invalid start address. \n Reason: %s" % e)
 
                 while True:
-                    user_input = raw_input(
+                    user_input = input(
                         "Management network end address [" +
                         str(self.management_end_address) + "]: ")
                     if user_input == 'Q' or user_input == 'q':
@@ -1233,7 +1233,7 @@ class ConfigAssistant():
                 "disables automatic provisioning of new hosts in System "
                 "Inventory, requiring the user to manually provision using "
                 "the 'system host-add' command. ", 80)
-            user_input = raw_input(
+            user_input = input(
                 "Dynamic IP address allocation [Y/n]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1299,7 +1299,7 @@ class ConfigAssistant():
                 self.management_multicast_subnet = \
                     IPNetwork(constants.DEFAULT_MULTICAST_SUBNET_IPV6)
 
-            user_input = raw_input("Management Network Multicast subnet [" +
+            user_input = input("Management Network Multicast subnet [" +
                                    str(self.management_multicast_subnet) +
                                    "]: ")
             if user_input.lower() == 'q':
@@ -1388,7 +1388,7 @@ class ConfigAssistant():
         infra_vlan_required = False
 
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "Configure an infrastructure interface [y/N]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1407,7 +1407,7 @@ class ConfigAssistant():
                 "An infrastructure bond interface provides redundant "
                 "connections for the infrastructure network.", 80)
             print
-            user_input = raw_input(
+            user_input = input(
                 "Infrastructure interface link aggregation [y/N]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1425,7 +1425,7 @@ class ConfigAssistant():
             if self.lag_infrastructure_interface:
                 self.infrastructure_interface = self.get_next_lag_name()
 
-            user_input = raw_input("Infrastructure interface [" +
+            user_input = input("Infrastructure interface [" +
                                    str(self.infrastructure_interface) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1466,13 +1466,13 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "Configure an infrastructure VLAN [y/N]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
             elif user_input.lower() == 'y':
                 while True:
-                    user_input = raw_input(
+                    user_input = input(
                         "Infrastructure VLAN Identifier [" +
                         str(self.infrastructure_vlan) + "]: ")
                     if user_input.lower() == 'q':
@@ -1508,7 +1508,7 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = raw_input("Infrastructure interface MTU [" +
+            user_input = input("Infrastructure interface MTU [" +
                                    str(self.infrastructure_mtu) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1531,7 +1531,7 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "Infrastructure interface link capacity Mbps [" +
                 str(self.infrastructure_link_capacity) + "]: ")
             if user_input.lower() == 'q':
@@ -1556,7 +1556,7 @@ class ConfigAssistant():
             print "  2) Balanced XOR policy"
             print "  3) 802.3ad (LACP) policy"
 
-            user_input = raw_input(
+            user_input = input(
                 "\nInfrastructure interface bonding policy [" +
                 str(self.lag_infrastructure_interface_policy) + "]: ")
             if user_input.lower() == 'q':
@@ -1593,7 +1593,7 @@ class ConfigAssistant():
                 "infrastructure interface.", 80)
             print
 
-            user_input = raw_input(
+            user_input = input(
                 "First infrastructure interface member [" +
                 str(self.lag_infrastructure_interface_member0) + "]: ")
             if user_input.lower() == 'q':
@@ -1616,7 +1616,7 @@ class ConfigAssistant():
                 self.lag_infrastructure_interface_member0 = ""
                 continue
 
-            user_input = raw_input(
+            user_input = input(
                 "Second infrastructure interface member [" +
                 str(self.lag_infrastructure_interface_member1) + "]: ")
             if user_input.lower() == 'q':
@@ -1642,7 +1642,7 @@ class ConfigAssistant():
             else:
                 print "Interface does not exist"
                 self.lag_infrastructure_interface_member1 = ""
-                user_input = raw_input(
+                user_input = input(
                     "Do you want a single physical member in the bond "
                     "interface [y/n]: ")
                 if user_input.lower() == 'q':
@@ -1657,7 +1657,7 @@ class ConfigAssistant():
 
         min_addresses = 8
         while True:
-            user_input = raw_input("Infrastructure subnet [" +
+            user_input = input("Infrastructure subnet [" +
                                    str(self.infrastructure_subnet) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1700,7 +1700,7 @@ class ConfigAssistant():
         self.infrastructure_end_address = \
             self.infrastructure_subnet[-2]
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "Use entire infrastructure subnet [Y/n]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1719,7 +1719,7 @@ class ConfigAssistant():
         if not self.use_entire_infra_subnet:
             while True:
                 while True:
-                    user_input = raw_input(
+                    user_input = input(
                         "Infrastructure network start address [" +
                         str(self.infrastructure_start_address) + "]: ")
                     if user_input.lower() == 'q':
@@ -1736,7 +1736,7 @@ class ConfigAssistant():
                         print ("Invalid start address. \n Reason: %s" % e)
 
                 while True:
-                    user_input = raw_input(
+                    user_input = input(
                         "Infrastructure network end address [" +
                         str(self.infrastructure_end_address) + "]: ")
                     if user_input.lower() == 'q':
@@ -1842,7 +1842,7 @@ class ConfigAssistant():
     def input_aio_simplex_oam_ip_address(self):
         """Allow user to input external OAM IP and perform validation."""
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "External OAM address [" +
                 str(self.external_oam_gateway_address + 1) + "]: ")
             if user_input.lower() == 'q':
@@ -1867,7 +1867,7 @@ class ConfigAssistant():
     def input_oam_ip_address(self):
         """Allow user to input external OAM IP and perform validation."""
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "External OAM floating address [" +
                 str(self.external_oam_gateway_address + 1) + "]: ")
             if user_input.lower() == 'q':
@@ -1888,7 +1888,7 @@ class ConfigAssistant():
                        )
 
         while True:
-            user_input = raw_input("External OAM address for first "
+            user_input = input("External OAM address for first "
                                    "controller node [" +
                                    str(self.external_oam_floating_address + 1)
                                    + "]: ")
@@ -1910,7 +1910,7 @@ class ConfigAssistant():
                        )
 
         while True:
-            user_input = raw_input("External OAM address for second "
+            user_input = input("External OAM address for second "
                                    "controller node [" +
                                    str(self.external_oam_address_0 + 1) +
                                    "]: ")
@@ -1950,7 +1950,7 @@ class ConfigAssistant():
                 "An external OAM bond interface provides redundant "
                 "connections for the OAM network.", 80)
             print
-            user_input = raw_input(
+            user_input = input(
                 "External OAM interface link aggregation [y/N]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -1970,7 +1970,7 @@ class ConfigAssistant():
             if self.lag_external_oam_interface:
                 self.external_oam_interface = self.get_next_lag_name()
 
-            user_input = raw_input("External OAM interface [" +
+            user_input = input("External OAM interface [" +
                                    str(self.external_oam_interface) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -2010,13 +2010,13 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = raw_input(
+            user_input = input(
                 "Configure an external OAM VLAN [y/N]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
             elif user_input.lower() == 'y':
                 while True:
-                    user_input = raw_input(
+                    user_input = input(
                         "External OAM VLAN Identifier [" +
                         str(self.external_oam_vlan) + "]: ")
                     if user_input.lower() == 'q':
@@ -2053,7 +2053,7 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = raw_input("External OAM interface MTU [" +
+            user_input = input("External OAM interface MTU [" +
                                    str(self.external_oam_mtu) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -2102,7 +2102,7 @@ class ConfigAssistant():
             print "  2) Balanced XOR policy"
             print "  3) 802.3ad (LACP) policy"
 
-            user_input = raw_input(
+            user_input = input(
                 "\nExternal OAM interface bonding policy [" +
                 str(self.lag_external_oam_interface_policy) + "]: ")
             if user_input.lower() == 'q':
@@ -2138,7 +2138,7 @@ class ConfigAssistant():
                 "external OAM interface.", 80)
             print
 
-            user_input = raw_input(
+            user_input = input(
                 "First external OAM interface member [" +
                 str(self.lag_external_oam_interface_member0) + "]: ")
             if user_input.lower() == 'q':
@@ -2161,7 +2161,7 @@ class ConfigAssistant():
                 self.lag_external_oam_interface_member0 = ""
                 continue
 
-            user_input = raw_input(
+            user_input = input(
                 "Second external oam interface member [" +
                 str(self.lag_external_oam_interface_member1) + "]: ")
             if user_input.lower() == 'q':
@@ -2186,7 +2186,7 @@ class ConfigAssistant():
             else:
                 print "Interface does not exist"
                 self.lag_external_oam_interface_member1 = ""
-                user_input = raw_input(
+                user_input = input(
                     "Do you want a single physical member in the bond "
                     "interface [y/n]: ")
                 if user_input.lower() == 'q':
@@ -2197,7 +2197,7 @@ class ConfigAssistant():
                     continue
 
         while True:
-            user_input = raw_input("External OAM subnet [" +
+            user_input = input("External OAM subnet [" +
                                    str(self.external_oam_subnet) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -2216,7 +2216,7 @@ class ConfigAssistant():
                        )
 
         while True:
-            user_input = raw_input("External OAM gateway address [" +
+            user_input = input("External OAM gateway address [" +
                                    str(self.external_oam_subnet[1]) + "]: ")
             if user_input.lower() == 'q':
                 raise UserQuit
@@ -4589,7 +4589,7 @@ class ConfigAssistant():
 
         if not configfile and not default_config:
             while True:
-                user_input = raw_input(
+                user_input = input(
                     "\nApply the above configuration? [y/n]: ")
                 if user_input.lower() == 'q':
                     raise UserQuit

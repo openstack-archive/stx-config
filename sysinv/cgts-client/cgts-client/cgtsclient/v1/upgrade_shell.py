@@ -128,12 +128,12 @@ def do_upgrade_abort(cc, args):
                 'revert to the state when controller-0 was last active.\n\n'
                 'Continue [yes/N]: ')
 
-    confirm = raw_input(warning_message)
+    confirm = input(warning_message)
     if confirm != 'yes':
         print "Operation cancelled."
         return
     elif abort_required:
-        confirm = raw_input("Type 'abort' to confirm: ")
+        confirm = input("Type 'abort' to confirm: ")
         if confirm != 'abort':
             print "Operation cancelled."
             return

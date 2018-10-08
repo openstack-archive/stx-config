@@ -1547,7 +1547,7 @@ def restore_system(backup_file, clone=False):
                     print ("After the reboot is complete, " +
                            "re-execute the restore command.")
                     while True:
-                        user_input = raw_input(
+                        user_input = input(
                             "Enter 'reboot' to reboot controller: ")
                         if user_input == 'reboot':
                             break
