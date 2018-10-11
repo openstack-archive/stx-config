@@ -1,0 +1,10 @@
+Code-Review+1: Bob Church <robert.church@windriver.com>
+Code-Review+1: Shoaib Nasir <shoaib.nasir@windriver.com>
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Workflow+1: Brent Rowsell <brent.rowsell@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 11 Oct 2018 19:48:43 +0000
+Reviewed-on: https://review.openstack.org/609116
+Project: openstack/stx-config
+Branch: refs/heads/master
