@@ -17,16 +17,13 @@ from os.path import isfile, join
 import re
 import subprocess
 
-from sysinv.common import utils
 from sysinv.openstack.common import log as logging
 import tsconfig.tsconfig as tsc
 
 LOG = logging.getLogger(__name__)
 
-# Defines per-socket vswitch memory requirements (in MB) for both real and
-# virtual deployments
-VSWITCH_REAL_MEMORY_MB = 1024
-VSWITCH_VIRTUAL_MEMORY_MB = 512
+# Defines per-socket vswitch memory requirements (in MB)
+VSWITCH_MEMORY_MB = 1024
 
 
 class CPU:
@@ -270,26 +267,6 @@ class NodeOperator(object):
         return [name for name in listdir(dir)
                 if os.path.isdir(join(dir, name))]
 
-    def _set_default_vswitch_hugesize(self):
-        """
-        Set the default memory size for vswitch hugepages when it must fallback
-        to 2MB pages because there are no 1GB pages.  In a virtual environment
-        we set a smaller amount of memory because vswitch is configured to use
-        a smaller mbuf pool.  In non-virtual environments we use the same
-        amount of memory as we would if 1GB pages were available.
-        """
-        hugepage_size = 2
-        if utils.is_virtual():
-            vswitch_hugepages_nr = VSWITCH_VIRTUAL_MEMORY_MB / hugepage_size
-        else:
-            vswitch_hugepages_nr = VSWITCH_REAL_MEMORY_MB / hugepage_size
-
-        # Create a new set of dict attributes
-        hp_attr = {'vswitch_hugepages_size_mib': hugepage_size,
-                   'vswitch_hugepages_nr': vswitch_hugepages_nr,
-                   'vswitch_hugepages_avail': 0}
-        return hp_attr
-
     def _inode_get_memory_hugepages(self):
         """Collect hugepage info, including vswitch, and vm.
            Collect platform reserved if config.
@@ -301,6 +278,8 @@ class NodeOperator(object):
         Ki = 1024
         SZ_2M_Ki = 2048
         SZ_1G_Ki = 1048576
+        SZ_2M_Mi = int(SZ_2M_Ki / Ki)
+        SZ_1G_Mi = int(SZ_1G_Ki / Ki)
         controller_min_MB = 6000
         compute_min_MB = 1600
         compute_min_non0_MB = 500
@@ -336,13 +315,10 @@ class NodeOperator(object):
                 for subdir in subdirs:
                     hp_attr = {}
                     sizesplit = subdir.split('-')
-                    # role via size; also from /etc/nova/compute_reserved.conf
                     if sizesplit[1].startswith("1048576kB"):
-                        hugepages_role = "vswitch"
-                        size = int(SZ_1G_Ki / Ki)
+                        size = SZ_1G_Mi
                     else:
-                        hugepages_role = "vm"
-                        size = int(SZ_2M_Ki / Ki)
+                        size = SZ_2M_Mi
 
                     nr_hugepages = 0
                     free_hugepages = 0
@@ -361,10 +337,9 @@ class NodeOperator(object):
                     Total_HP_MiB = Total_HP_MiB + int(nr_hugepages * size)
                     Free_HP_MiB = Free_HP_MiB + int(free_hugepages * size)
 
-                    # Libvirt hugepages can now be 1G and 2M, can't only look
-                    # at 2M pages
-                    if hugepages_role == "vswitch":
-                        vswitch_hugepages_nr = VSWITCH_REAL_MEMORY_MB / size
+                    # Libvirt hugepages can be 1G and 2M
+                    if size == SZ_1G_Mi:
+                        vswitch_hugepages_nr = VSWITCH_MEMORY_MB / size
                         hp_attr = {
                                'vswitch_hugepages_size_mib': size,
                                'vswitch_hugepages_nr': vswitch_hugepages_nr,
@@ -376,10 +351,18 @@ class NodeOperator(object):
                                   }
                     else:
                         if len(subdirs) == 1:
-                            hp_attr = self._set_default_vswitch_hugesize()
+                            # No 1G hugepage support.
+                            vswitch_hugepages_nr = VSWITCH_MEMORY_MB / size
+                            hp_attr = {
+                                'vswitch_hugepages_size_mib': size,
+                                'vswitch_hugepages_nr': vswitch_hugepages_nr,
+                                'vswitch_hugepages_avail': 0,
+                            }
                             hp_attr.update({'vm_hugepages_use_1G': 'False'})
+                        else:
+                            # vswitch will use 1G hugpages
+                            vswitch_hugepages_nr = 0
 
-                        vswitch_hugepages_nr = hp_attr.get('vswitch_hugepages_nr', 0)
                         hp_attr.update({
                             'vm_hugepages_avail_2M': free_hugepages,
                             'vm_hugepages_nr_2M':
