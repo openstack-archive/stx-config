@@ -27,6 +27,24 @@ class StorageBackend(base.Resource):
         return "<storage_backends %s>" % self._info
 
 
+def list_storage_profiles(self):
+    path = "storprofiles_list"
+    profiles = self._list(self._path(path))
+    for profile in profiles:
+        profile.disks = [utils.objectify(n) for n in profile.disks]
+        profile.partitions = [utils.objectify(n) for n in
+                              profile.partitions]
+        profile.stors = [utils.objectify(n) for n in profile.stors]
+        profile.lvgs = [utils.objectify(n) for n in profile.lvgs]
+        profile.pvs = [utils.objectify(n) for n in profile.pvs]
+
+
+def _format_cap(obj):
+    obj.capabilities = [str("%s: %s" % (k, v)) for (k,v)
+                        in obj.capabilities.items() if k[0] != '.']
+    obj.capabilities = "\n".join(obj.capabilities)
+
+
 class StorageBackendManager(base.Manager):
     resource_class = StorageBackend
 
@@ -34,8 +52,13 @@ class StorageBackendManager(base.Manager):
     def _path(id=None):
         return '/v1/storage_backend/%s' % id if id else '/v1/storage_backend'
 
-    def list(self):
-        return self._list(self._path(), "storage_backends")
+    def list(self, asdict=False):
+        backends = self._list(self._path(), "storage_backends")
+        if not asdict:
+            for bk in backends:
+                _format_cap(bk)
+
+        return backends
 
     def get(self, storage_backend_id):
         try:
@@ -95,7 +118,7 @@ def _show_backend(backend_obj, extra_fields=None):
     utils.print_tuple_list(data)
 
 
-def backend_show(cc, backend_name_or_uuid):
+def backend_show(cc, backend_name_or_uuid, asdict=False):
     db_backends = cc.storage_backend.list()
     db_backend = next((b for b in db_backends
                        if ((b.name == backend_name_or_uuid) or
@@ -108,6 +131,8 @@ def backend_show(cc, backend_name_or_uuid):
     backend_type = db_backend.backend.replace('-', '_')
     backend_client = getattr(cc, 'storage_' + backend_type)
     backend_obj = backend_client.get(db_backend.uuid)
+    if not asdict:
+        _format_cap(backend_obj)
     extra_fields = getattr(eval('storage_' + backend_type),
                            'DISPLAY_ATTRIBUTES')
     _show_backend(backend_obj, extra_fields)
