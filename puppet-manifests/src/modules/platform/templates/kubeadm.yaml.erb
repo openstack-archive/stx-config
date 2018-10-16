@@ -1,10 +1,14 @@
-apiVersion: kubeadm.k8s.io/v1alpha1
-kind: MasterConfiguration
-api:
+apiVersion: kubeadm.k8s.io/v1alpha3
+kind: InitConfiguration
+apiEndpoint:
   advertiseAddress: <%= @apiserver_advertise_address %>
+---
+apiVersion: kubeadm.k8s.io/v1alpha3
+kind: ClusterConfiguration
 etcd:
-  endpoints:
-  - <%= @etcd_endpoint %>
+  external:
+    endpoints:
+    - <%= @etcd_endpoint %>
 apiServerCertSANs:
 - "<%= @apiserver_advertise_address %>"
 - "127.0.0.1"

@@ -136,11 +136,12 @@ class platform::kubernetes::master::init
       logoutput => true,
     } ->
 
+    # kubernetes 1.12 uses coredns rather than kube-dns. Commenting out for now.
     # Restrict the kube-dns pod to master nodes
-    exec { "restrict kube-dns to master nodes":
-      command => 'kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system patch deployment kube-dns -p \'{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/master":""}}}}}\'',
-      logoutput => true,
-    } ->
+    # exec { "restrict kube-dns to master nodes":
+    #  command => 'kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system patch deployment kube-dns -p \'{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/master":""}}}}}\'',
+    #  logoutput => true,
+    # } ->
 
     # Remove the taint from the master node
     exec { "remove taint from master node":
@@ -216,12 +217,13 @@ class platform::kubernetes::master::init
         source  => "puppet:///modules/${module_name}/kubeconfig.sh"
       } ->
 
+      # kubernetes 1.12 uses coredns rather than kube-dns. Commenting out for now.
       # Restrict the kube-dns pod to master nodes. It seems that each time
       # kubeadm init is run, it undoes any changes to the deployment.
-      exec { "restrict kube-dns to master nodes":
-        command => 'kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system patch deployment kube-dns -p \'{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/master":""}}}}}\'',
-        logoutput => true,
-      } ->
+      # exec { "restrict kube-dns to master nodes":
+      #  command => 'kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system patch deployment kube-dns -p \'{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/master":""}}}}}\'',
+      #  logoutput => true,
+      # } ->
 
       # Remove the taint from the master node
       exec { "remove taint from master node":
