@@ -66,6 +66,7 @@ include ::platform::collectd
 include ::platform::fm
 include ::platform::fm::api
 
+include ::platform::client
 include ::openstack::client
 include ::openstack::keystone
 include ::openstack::keystone::api
