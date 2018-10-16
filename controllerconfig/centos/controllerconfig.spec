@@ -15,7 +15,6 @@ Requires: python-keyring
 Requires: python-six
 Requires: python-iso8601
 Requires: psmisc
-Requires: lshell
 Requires: python-pyudev
 Requires: python-netifaces
 
