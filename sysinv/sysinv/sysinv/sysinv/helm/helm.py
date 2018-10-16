@@ -41,6 +41,9 @@ from . import openvswitch
 from . import rabbitmq
 from . import cinder
 
+# Chart source: Custom
+from . import rbd_provisioner
+
 
 LOG = logging.getLogger(__name__)
 
@@ -100,6 +103,8 @@ class HelmOperator(object):
                 openvswitch.OpenvswitchHelm(self),
             constants.HELM_CHART_RABBITMQ: rabbitmq.RabbitmqHelm(self),
             constants.HELM_CHART_CINDER: cinder.CinderHelm(self),
+            constants.HELM_CHART_RBD_PROVISIONER:
+                rbd_provisioner.RbdProvisionerHelm(self)
         }
 
         # build the list of registered supported charts
