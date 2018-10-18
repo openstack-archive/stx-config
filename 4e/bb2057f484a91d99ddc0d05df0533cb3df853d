@@ -1,0 +1,13 @@
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Code-Review+1: Al Bailey <al.bailey@windriver.com>
+Code-Review+1: Matt Peters <matt.peters@windriver.com>
+Code-Review+1: Bob Church <rtchurchos@gmail.com>
+Code-Review+2: Scott Little <scott.little@windriver.com>
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Workflow+1: Bart Wensley <barton.wensley@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 18 Oct 2018 20:51:04 +0000
+Reviewed-on: https://review.openstack.org/611108
+Project: openstack/stx-config
+Branch: refs/heads/master
