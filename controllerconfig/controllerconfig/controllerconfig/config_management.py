@@ -89,7 +89,8 @@ def configure_management():
             continue
 
     while True:
-        user_input = raw_input("Enter management address CIDR: ")
+        user_input = raw_input("Enter management IP address in CIDR "
+                               "notation, ie. ip/netmask: ")
         try:
             management_cidr = netaddr.IPNetwork(user_input)
             management_ip = management_cidr.ip
@@ -102,7 +103,8 @@ def configure_management():
             break
         except (netaddr.AddrFormatError, ValueError):
             print ("Invalid CIDR - "
-                   "please enter a valid management address CIDR")
+                   "please enter a valid management IP address in "
+                   "CIDR notation.")
 
     while True:
         user_input = raw_input("Enter management gateway address [" +
