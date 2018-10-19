@@ -36,6 +36,7 @@ from . import mariadb
 from . import memcached
 from . import openvswitch
 from . import rabbitmq
+from . import cinder
 
 
 LOG = logging.getLogger(__name__)
@@ -92,6 +93,7 @@ class HelmOperator(object):
             constants.HELM_CHART_OPENVSWITCH:
                 openvswitch.OpenvswitchHelm(self),
             constants.HELM_CHART_RABBITMQ: rabbitmq.RabbitmqHelm(self),
+            constants.HELM_CHART_CINDER: cinder.CinderHelm(self),
         }
 
         # build the list of registered supported charts
