@@ -1464,3 +1464,6 @@ K8S_RBD_PROV_NAMESPACE_DEFAULT = "kube-system"
 K8S_RBD_PROV_USER_NAME = 'admin'
 K8S_RBD_PROV_ADMIN_SECRET_NAME = 'ceph-admin'
 K8S_RBD_PROV_STOR_CLASS_NAME = 'general'
+
+# Data used in the helm charts.
+RBD_STORE_USER = 'images'
