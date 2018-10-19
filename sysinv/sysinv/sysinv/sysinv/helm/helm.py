@@ -39,6 +39,7 @@ from . import mariadb
 from . import memcached
 from . import openvswitch
 from . import rabbitmq
+from . import cinder
 
 
 LOG = logging.getLogger(__name__)
@@ -81,6 +82,7 @@ class HelmOperator(object):
         # register chart operators for lookup
         self.chart_operators = {
             constants.HELM_CHART_BARBICAN: barbican.BarbicanHelm(self),
+            constants.HELM_CHART_CINDER: cinder.CinderHelm(self),
             constants.HELM_CHART_GLANCE: glance.GlanceHelm(self),
             constants.HELM_CHART_HEAT: heat.HeatHelm(self),
             constants.HELM_CHART_HORIZON: horizon.HorizonHelm(self),
