@@ -1383,3 +1383,6 @@ SUPPORTED_HELM_APP_CHARTS = {
         HELM_CHART_INGRESS
     ]
 }
+
+# Data used in the helm charts.
+RBD_STORE_USER = 'images'
