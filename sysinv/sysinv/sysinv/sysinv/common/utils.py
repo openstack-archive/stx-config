@@ -1758,3 +1758,10 @@ def get_disk_capacity_mib(device_node):
     size_mib = int_size / (1024**2)
 
     return int(size_mib)
+
+
+def _format_ceph_mon_address(ip_address, service_port_mon):
+    if netaddr.IPAddress(ip_address).version == constants.IPV4_FAMILY:
+        return '%s:%d' % (ip_address, service_port_mon)
+    else:
+        return '[%s]:%d' % (ip_address, service_port_mon)
