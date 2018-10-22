@@ -1,0 +1,9 @@
+Code-Review+2: Dean Troyer <dtroyer@gmail.com>
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Workflow+1: Bart Wensley <barton.wensley@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 22 Oct 2018 16:49:05 +0000
+Reviewed-on: https://review.openstack.org/611952
+Project: openstack/stx-config
+Branch: refs/heads/master
