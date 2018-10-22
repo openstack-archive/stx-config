@@ -5536,6 +5536,18 @@ class HostController(rest.RestController):
         """Pre lock semantic checks for storage"""
         LOG.info("%s ihost check_lock_storage" % hostupdate.displayid)
 
+        backend = StorageBackendConfig.get_configured_backend(
+            pecan.request.dbapi,
+            constants.CINDER_BACKEND_CEPH
+        )
+        if not backend:
+            raise wsme.exc.ClientSideError(
+                        _("Ceph must be configured as a backend."))
+
+        if (backend.task == constants.SB_TASK_RESTORE and force):
+            # Allow force-locking if ceph backend is in restore mode
+            return
+
         ceph_pools_empty = False
         if (hostupdate.ihost_orig['administrative'] ==
                 constants.ADMIN_UNLOCKED and
