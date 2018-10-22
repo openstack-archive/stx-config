@@ -5536,11 +5536,20 @@ class HostController(rest.RestController):
         """Pre lock semantic checks for storage"""
         LOG.info("%s ihost check_lock_storage" % hostupdate.displayid)
 
+        backend = StorageBackendConfig.get_configured_backend(
+            pecan.request.dbapi,
+            constants.CINDER_BACKEND_CEPH
+        )
+        if not backend:
+            raise wsme.exc.ClientSideError(
+                        _("Ceph should be configured as a backend."))
+
         ceph_pools_empty = False
         if (hostupdate.ihost_orig['administrative'] ==
                 constants.ADMIN_UNLOCKED and
                 hostupdate.ihost_orig['operational'] ==
-                constants.OPERATIONAL_ENABLED):
+                constants.OPERATIONAL_ENABLED and
+                backend.task != constants.SB_TASK_RESTORE):
             num_monitors, required_monitors, quorum_names = \
                 self._ceph.get_monitors_status(pecan.request.dbapi)
 
@@ -5600,7 +5609,7 @@ class HostController(rest.RestController):
 
         # Perform checks on storage regardless of operational state
         # as a minimum number of monitor is required.
-        if not force:
+        if (not force and backend.task != constants.SB_TASK_RESTORE):
             # Check if there is upgrade in progress
             try:
                 upgrade = pecan.request.dbapi.software_upgrade_get_one()
