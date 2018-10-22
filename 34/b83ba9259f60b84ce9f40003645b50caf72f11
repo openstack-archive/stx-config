@@ -1,0 +1,10 @@
+Code-Review+1: Kevin Smith <kevin.smith@windriver.com>
+Code-Review+2: John Kung <john.kung@windriver.com>
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Workflow+1: Bart Wensley <barton.wensley@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 22 Oct 2018 20:38:07 +0000
+Reviewed-on: https://review.openstack.org/612458
+Project: openstack/stx-config
+Branch: refs/heads/master
