@@ -1,0 +1,10 @@
+Code-Review+1: Kristal Dale <kristal.dale@intel.com>
+Code-Review+1: Scott Rifenbark <srifenbark@gmail.com>
+Code-Review+2: Dean Troyer <dtroyer@gmail.com>
+Workflow+1: Dean Troyer <dtroyer@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 23 Oct 2018 00:44:25 +0000
+Reviewed-on: https://review.openstack.org/612507
+Project: openstack/stx-config
+Branch: refs/heads/master
