@@ -1,0 +1,9 @@
+Code-Review+2: Bob Church <robert.church@windriver.com>
+Code-Review+2: Chris Friesen <chris.friesen@windriver.com>
+Workflow+1: Chris Friesen <chris.friesen@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 23 Oct 2018 20:20:53 +0000
+Reviewed-on: https://review.openstack.org/611973
+Project: openstack/stx-config
+Branch: refs/heads/master
