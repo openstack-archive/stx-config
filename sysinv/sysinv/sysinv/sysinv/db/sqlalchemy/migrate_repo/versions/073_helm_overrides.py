@@ -36,6 +36,7 @@ def upgrade(migrate_engine):
         Column('name', String(255), nullable=False),
         Column('namespace', String(255), nullable=False),
         Column('user_overrides', Text, nullable=True),
+        Column('system_overrides', Text, nullable=True),
         UniqueConstraint('name', 'namespace', name='u_name_namespace'),
 
         mysql_engine=ENGINE,
