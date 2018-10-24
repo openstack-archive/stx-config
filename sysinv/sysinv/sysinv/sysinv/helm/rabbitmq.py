@@ -31,7 +31,8 @@ class RabbitmqHelm(openstack.OpenstackBaseHelm):
                     'replicas': {
                         'server': self._num_controllers()
                     }
-                }
+                },
+                'endpoints': self._get_endpoints_overrides(),
             }
         }
 
@@ -42,3 +43,11 @@ class RabbitmqHelm(openstack.OpenstackBaseHelm):
                                                  namespace=namespace)
         else:
             return overrides
+
+    def _get_endpoints_overrides(self):
+        return {
+            'oslo_messaging': {
+                'auth': self._get_endpoints_oslo_messaging_overrides(
+                    self.CHART, [])
+            },
+        }
