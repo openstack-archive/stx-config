@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import copy
+
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.openstack.common import log as logging
@@ -31,7 +33,8 @@ class RabbitmqHelm(openstack.OpenstackBaseHelm):
                     'replicas': {
                         'server': self._num_controllers()
                     }
-                }
+                },
+                'endpoints': self._get_endpoints_overrides(),
             }
         }
 
@@ -42,3 +45,17 @@ class RabbitmqHelm(openstack.OpenstackBaseHelm):
                                                  namespace=namespace)
         else:
             return overrides
+
+    def _get_endpoints_overrides(self):
+        credentials = self._get_endpoints_oslo_messaging_overrides(
+            self.CHART, [])
+        overrides = {
+            'oslo_messaging': {
+                'auth': credentials,
+
+            },
+        }
+        # Set the rabbitmq user as the admin user also
+        overrides['oslo_messaging']['auth'].update({
+            'user': copy.deepcopy(credentials['admin'])})
+        return overrides
