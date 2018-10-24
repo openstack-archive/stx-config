@@ -1,0 +1,9 @@
+Code-Review+2: Brent Rowsell <brent.rowsell@windriver.com>
+Code-Review+2: Bob Church <robert.church@windriver.com>
+Workflow+1: Brent Rowsell <brent.rowsell@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 24 Oct 2018 03:25:10 +0000
+Reviewed-on: https://review.openstack.org/612734
+Project: openstack/stx-config
+Branch: refs/heads/master
