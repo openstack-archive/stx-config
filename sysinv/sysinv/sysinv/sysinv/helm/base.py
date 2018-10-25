@@ -8,7 +8,10 @@ import abc
 import os
 import six
 
+from sysinv.common import constants
 from sysinv.common import exception
+from sysinv.common import utils
+
 from sysinv.openstack.common import log as logging
 
 from . import common
@@ -128,3 +131,22 @@ class BaseHelm(object):
 
     def _num_computes(self):
         return self._count_hosts_by_label(common.LABEL_COMPUTE)
+
+    def _get_address_by_name(self, name, networktype):
+        """
+        Retrieve an address entry by name and scoped by network type
+        """
+        addresses = self.context.setdefault('_address_names', {})
+        address_name = utils.format_address_name(name, networktype)
+        address = addresses.get(address_name)
+        if address is None:
+            address = self.dbapi.address_get_by_name(address_name)
+            addresses[address_name] = address
+
+        return address
+
+    def _get_management_address(self):
+        address = self._get_address_by_name(
+            constants.CONTROLLER_HOSTNAME, constants.NETWORK_TYPE_MGMT)
+        return address.address
+
