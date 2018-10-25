@@ -27,6 +27,7 @@ import time
 
 import eventlet
 
+from six import reraise as raise_
 from sysinv.openstack.common.rpc import common as rpc_common
 
 CONSUMERS = {}
@@ -69,7 +70,7 @@ class Consumer(object):
                 # Caller might have called ctxt.reply() manually
                 for (reply, failure) in ctxt._response:
                     if failure:
-                        raise failure[0], failure[1], failure[2]
+                        raise_(failure[0], failure[1], failure[2])
                     res.append(reply)
                 # if ending not 'sent'...we might have more data to
                 # return from the function itself

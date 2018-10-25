@@ -24,6 +24,7 @@ import logging
 import sys
 import traceback
 
+from six import reraise as raise_
 from sysinv.openstack.common.gettextutils import _
 
 
@@ -48,4 +49,4 @@ def save_and_reraise_exception():
         logging.error(_('Original exception being dropped: %s'),
                       traceback.format_exception(type_, value, tb))
         raise
-    raise type_, value, tb
+    raise_(type_, value, tb)
