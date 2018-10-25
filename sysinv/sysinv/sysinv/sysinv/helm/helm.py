@@ -43,7 +43,7 @@ from . import rabbitmq
 
 # Chart source: Custom
 from . import rbd_provisioner
-
+from . import nova_api_proxy
 
 LOG = logging.getLogger(__name__)
 
@@ -104,7 +104,9 @@ class HelmOperator(object):
                 openvswitch.OpenvswitchHelm(self),
             constants.HELM_CHART_RABBITMQ: rabbitmq.RabbitmqHelm(self),
             constants.HELM_CHART_RBD_PROVISIONER:
-                rbd_provisioner.RbdProvisionerHelm(self)
+                rbd_provisioner.RbdProvisionerHelm(self),
+            constants.HELM_CHART_NOVA_API_PROXY:
+                nova_api_proxy.NovaApiProxyHelm(self)
         }
 
         # build the list of registered supported charts
