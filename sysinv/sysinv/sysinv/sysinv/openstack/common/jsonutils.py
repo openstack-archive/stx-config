@@ -38,7 +38,6 @@ import functools
 import inspect
 import itertools
 import json
-import types
 import xmlrpclib
 
 import six
@@ -52,7 +51,7 @@ _nasty_type_tests = [inspect.ismodule, inspect.isclass, inspect.ismethod,
                      inspect.iscode, inspect.isbuiltin, inspect.isroutine,
                      inspect.isabstract]
 
-_simple_types = (types.NoneType, int, basestring, bool, float, long)
+_simple_types = (type(None), int, basestring, bool, float, long)
 
 
 def to_primitive(value, convert_instances=False, convert_datetime=True,
