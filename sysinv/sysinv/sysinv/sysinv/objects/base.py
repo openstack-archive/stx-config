@@ -20,6 +20,7 @@
 
 import collections
 import copy
+import six
 
 from sysinv.common import exception
 from sysinv.objects import utils as obj_utils
@@ -156,6 +157,7 @@ def check_object_version(server, client):
             dict(client=client_minor, server=server_minor))
 
 
+@six.add_metaclass(SysinvObjectMetaclass)
 class SysinvObject(object):
     """Base class and object factory.
 
