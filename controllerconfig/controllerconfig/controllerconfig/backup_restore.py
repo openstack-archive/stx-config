@@ -34,7 +34,6 @@ import tsconfig.tsconfig as tsconfig
 import utils
 import sysinv_api as sysinv
 
-
 LOG = log.get_logger(__name__)
 
 DEVNULL = open(os.devnull, 'w')
@@ -1252,7 +1251,7 @@ def restore_complete():
         return True
 
 
-def restore_system(backup_file, clone=False):
+def restore_system(backup_file, include_storage_reinstall, clone=False):
     """Restoring system configuration."""
 
     if (os.path.exists(constants.CGCS_CONFIG_FILE) or
@@ -1595,6 +1594,14 @@ def restore_system(backup_file, clone=False):
 
                 failed_lock_host = False
                 skip_hosts = ['controller-0']
+                if not include_storage_reinstall:
+                    storage_hosts = \
+                        sysinv.get_hosts(client.admin_token,
+                                         client.conf['region_name'],
+                                         personality='storage')
+                    if storage_hosts:
+                        for h in storage_hosts:
+                            skip_hosts.append(h.name)
 
                 # Wait for nodes to be identified as disabled before attempting
                 # to lock hosts. Even if after 3 minute nodes are still not
