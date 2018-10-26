@@ -34,6 +34,9 @@ import tsconfig.tsconfig as tsconfig
 import utils
 import sysinv_api as sysinv
 
+from cinderclient import utils as c_utils
+
+import numpy as np
 
 LOG = log.get_logger(__name__)
 
@@ -1198,6 +1201,240 @@ def overwrite_iscsi_target_config():
     subprocess.call(["targetctl", "restore"], stdout=DEVNULL, stderr=DEVNULL)
 
 
+def query_storage():
+    """
+    Search Glance image DB and rbd images pool for any discrepancy
+    between the two.
+      - If an image is in Glance image DB but not in rbd images pool,
+        list the image and suggested actions to take in a log file.
+      - If an image is in rbd images pool but not in Glance image DB,
+        create a Glance image in Glance image DB to associate with the
+        backend data. List the image and suggested actions to take in a log
+        file.
+
+    Search Cinder volume DB and rbd cinder-volumes pool for any discrepancy
+    between the two.
+       - If a volume is in Cinder volume DB but not in rbd cinder-volumes pool,
+         set the volume state to "error". List the volume and suggested actions
+         to take in a log file.
+       - If a volume is in rbd images pool but not in Glance image DB,
+         create a volume in Cinder volume DB to associate with the backend
+         data. List the volume and suggested actions to take in a log file.
+    """
+    with openstack.OpenStack() as client:
+        # For Glance images
+        try:
+            g_client_v1, g_client_v2 = client.get_glance_client
+            image_l = g_client_v2.images.list()
+            image_id_l = [image['id'].encode('utf-8') for image in image_l]
+        except Exception as e:
+            LOG.exception(e)
+            raise RestoreFail("Failed to list Glance images")
+
+        try:
+            output = subprocess.check_output(
+                ["rbd",
+                 "ls",
+                 "--pool",
+                 "images"],
+                stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            LOG.error("Failed to access rbd images pool")
+            raise RestoreFail("Failed to access rbd images pool")
+
+        rbd_image_l = [i for i in output.split('\n') if i != ""]
+
+        in_glance_only = np.setdiff1d(image_id_l, rbd_image_l)
+        in_rbd_image_only = np.setdiff1d(rbd_image_l, image_id_l)
+
+        # print("images in glance only %s " %in_glance_only)
+        # print("imags in rbd images pool only  %s " %in_rbd_image_only)
+
+        if in_rbd_image_only:
+            output = subprocess.check_output(
+                ["grep",
+                 "fsid",
+                 "/etc/ceph/ceph.conf"],
+                stderr=subprocess.STDOUT)
+
+            ceph_cluster = [i.strip() for i in output.split('=')
+                            if i.find('fsid') == -1]
+
+        for image in in_rbd_image_only:
+            try:
+                fields = dict()
+                fields['name'] = 'found-image-%s' % image
+                fields['id'] = image
+                fields['disk_format'] = 'qcow2'
+                fields['container_format'] = 'bare'
+                fields['location'] = \
+                    'rbd://{}/images/{}/snap'.format(ceph_cluster[0],
+                                                     image)
+                g_client_v1.images.create(**fields)
+            except Exception as e:
+                LOG.exception(e)
+                raise RestoreFail("Failed to create glance image")
+
+        # For Cinder volumes
+        try:
+            c_client = client.get_cinder_client
+            volume_l = c_client.volumes.list()
+            v_t_d = c_client.volume_types.default()
+            avail_zones = c_client.availability_zones.list()
+            pools = c_client.pools.list()
+        except Exception as e:
+            LOG.exception(e)
+            raise RestoreFail("Failed to get cinder volume info")
+
+        if pools:
+            host = pools[0].name
+
+        if v_t_d is None:
+            v_t_d = 'ceph'
+        else:
+            v_t_d = v_t_d.name
+
+        cinder_volume_l = [i.id.encode('utf-8') for i in volume_l]
+
+        if avail_zones:
+            avail_z = avail_zones[0].zoneName
+
+        try:
+            output = subprocess.check_output(
+                ["rbd",
+                 "ls",
+                 "--pool",
+                 "cinder-volumes"],
+                stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            LOG.error("Failed to access rbd cinder-volumes pool")
+            raise RestoreFail("Failed to access rbd cinder-volumes pool")
+
+        rbd_volume_l = [i[7:] for i in output.split('\n') if i != ""]
+
+        in_cinder_only = np.setdiff1d(cinder_volume_l, rbd_volume_l)
+        in_rbd_volume_only = np.setdiff1d(rbd_volume_l, cinder_volume_l)
+
+        # print("Volumes in cinder only %s " % in_cinder_only)
+        # print("Volumes in rbd pool only %s " % in_rbd_volume_only)
+
+        for vol_id in in_rbd_volume_only:
+            volume = 'cinder-volumes/volume-{}'.format(vol_id)
+            try:
+                output = subprocess.check_output(
+                    ["rbd", "info", volume],
+                    stderr=subprocess.STDOUT)
+
+            except subprocess.CalledProcessError:
+                LOG.error("Failed to access rbd image")
+                raise RestoreFail("Failed to access rbd image")
+
+            bootable = False
+            for line in output.split('\n'):
+                if 'parent: images/' in line:
+                    bootable = True
+                    break
+
+            try:
+                c_client.volumes.manage(
+                    host=host,
+                    ref={'source-name': 'volume-%s' % vol_id},
+                    name='found-volume-%s' % vol_id,
+                    description='manage a volume',
+                    volume_type=v_t_d,
+                    availability_zone=avail_z,
+                    bootable=bootable)
+
+            except Exception as e:
+                LOG.exception(e)
+                raise RestoreFail("Failed to manage volume")
+
+        for i in in_cinder_only:
+            try:
+                c_client.volumes.reset_state(c_utils.find_volume(c_client, i),
+                                             state='error')
+            except Exception as e:
+                LOG.error("Failed to update volume to error state")
+                raise RestoreFail("Failed to update volume to error state")
+
+        # WEI: Need to find a better place for this file
+        filename = '/home/wrsroot/post-restore-action-sheet.txt'
+        try:
+            with open(filename, 'w') as f:
+                f.write("\n-------------------------------------------------"
+                        "----------------------------------\n")
+                f.write(textwrap.fill(
+                    "Following images are found in Ceph images pool but "
+                    "not in Glance. These images were created after the "
+                    "system backup was done. If you do not want to keep "
+                    "them, you can delete them by "
+                    "\"glance image-delete <id>\" command.", 80))
+                f.write("\n\n")
+                f.write('{0[0]:<40}{0[1]:<50}\n'.format(['ID', 'NAME']))
+                image_l = g_client_v2.images.list()
+                for image in image_l:
+                    if image['name'].find("found-image") != -1:
+                        f.write('{0[0]:<40}{0[1]:<50}\n'.format(
+                            [image['id'].encode('utf-8'), image['name']]))
+
+                f.write("\n")
+                f.write("\n-------------------------------------------------"
+                        "----------------------------------\n")
+                f.write(textwrap.fill(
+                    "Following images are found in Glance without backend "
+                    "data associated with. You can delete them by "
+                    "\"glance image-delete <id>\" command or follow the B&R "
+                    "document to restore the image.", 80))
+                f.write("\n\n")
+                f.write('{0[0]:<40}{0[1]:<50}\n'.format(['ID', 'NAME']))
+                image_l = g_client_v2.images.list()
+                for image in image_l:
+                    if image['id'].encode('utf-8') in in_glance_only:
+                        f.write('{0[0]:<40}{0[1]:<50}\n'.format(
+                            [image['id'].encode('utf-8'), image['name']]))
+
+                f.write("\n")
+                f.write("\n-------------------------------------------------"
+                        "----------------------------------\n")
+                f.write(textwrap.fill(
+                    "Following volumes are found in Ceph cinder-volumes "
+                    "pool but not in Cinder. These volumes were created  "
+                    "after the system backup was done. If you do not want "
+                    "to keep them you can delete them by "
+                    "\"cinder delete <id>\" command.", 80))
+                f.write("\n\n")
+                f.write('{0[0]:<40}{0[1]:<50}\n'.format(['ID', 'NAME']))
+                volume_l = c_client.volumes.list()
+                for volume in volume_l:
+                    if volume.name.find("found-") != -1:
+                        f.write('{0[0]:<40}{0[1]:<50}\n'.format(
+                            [volume.id.encode('utf-8'), volume.name]))
+
+                f.write("\n")
+                f.write("\n-------------------------------------------------"
+                        "----------------------------------\n")
+                f.write(textwrap.fill(
+                    "Following volumes are found in Cinder without backend "
+                    "data associated with. You can delete them by "
+                    "\"cinder delete <id>\" command or follow the B&R "
+                    "document to restore the cinder volume.", 80))
+                f.write("\n\n")
+                f.write('{0[0]:<40}{0[1]:<50}\n'.format(['ID', 'NAME']))
+                for volume in volume_l:
+                    if volume.id in in_cinder_only:
+                        f.write('{0[0]:<40}{0[1]:<50}\n'.format(
+                            [volume.id.encode('utf-8'), volume.name]))
+
+                f.write("\n")
+                f.write("\n-------------------------------------------------"
+                        "----------------------------------\n")
+
+        except IOError:
+            print("Failed to open file: %s", filename)
+
+        return
+
+
 def restore_complete():
     """
     Restore proper ISCSI configuration file after cinder restore.
@@ -1252,7 +1489,7 @@ def restore_complete():
         return True
 
 
-def restore_system(backup_file, clone=False):
+def restore_system(backup_file, include_storage_reinstall, clone=False):
     """Restoring system configuration."""
 
     if (os.path.exists(constants.CGCS_CONFIG_FILE) or
@@ -1595,6 +1832,14 @@ def restore_system(backup_file, clone=False):
 
                 failed_lock_host = False
                 skip_hosts = ['controller-0']
+                if not include_storage_reinstall:
+                    storage_hosts = \
+                        sysinv.get_hosts(client.admin_token,
+                                         client.conf['region_name'],
+                                         personality='storage')
+                    if storage_hosts:
+                        for h in storage_hosts:
+                            skip_hosts.append(h.name)
 
                 # Wait for nodes to be identified as disabled before attempting
                 # to lock hosts. Even if after 3 minute nodes are still not

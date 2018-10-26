@@ -17,6 +17,10 @@ from common.exceptions import SysInvFail
 from common.rest_api_utils import get_token
 import sysinv_api as sysinv
 
+from keystoneclient.auth.identity import v3
+from keystoneauth1 import session as ksc_session
+from cinderclient.v3 import client as cinder_client_v3
+from glanceclient import Client
 
 LOG = log.get_logger(__name__)
 
@@ -29,6 +33,9 @@ class OpenStack(object):
     def __init__(self):
         self.admin_token = None
         self.conf = {}
+        self.cinder_client = None
+        self.glance_client_v1 = None
+        self.glance_client_v2 = None
         self._sysinv = None
 
         source_command = 'source /etc/platform/openrc && env'
@@ -283,3 +290,38 @@ class OpenStack(object):
                 token=self.admin_token.get_id())
 
         return self._sysinv
+
+    @property
+    def get_cinder_client(self):
+        if not self.cinder_client:
+            auth = v3.Password(auth_url=self.conf['auth_url'],
+                               username=self.conf['admin_user'],
+                               password=self.conf['admin_pwd'],
+                               user_domain_name=self.conf['user_domain'],
+                               project_name=self.conf['admin_tenant'],
+                               project_domain_name=self.conf['project_domain'])
+
+            self.cinder_client = cinder_client_v3.Client(
+                session=ksc_session.Session(auth=auth),
+                auth_url=self.conf['auth_url'],
+                endpoint_type='internalURL',
+                region_name="RegionOne")
+
+        return self.cinder_client
+
+    @property
+    def get_glance_client(self):
+        if not self.glance_client_v1 or not self.glance_client_v2:
+            auth = v3.Password(auth_url=self.conf['auth_url'],
+                               username=self.conf['admin_user'],
+                               password=self.conf['admin_pwd'],
+                               user_domain_name=self.conf['user_domain'],
+                               project_name=self.conf['admin_tenant'],
+                               project_domain_name=self.conf['project_domain'])
+
+            self.glance_client_v1 = Client(
+                '1', session=ksc_session.Session(auth=auth))
+            self.glance_client_v2 = Client(
+                '2', session=ksc_session.Session(auth=auth))
+
+        return self.glance_client_v1, self.glance_client_v2

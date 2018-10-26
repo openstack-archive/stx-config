@@ -327,8 +327,10 @@ def main():
     do_default_config = False
     do_backup = False
     do_system_restore = False
+    include_storage_reinstall = False
     do_images_restore = False
     do_complete_restore = False
+    do_query_storage = False
     do_clone = False
     do_non_interactive = False
     do_provision = False
@@ -365,9 +367,31 @@ def main():
         elif sys.argv[arg] == "--restore-system":
             arg += 1
             if arg < len(sys.argv):
+                if sys.argv[arg] in ["--include-storage-reinstall",
+                                     "--exclude-storage-reinstall"]:
+                    if sys.argv[arg] == "--include-storage-reinstall":
+                        include_storage_reinstall = True
+                    arg += 1
+                    if arg < len(sys.argv):
+                        backup_name = sys.argv[arg]
+                    else:
+                        print textwrap.fill(
+                            "--restore-system requires the filename "
+                            " of the backup", 80)
+                        exit(1)
+                else:
+                    print textwrap.fill(
+                        "--restore-system requires second option "
+                        "--include-storage-reinstall or "
+                        "--exclude-storage-reinstall", 80)
+                    exit(1)
                 backup_name = sys.argv[arg]
             else:
-                print "--restore-system requires the filename of the backup"
+                print textwrap.fill(
+                    "--restore-system requires second option "
+                    "--include-storage-reinstall or "
+                    "--exclude-storage-reinstall and the filename "
+                    "of the backup", 80)
                 exit(1)
             do_system_restore = True
         elif sys.argv[arg] == "--restore-images":
@@ -380,6 +404,8 @@ def main():
             do_images_restore = True
         elif sys.argv[arg] == "--restore-complete":
             do_complete_restore = True
+        elif sys.argv[arg] == "--query-storage":
+            do_query_storage = True
         elif sys.argv[arg] == "--archive-dir":
             arg += 1
             if arg < len(sys.argv):
@@ -431,6 +457,7 @@ def main():
             do_system_restore,
             do_images_restore,
             do_complete_restore,
+            do_query_storage,
             do_clone,
             do_default_config,
             do_non_interactive].count(True) > 1:
@@ -441,6 +468,7 @@ def main():
                        do_system_restore,
                        do_images_restore,
                        do_complete_restore,
+                       do_query_storage,
                        do_clone,
                        do_default_config,
                        do_non_interactive].count(True) > 0:
@@ -449,7 +477,7 @@ def main():
 
     log.configure()
 
-    if not do_backup and not do_clone:
+    if not do_backup and not do_clone and not do_query_storage:
         # Check if that the command is being run from the console
         if utils.is_ssh_parent():
             if allow_ssh:
@@ -473,13 +501,16 @@ def main():
             backup_restore.backup(backup_name, archive_dir)
             print "\nBackup complete"
         elif do_system_restore:
-            backup_restore.restore_system(backup_name)
+            backup_restore.restore_system(backup_name,
+                                          include_storage_reinstall)
             print "\nSystem restore complete"
         elif do_images_restore:
             backup_restore.restore_images(backup_name)
             print "\nImages restore complete"
         elif do_complete_restore:
             backup_restore.restore_complete()
+        elif do_query_storage:
+            backup_restore.query_storage()
         elif do_clone:
             clone.clone(backup_name, archive_dir)
             print "\nCloning complete"
