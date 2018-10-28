@@ -7248,8 +7248,14 @@ class ConductorManager(service.PeriodicService):
     def _update_resolv_file(self, context, config_uuid, personalities):
         """Generate and update the resolv.conf files on the system"""
 
-        # get default name server which is the controller floating IP address
-        servers = [cutils.gethostbyname(constants.CONTROLLER_HOSTNAME)]
+        system_mode = self.dbapi.isystem_get_one().system_mode
+        if (utils.is_kubernetes_config(self.dbapi) and
+                system_mode == constants.SYSTEM_MODE_SIMPLEX):
+            servers = []
+        else:
+            # get default name server which is the controller floating IP
+            # address
+            servers = [cutils.gethostbyname(constants.CONTROLLER_HOSTNAME)]
 
         # add configured dns entries (if any)
         dns = self.dbapi.idns_get_one()
