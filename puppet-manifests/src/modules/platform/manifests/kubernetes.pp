@@ -45,6 +45,13 @@ class platform::kubernetes::kubeadm {
     command => "sysctl --system",
   } ->
 
+  file { '/etc/sysconfig/kubelet':
+    ensure => file,
+    content => 'KUBELET_EXTRA_ARGS="--feature-gates HugePages=false"',
+    owner => 'root',
+    group => 'root',
+    mode => '0644',
+  } ->
   # Start kubelet.
   service { 'kubelet':
     ensure => 'running',
