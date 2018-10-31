@@ -46,8 +46,11 @@ class SysinvOVSAgentDriver(lldpd_driver.SysinvLldpdAgentDriver):
         ports = ports['data']
 
         for port in ports:
-            port_uuid = port[1][1]
-            interfaces = port[2][1]
+            try:
+                port_uuid = port[1][1]
+                interfaces = port[2][1]
+            except IndexError:
+                LOG.error("Unexpected port in LLDP port list: %r", port)
 
             if isinstance(interfaces, list):
                 for interface in interfaces:
@@ -72,11 +75,23 @@ class SysinvOVSAgentDriver(lldpd_driver.SysinvLldpdAgentDriver):
         bridges = bridges['data']
 
         for bridge in bridges:
-            bridge_name = bridge[0]
-            port_set = bridge[1][1]
-            for port in port_set:
-                value = port[1]
-                port_bridge_map[value] = bridge_name
+            try:
+                bridge_name = bridge[0]
+                ports = bridge[1][1]
+            except IndexError:
+                LOG.error("Unexpected bridge in LLDP bridge list: %r", bridge)
+
+            if isinstance(ports, list):
+                for port in ports:
+                    try:
+                        port_uuid = port[1]
+                    except IndexError:
+                        LOG.error("Unexpected port in LLDP bridge list: %r",
+                                  port)
+                    port_bridge_map[port_uuid] = bridge_name
+            else:
+                port_uuid = ports
+                port_bridge_map[port_uuid] = bridge_name
 
         return port_bridge_map
 
@@ -130,29 +145,50 @@ class SysinvOVSAgentDriver(lldpd_driver.SysinvLldpdAgentDriver):
         data = data['data']
 
         for interface in data:
-            name = interface[0]
-            uuid = interface[1][1]
-            type = interface[2]
-            other_config = interface[3]
+            try:
+                name = interface[0]
+                uuid = interface[1][1]
+                type = interface[2]
+                other_config = interface[3]
+            except IndexError:
+                LOG.error("Unexpected interface in LLDP interface list: %r",
+                          interface)
 
             if type != 'internal':
                 continue
 
-            config_map = other_config[1]
+            if uuid not in interface_port_map:
+                continue
+
+            if interface_port_map[uuid] not in port_bridge_map:
+                continue
+
+            brname = port_bridge_map[interface_port_map[uuid]]
+
+            try:
+                config_map = other_config[1]
+            except IndexError:
+                LOG.error("Unexpected config map in LLDP interface list: %r",
+                          config_map)
+
             for config in config_map:
-                key = config[0]
-                value = config[1]
+                try:
+                    key = config[0]
+                    value = config[1]
+                except IndexError:
+                    LOG.error("Unexpected config in LLDP interface list: %r",
+                              config)
+
                 if key != 'lldp_phy_peer':
                     continue
-
                 phy_peer = value
-                brname = port_bridge_map[interface_port_map[uuid]]
+
                 if not self.lldp_ovs_lldp_flow_exists(brname, name):
                     LOG.info("Adding missing LLDP flow from %s to %s",
                              name, phy_peer)
                     self.lldp_ovs_add_flows(brname, name, phy_peer)
 
-                if not self.lldp_ovs_lldp_flow_exists(brname, value):
+                if not self.lldp_ovs_lldp_flow_exists(brname, phy_peer):
                     LOG.info("Adding missing LLDP flow from %s to %s",
                              phy_peer, name)
                     self.lldp_ovs_add_flows(brname, phy_peer, name)
