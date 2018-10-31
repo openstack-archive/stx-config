@@ -277,6 +277,10 @@ class platform::kubernetes::worker
       ensure => file,
       replace => no,
     }
+    exec { 'Update PMON libvirtd.conf':
+      command => "/bin/sed -i 's#mode  = passive#mode  = ignore #' /etc/pmon.d/libvirtd.conf",
+      onlyif => '/usr/bin/test -e /etc/pmon.d/libvirtd.conf'
+    }
   }
 }
 
