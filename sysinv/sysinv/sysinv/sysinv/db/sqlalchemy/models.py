@@ -1633,3 +1633,14 @@ class Label(Base):
     label_key = Column(String(384))
     label_value = Column(String(128))
     UniqueConstraint('host_id', 'label_key', name='u_host_id@label_key')
+
+
+class KubeApp(Base):
+    __tablename__ = 'kube_app'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    manifest_name = Column(String(255), nullable=False)
+    manifest_file = Column(String(255), nullable=False)
+    status = Column(String(255), nullable=False)
+    UniqueConstraint('name')

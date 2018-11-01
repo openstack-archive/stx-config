@@ -1788,3 +1788,12 @@ def _format_ceph_mon_address(ip_address, service_port_mon):
         return '%s:%d' % (ip_address, service_port_mon)
     else:
         return '[%s]:%d' % (ip_address, service_port_mon)
+
+
+def get_files_matching(path, pattern):
+    results = []
+    for root, dirs, files in os.walk(path, topdown=True):
+        for f in files:
+            if f.endswith(pattern):
+                results.append((root, f))
+    return results
