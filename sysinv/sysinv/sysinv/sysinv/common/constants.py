@@ -1477,3 +1477,7 @@ K8S_RBD_PROV_NAMESPACE_DEFAULT = "kube-system"
 K8S_RBD_PROV_USER_NAME = 'admin'
 K8S_RBD_PROV_ADMIN_SECRET_NAME = 'ceph-admin'
 K8S_RBD_PROV_STOR_CLASS_NAME = 'general'
+
+# Kubernetes Host Labels
+HOST_LABEL_ENABLED = 'enabled'
+HOST_LABEL_DISABLED = 'disabled'
