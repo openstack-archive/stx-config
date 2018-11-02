@@ -1226,6 +1226,7 @@ CINDER_HPE3PAR_PARAMETER_MANDATORY = [
 ]
 
 CINDER_HPE3PAR_PARAMETER_PROTECTED = [
+    'san_login', 'san_password',
 ]
 
 # If the lists:
