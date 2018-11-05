@@ -73,6 +73,12 @@ class platform::kubernetes::master::init
       line => 'nameserver 8.8.8.8',
     } ->
 
+    # Create custom resokv.conf file for kubelet
+    file { "/etc/resolv.conf.k8s":
+      ensure => file,
+      content => "nameserver 8.8.8.8",
+    } ->
+
     # Configure the master node.
     file { "/etc/kubernetes/kubeadm.yaml":
       ensure => file,
