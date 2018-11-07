@@ -14,7 +14,7 @@ from pecan import rest
 import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
-import urlparse
+import six.moves.urllib.parse as urlparse
 
 from sysinv.api.controllers.v1 import address_pool
 from sysinv.api.controllers.v1 import base
