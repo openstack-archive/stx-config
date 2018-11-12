@@ -1477,7 +1477,7 @@ data:
             release_group: osh-openstack-horizon
   values:
     conf:
-          horizon:
+      horizon:
         local_settings:
           template: |
             import os
@@ -2420,4 +2420,3 @@ data:
     - openstack-heat
     - openstack-horizon
     - openstack-cinder
-    - openstack-telemetry
