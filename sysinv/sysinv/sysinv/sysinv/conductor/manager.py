@@ -812,6 +812,11 @@ class ConductorManager(service.PeriodicService):
         mgmt_network = self.dbapi.network_get_by_type(
             constants.NETWORK_TYPE_MGMT
         )
+        cluster_network = None
+        if utils.is_kubernetes_config(self.dbapi):
+            cluster_network = self.dbapi.network_get_by_type(
+                constants.NETWORK_TYPE_CLUSTER_HOST
+            )
         try:
             infra_network = self.dbapi.network_get_by_type(
                 constants.NETWORK_TYPE_INFRA
@@ -878,26 +883,67 @@ class ConductorManager(service.PeriodicService):
                                                           mac_address)
                 f_out.write(line)
 
-                # Write mgmt address to addn_hosts with infra address_name
-                # as alias if there is no infra address.
-                try:
-                    # Don't add static addresses to database
-                    if hostname != str(address.name):
-                        self.dbapi.address_get_by_name(
-                            cutils.format_address_name(
-                                hostname, constants.NETWORK_TYPE_INFRA
+                if not utils.is_kubernetes_config(self.dbapi):
+                    # Write mgmt address to addn_hosts with infra address_name
+                    # as alias if there is no infra address.
+                    try:
+                        # Don't add static addresses to database
+                        if hostname != str(address.name):
+                            self.dbapi.address_get_by_name(
+                                cutils.format_address_name(
+                                    hostname, constants.NETWORK_TYPE_INFRA
+                                )
                             )
+                        aliases = []
+                    except exception.AddressNotFoundByName:
+                        address_name = cutils.format_address_name(
+                            hostname, constants.NETWORK_TYPE_INFRA
                         )
-                    aliases = []
-                except exception.AddressNotFoundByName:
-                    address_name = cutils.format_address_name(
-                        hostname, constants.NETWORK_TYPE_INFRA
+                        aliases = [address_name]
+                    addn_line = self._dnsmasq_addn_host_entry_to_string(
+                        address.address, hostname, aliases
                     )
-                    aliases = [address_name]
-                addn_line = self._dnsmasq_addn_host_entry_to_string(
-                    address.address, hostname, aliases
-                )
-                f_out_addn.write(addn_line)
+                    f_out_addn.write(addn_line)
+                else:
+                    if mgmt_network.pool_uuid == cluster_network.pool_uuid:
+                        address_name = cutils.format_address_name(
+                            hostname, constants.NETWORK_TYPE_INFRA
+                        )
+                        aliases = [address_name]
+                    else:
+                        aliases = []
+                    addn_line = self._dnsmasq_addn_host_entry_to_string(
+                        address.address, hostname, aliases
+                    )
+                    f_out_addn.write(addn_line)
+
+            if cluster_network and \
+                    mgmt_network.pool_uuid != cluster_network.pool_uuid:
+                for address in self.dbapi._addresses_get_by_pool_uuid(
+                        cluster_network.pool_uuid):
+                    hostname = re.sub("-%s$" % constants.NETWORK_TYPE_INFRA,
+                                      '', str(address.name))
+
+                    if address.interface:
+                        mac_address = address.interface.imac
+                        cid = cutils.get_dhcp_cid(
+                            hostname, constants.NETWORK_TYPE_CLUSTER_HOST,
+                            mac_address
+                        )
+                    else:
+                        cid = None
+                    address_name = re.sub("%s$" % constants.NETWORK_TYPE_CLUSTER_HOST,
+                                          constants.NETWORK_TYPE_INFRA, str(address.name))
+                    line = self._dnsmasq_host_entry_to_string(address.address,
+                                                              address_name,
+                                                              cid=cid)
+                    f_out.write(line)
+
+                    # Write infra address to addn_hosts
+                    addn_line = self._dnsmasq_addn_host_entry_to_string(
+                        address.address, address_name
+                    )
+                    f_out_addn.write(addn_line)
 
             # Loop through infra addresses to write to file
             if infra_network:
@@ -8104,8 +8150,15 @@ class ConductorManager(service.PeriodicService):
                                                              expunge=True)
 
         if nettype:
-            iinterfaces[:] = [i for i in iinterfaces if
-                              i.networktype == nettype]
+            network_id = self.dbapi.network_get_by_type(nettype).id
+            for i in iinterfaces:
+                interface_network = {'interface_id': i.id,
+                                     'network_id': network_id}
+                try:
+                    self.dbapi.interface_network_query(interface_network)
+                    iinterfaces[:] = [i]
+                except exception.InterfaceNetworkNotFoundByHostInterfaceNetwork:
+                    pass
         return iinterfaces
 
     def mgmt_ip_set_by_ihost(self,
@@ -8239,6 +8292,68 @@ class ConductorManager(service.PeriodicService):
                                                  infra_ip,
                                                  constants.NETWORK_TYPE_INFRA,
                                                  infra_if['id'])
+        return address
+
+    def cluster_ip_set_by_ihost(self,
+                                context,
+                                ihost_uuid,
+                                cluster_ip):
+        """Call sysinv to update host cluster_ip
+           (removes previous entry if necessary)
+
+        :param context: an admin context
+        :param ihost_uuid: ihost uuid
+        :param cluster_ip: cluster_ip to set, None for removal
+        :returns: Address
+        """
+
+        LOG.info("Calling cluster ip set for ihost %s, ip %s" % (ihost_uuid,
+                                                                 cluster_ip))
+
+        # Check for and remove existing addrs on cluster subnet & host
+        ihost = self.dbapi.ihost_get(ihost_uuid)
+
+        interfaces = self.iinterfaces_get_by_ihost_nettype(
+            context, ihost_uuid, constants.NETWORK_TYPE_CLUSTER_HOST)
+        if not interfaces:
+            LOG.warning("No cluster interface configured for ihost %s while "
+                        "updating cluster IP address" %
+                        ihost.get('hostname'))
+            return
+
+        # Only 1 cluster interface per host
+        cluster_if = interfaces[0]
+
+        for address in self.dbapi.addresses_get_by_interface(cluster_if['id']):
+            if address['address'] == cluster_ip:
+                # Address already exists, can return early
+                return address
+            if not address['name']:
+                self.dbapi.address_destroy(address['uuid'])
+
+        try:
+            if ihost.get('hostname'):
+                self._generate_dnsmasq_hosts_file()
+        except Exception:
+            LOG.warning("Failed to remove cluster ip from dnsmasq.hosts")
+
+        if cluster_ip is None:
+            # Remove DHCP lease when removing cluster interface
+            self._unallocate_address(ihost.hostname,
+                                     constants.NETWORK_TYPE_CLUSTER_HOST)
+            self._generate_dnsmasq_hosts_file()
+            # Just doing a remove, return early
+            return
+
+        # Check for IPv4 or IPv6
+        if not cutils.is_valid_ipv4(cluster_ip):
+            if not cutils.is_valid_ipv6(cluster_ip):
+                LOG.error("Invalid cluster_ip=%s" % cluster_ip)
+                return False
+        address = self._create_or_update_address(context, ihost.hostname,
+                                                 cluster_ip,
+                                                 constants.NETWORK_TYPE_CLUSTER_HOST,
+                                                 cluster_if['id'])
         return address
 
     def neutron_extension_list(self, context):

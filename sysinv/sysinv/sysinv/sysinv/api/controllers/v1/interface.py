@@ -64,6 +64,7 @@ VALID_NETWORK_TYPES = [constants.NETWORK_TYPE_NONE,
                        constants.NETWORK_TYPE_OAM,
                        constants.NETWORK_TYPE_MGMT,
                        constants.NETWORK_TYPE_INFRA,
+                       constants.NETWORK_TYPE_CLUSTER_HOST,
                        constants.NETWORK_TYPE_DATA,
                        constants.NETWORK_TYPE_PCI_PASSTHROUGH,
                        constants.NETWORK_TYPE_PCI_SRIOV]
@@ -698,6 +699,8 @@ class InterfaceController(rest.RestController):
                 _update_host_mgmt_address(ihost, interface)
             if constants.NETWORK_TYPE_INFRA in networktypelist:
                 _update_host_infra_address(ihost, interface)
+            if constants.NETWORK_TYPE_CLUSTER_HOST in networktypelist:
+                _update_host_cluster_address(ihost, interface)
             if ihost['personality'] == constants.CONTROLLER:
                 if constants.NETWORK_TYPE_OAM in networktypelist:
                     _update_host_oam_address(ihost, interface)
@@ -1385,10 +1388,8 @@ def _check_interface_data(op, interface, ihost, existing_interface):
     # Make sure interface type is valid
     supported_type = [constants.INTERFACE_TYPE_AE,
                       constants.INTERFACE_TYPE_VLAN,
-                      constants.INTERFACE_TYPE_ETHERNET]
-    # only allows add operation for the virtual interface
-    if op == 'add':
-        supported_type.append(constants.INTERFACE_TYPE_VIRTUAL)
+                      constants.INTERFACE_TYPE_ETHERNET,
+                      constants.INTERFACE_TYPE_VIRTUAL]
     if not iftype or iftype not in supported_type:
         msg = (_("Device interface type must be one of "
                  "{}").format(', '.join(supported_type)))
@@ -1871,6 +1872,22 @@ def _update_host_pxeboot_address(host, interface):
     pecan.request.dbapi.address_update(address.uuid, updates)
 
 
+def _update_host_cluster_address(host, interface):
+    cluster_ip = utils.lookup_static_ip_address(
+        host.hostname, constants.NETWORK_TYPE_CLUSTER_HOST)
+    if cluster_ip:
+        pecan.request.rpcapi.cluster_ip_set_by_ihost(
+            pecan.request.context, host.uuid, cluster_ip)
+    elif _dynamic_address_allocation():
+        cluster_pool_uuid = pecan.request.dbapi.network_get_by_type(
+            constants.NETWORK_TYPE_CLUSTER_HOST
+        ).pool_uuid
+        address_name = cutils.format_address_name(
+            host.hostname, constants.NETWORK_TYPE_CLUSTER_HOST)
+        _allocate_pool_address(interface['id'], cluster_pool_uuid,
+                               address_name)
+
+
 def _clean_providernetworks(providernetworks):
     pn = [','.join(p['name']) for p in providernetworks]
     return pn
@@ -2329,11 +2346,15 @@ def _create(interface, from_profile=False):
                         _update_host_mgmt_address(ihost, new_interface.as_dict())
                     elif network.type == constants.NETWORK_TYPE_INFRA:
                         _update_host_infra_address(ihost, new_interface.as_dict())
+                    elif network.type == constants.NETWORK_TYPE_CLUSTER_HOST:
+                        _update_host_cluster_address(ihost,
+                                                     new_interface.as_dict())
                     if ihost['personality'] == constants.CONTROLLER:
                         if network.type == constants.NETWORK_TYPE_OAM:
                             _update_host_oam_address(ihost, new_interface.as_dict())
                         elif network.type == constants.NETWORK_TYPE_PXEBOOT:
                             _update_host_pxeboot_address(ihost, new_interface.as_dict())
+
         except Exception as e:
             LOG.exception(
                 "Failed to add static infrastructure interface address: "

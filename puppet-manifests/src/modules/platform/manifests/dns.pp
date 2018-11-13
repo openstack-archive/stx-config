@@ -63,6 +63,16 @@ class platform::dns::dnsmasq {
     }
   }
 
+  include ::platform::kubernetes::params
+  $kubernetes_enabled = $::platform::kubernetes::params::enabled
+  if $kubernetes_enabled {
+    $service_domain = $::platform::kubernetes::params::service_domain
+    $dns_cluster_ip = $::platform::kubernetes::params::dns_cluster_ip
+  } else {
+    $service_domain = undef
+    $dns_cluster_ip = undef
+  }
+
   file { "/etc/dnsmasq.conf":
       ensure => 'present',
       replace => true,

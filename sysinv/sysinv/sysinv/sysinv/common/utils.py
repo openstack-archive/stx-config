@@ -1192,6 +1192,9 @@ def get_dhcp_cid(hostname, network_type, mac):
     if network_type == constants.NETWORK_TYPE_INFRA:
         prefix = '{}:{}'.format(hostname, network_type)
         prefix = ':'.join(x.encode('hex') for x in prefix)
+    elif network_type == constants.NETWORK_TYPE_CLUSTER_HOST:
+            prefix = '{}:{}'.format(hostname, network_type)
+            prefix = ':'.join(x.encode('hex') for x in prefix)
     elif network_type == constants.NETWORK_TYPE_MGMT:
         # Our default dhclient.conf files requests a prefix of '00:03:00' to
         # which dhclient adds a hardware address type of 01 to make final

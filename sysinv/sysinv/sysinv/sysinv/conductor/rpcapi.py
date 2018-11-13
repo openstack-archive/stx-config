@@ -1023,6 +1023,24 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
                                        ihost_uuid=ihost_uuid,
                                        infra_ip=infra_ip))
 
+    def cluster_ip_set_by_ihost(self,
+                              context,
+                              ihost_uuid,
+                              cluster_ip):
+        """Call sysinv to update host cluster_ip (removes previous entry if
+           necessary)
+
+        :param context: an admin context
+        :param ihost_uuid: ihost uuid
+        :param cluster_ip: cluster_ip
+        :returns: Address
+        """
+
+        return self.call(context,
+                         self.make_msg('cluster_ip_set_by_ihost',
+                                       ihost_uuid=ihost_uuid,
+                                       cluster_ip=cluster_ip))
+
     def neutron_extension_list(self, context):
         """
         Send a request to neutron to query the supported extension list.

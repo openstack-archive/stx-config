@@ -140,6 +140,10 @@ class PlatformPuppet(base.BasePuppet):
              constants.CONTROLLER_CINDER,
              constants.NETWORK_TYPE_INFRA),
 
+            (constants.CONTROLLER_CINDER,
+             constants.CONTROLLER_CINDER,
+             constants.NETWORK_TYPE_CLUSTER_HOST),
+
             # ceph storage hosts
             (constants.STORAGE_0_HOSTNAME,
              constants.STORAGE_0_HOSTNAME,
@@ -169,6 +173,27 @@ class PlatformPuppet(base.BasePuppet):
             (constants.CONTROLLER_CGCS_NFS,
              constants.CONTROLLER_CGCS_NFS,
              constants.NETWORK_TYPE_INFRA),
+
+            # cluster network hosts
+            (constants.CONTROLLER_0_HOSTNAME + HOSTNAME_INFRA_SUFFIX,
+             constants.CONTROLLER_0_HOSTNAME,
+             constants.NETWORK_TYPE_CLUSTER_HOST),
+
+            (constants.CONTROLLER_1_HOSTNAME + HOSTNAME_INFRA_SUFFIX,
+             constants.CONTROLLER_1_HOSTNAME,
+             constants.NETWORK_TYPE_CLUSTER_HOST),
+
+            (constants.STORAGE_0_HOSTNAME + HOSTNAME_INFRA_SUFFIX,
+             constants.STORAGE_0_HOSTNAME,
+             constants.NETWORK_TYPE_CLUSTER_HOST),
+
+            (constants.STORAGE_1_HOSTNAME + HOSTNAME_INFRA_SUFFIX,
+             constants.STORAGE_1_HOSTNAME,
+             constants.NETWORK_TYPE_CLUSTER_HOST),
+
+            (constants.CONTROLLER_CGCS_NFS,
+             constants.CONTROLLER_CGCS_NFS,
+             constants.NETWORK_TYPE_CLUSTER_HOST),
         ]
 
         hosts = {}
