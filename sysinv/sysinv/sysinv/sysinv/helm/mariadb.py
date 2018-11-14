@@ -36,7 +36,6 @@ class MariadbHelm(openstack.OpenstackBaseHelm):
                     }
                 },
                 'endpoints': self._get_endpoints_overrides(),
-                'force_recovey': 'mariadb-server-0',
             }
         }
 
