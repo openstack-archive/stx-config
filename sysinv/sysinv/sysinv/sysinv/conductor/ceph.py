@@ -1177,9 +1177,13 @@ class CephOperator(object):
         # Check if the ceph cluster is ready to return statistics
         storage_hosts = self._db_api.ihost_get_by_personality(
             constants.STORAGE)
+
+        # Determine if we are on an AIO system and have kubernetes enabled.
+        is_k8s_aio = (utils.is_aio_system(self._db_api) and
+                      utils.is_kubernetes_config(self._db_api))
         # If there is no storage node present, ceph usage
         # information is not relevant
-        if not storage_hosts:
+        if not storage_hosts and not is_k8s_aio:
             return False
         # At least one storage node must be in available state
         for host in storage_hosts:
