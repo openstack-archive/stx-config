@@ -13,6 +13,7 @@ class platform::sm
   $region_config                 = $::platform::params::region_config
   $region_2_name                 = $::platform::params::region_2_name
   $system_mode                   = $::platform::params::system_mode
+  $system_type                   = $::platform::params::system_type
 
   include ::platform::network::pxeboot::params
   if $::platform::network::pxeboot::params::interface_name {
@@ -78,6 +79,11 @@ class platform::sm
   $dockerdistribution_drbd_resource          = $::platform::drbd::dockerdistribution::params::resource_name
   $dockerdistribution_fs_device              = $::platform::drbd::dockerdistribution::params::device
   $dockerdistribution_fs_directory           = $::platform::drbd::dockerdistribution::params::mountpoint
+
+  include ::platform::drbd::cephmon::params
+  $cephmon_drbd_resource          = $::platform::drbd::cephmon::params::resource_name
+  $cephmon_fs_device              = $::platform::drbd::cephmon::params::device
+  $cephmon_fs_directory           = $::platform::drbd::cephmon::params::mountpoint
 
   include ::openstack::keystone::params
   $keystone_api_version          = $::openstack::keystone::params::api_version
@@ -401,6 +407,7 @@ class platform::sm
     exec { 'Configure Docker Distribution FileSystem':
       command => "sm-configure service_instance dockerdistribution-fs dockerdistribution-fs \"device=${dockerdistribution_fs_device},directory=${dockerdistribution_fs_directory},options=noatime,nodiratime,fstype=ext4,check_level=20\"",
     }
+
   } else {
     exec { 'Deprovision Docker Distribution FS in SM (service-group-member dockerdistribution-fs)':
       command => "sm-deprovision service-group-member controller-services dockerdistribution-fs",
@@ -1055,6 +1062,7 @@ class platform::sm
     command => "sm-configure service_instance docker-distribution docker-distribution \"\"",
   }
 
+
   if $system_mode == 'duplex-direct' or $system_mode == 'simplex' {
       exec { 'Configure Platform NFS':
         command => "sm-configure service_instance platform-nfs-ip platform-nfs-ip \"ip=${platform_nfs_ip_param_ip},cidr_netmask=${platform_nfs_ip_param_mask},nic=${mgmt_ip_interface},arp_count=7,dc=yes\"",
@@ -1213,6 +1221,8 @@ class platform::sm
     exec { 'Provision Docker Distribution (service)':
       command => "sm-provision service docker-distribution",
     }
+
+
   }
 
   exec { 'Configure Murano Rabbit':
@@ -1376,7 +1386,46 @@ class platform::sm
   }
 
   if $ceph_configured {
-    # Ceph-Rest-API
+    if $system_type == 'All-in-one' and 'duplex' in $system_mode {
+      exec { 'Provision Cephmon FS in SM (service-group-member cephmon-fs)':
+        command => "sm-provision service-group-member controller-services cephmon-fs",
+      } ->
+      exec { 'Provision Cephmon FS in SM (service cephmon-fs)':
+        command => "sm-provision service cephmon-fs",
+      } ->
+      exec { 'Provision Cephmon DRBD in SM (service-group-member drbd-cephmon':
+        command => "sm-provision service-group-member controller-services drbd-cephmon",
+      } ->
+      exec { 'Provision Cephmon DRBD in SM (service drbd-cephmon)':
+        command => "sm-provision service drbd-cephmon",
+      } ->
+      exec { 'Configure Cephmon DRBD':
+        command => "sm-configure service_instance drbd-cephmon drbd-cephmon:${hostunit} \"drbd_resource=${cephmon_drbd_resource}\"",
+      } ->
+      exec { 'Configure Cephmon FileSystem':
+        command => "sm-configure service_instance cephmon-fs cephmon-fs \"device=${cephmon_fs_device},directory=${cephmon_fs_directory},options=noatime,nodiratime,fstype=ext4,check_level=20\"",
+      } ->
+      exec { 'Configure cephmon':
+        command => "sm-configure service_instance ceph-mon ceph-mon \"\"",
+      } ->
+      exec { 'Provision cephmon (service-group-member)':
+        command => "sm-provision service-group-member controller-services ceph-mon",
+      } ->
+      exec { 'Provision cephmon (service)':
+        command => "sm-provision service ceph-mon",
+      } ->
+      exec { 'Configure ceph-osd':
+        command => "sm-configure service_instance ceph-osd ceph-osd \"\"",
+      } ->
+      exec { 'Provision ceph-osd (service-group-member)':
+        command => "sm-provision service-group-member storage-services ceph-osd",
+      } ->
+      exec { 'Provision ceph-osd (service)':
+        command => "sm-provision service ceph-osd",
+      }
+    }
+
+    # Ceph-Rest-Api
     exec { 'Provision Ceph-Rest-Api (service-domain-member storage-services)':
       command => "sm-provision service-domain-member controller storage-services",
     } ->
