@@ -155,6 +155,7 @@ dependencies:
   static:
     ks_endpoints:
       jobs:
+        - nova-ks-user
         - nova-ks-service
       services:
         - endpoint: internal
@@ -295,6 +296,7 @@ manifests:
   configmap_etc: true
   deployment_api_proxy: true
   ingress_api: true
+  service_api: true
   job_ks_endpoints: false
 
 resources: {}
