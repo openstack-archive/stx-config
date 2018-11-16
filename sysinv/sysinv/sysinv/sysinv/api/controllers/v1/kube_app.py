@@ -127,7 +127,8 @@ class KubeAppController(rest.RestController):
             if (not app_tarfile.endswith('.tgz') and
                     not app_tarfile.endswith('.tar.gz')):
                 raise wsme.exc.ClientSideError(_(
-                    "Application-upload rejected: %s is not a tar file" %
+                    "Application-upload rejected: %s has unrecognizable tar file "
+                    "extention. Supported extensions are: .tgz and .tar.gz." %
                     app_tarfile))
 
             with TempDirectory() as app_path:
@@ -146,16 +147,19 @@ class KubeAppController(rest.RestController):
                 charts_dir = os.path.join(app_path, 'charts')
                 if os.path.isdir(charts_dir):
                     tar_filelist = cutils.get_files_matching(app_path, '.tgz')
-                    if (len(os.listdir(charts_dir)) == 0 or
-                            not tar_filelist):
+                    if len(os.listdir(charts_dir)) == 0:
                         raise wsme.exc.ClientSideError(_(
-                            "Application-upload rejected: tar file "
-                            "contains no Helm charts."))
+                            "Application-upload rejected: tar file contains no "
+                            "Helm charts."))
+                    if not tar_filelist:
+                        raise wsme.exc.ClientSideError(_(
+                            "Application-upload rejected: tar file contains no "
+                            "Helm charts of expected file extension (.tgz)."))
                     for p, f in tar_filelist:
                         if not cutils.extract_tarfile(p, os.path.join(p, f)):
                             raise wsme.exc.ClientSideError(_(
                                 "Application-upload rejected: failed to extract tar "
-                                "file %s" % os.path.basename(f)))
+                                "file %s." % os.path.basename(f)))
                 LOG.info("Tar file of application %s verified." % app_name)
                 return mname, mfile
 
@@ -208,9 +212,16 @@ class KubeAppController(rest.RestController):
         for file in os.listdir(app_path):
             if file.endswith('.yaml'):
                 yaml_file = os.path.join(app_path, file)
-                mname, mfile = _is_manifest(yaml_file)
-                if mfile:
-                    mfiles.append((mname, mfile))
+                try:
+                    mname, mfile = _is_manifest(yaml_file)
+                    if mfile:
+                        mfiles.append((mname, mfile))
+                except Exception as e:
+                    # Included yaml file is corrupted
+                    LOG.exception(e)
+                    raise wsme.exc.ClientSideError(_(
+                        "Application-upload rejected: failed to process "
+                        "file %s." % file))
 
         if mfiles:
             if len(mfiles) == 1:
@@ -315,7 +326,8 @@ class KubeAppController(rest.RestController):
             return KubeApp.convert_with_links(db_app)
         else:
             if db_app.status not in [constants.APP_APPLY_SUCCESS,
-                                     constants.APP_APPLY_FAILURE]:
+                                     constants.APP_APPLY_FAILURE,
+                                     constants.APP_REMOVE_FAILURE]:
                 raise wsme.exc.ClientSideError(_(
                     "Application-remove rejected: operation is not allowed while "
                     "the current status is %s." % db_app.status))
