@@ -62,9 +62,8 @@ class AppOperator(object):
     def _cleanup(self, app):
         """" Remove application directories and override files """
         try:
-            # TODO(tngo): Disable node labeling for system app for now until
-            # vim integration with sysinv for container support is ready
-            if not app.system_app and app.status != constants.APP_UPLOAD_FAILURE:
+            if (app.status != constants.APP_UPLOAD_FAILURE and
+                    os.path.exists(os.path.join(app.path, 'metadata.yaml'))):
                 self._process_node_labels(app, op=constants.LABEL_REMOVE_OP)
             if app.system_app and app.status != constants.APP_UPLOAD_FAILURE:
                 self._remove_chart_overrides(app.mfile_abs)
@@ -359,7 +358,10 @@ class AppOperator(object):
                     name=app.name,
                     reason="compute labels are malformed.")
 
-        # Add the default labels for system app
+        # Add the default labels for system app. They must exist for
+        # the app manifest to be applied successfully. If the nodes have
+        # been assigned these labels manually before, these
+        # reassignments are simply ignored.
         if app.system_app:
             controller_labels_set.add(constants.CONTROL_PLANE_LABEL)
             compute_labels_set.add(constants.COMPUTE_NODE_LABEL)
@@ -497,10 +499,7 @@ class AppOperator(object):
         app = AppOperator.Application(rpc_app)
         LOG.info("Application (%s) apply started." % app.name)
 
-        # TODO(tngo): Disable node labeling for system app for now until
-        # vim integration with sysinv for container support is ready
-        if not app.system_app:
-            self._process_node_labels(app)
+        self._process_node_labels(app)
 
         overrides_str = ''
         ready = True
@@ -683,7 +682,6 @@ class DockerHelper(object):
                     name=ARMADA_CONTAINER_NAME,
                     detach=True,
                     volumes=binds,
-                    restart_policy={'Name': 'always'},
                     command=None)
                 LOG.info("Armada service started!")
                 return container
@@ -696,6 +694,28 @@ class DockerHelper(object):
                 LOG.error("Docker error while launching Armada container: %s", e)
                 os.unlink(kube_config)
             return None
+
+    def _is_armada_running(self):
+        """
+        The caller of this method is making sure the return of exec_run
+        was not caused by Armada service crash, manual stopping the container
+        or killing the process. For an existing docker client, the container
+        status is cached and not refreshed after it is restarted or has
+        exited. This appears to be more of a bug in docker python API than a
+        design intent.
+
+        Need to get a fresh client in order to obtain the latest container
+        status. Wait a couple of seconds for the container status to be
+        updated following an abrupt stop.
+        """
+
+        time.sleep(2)
+        client = docker.from_env()
+        armada_container = client.containers.get(ARMADA_CONTAINER_NAME)
+        if armada_container.status == 'running':
+            return True
+        else:
+            return False
 
     def make_armada_request(self, request, manifest_file, overrides_str=''):
         rc = True
@@ -714,22 +734,34 @@ class DockerHelper(object):
                         LOG.error("Validation of the armada manifest %s "
                                   "failed: %s" % (manifest_file, exec_logs))
                 elif request == 'apply':
-                    cmd = 'armada apply --debug ' + manifest_file + overrides_str
+                    cmd = "/bin/bash -c 'armada apply --debug " + manifest_file +\
+                          overrides_str + " | tee manifest-apply.log'"
                     LOG.info("Armada apply command = %s" % cmd)
                     exec_logs = armada_svc.exec_run(cmd)
                     if not any(str in exec_logs for str in ARMADA_ERRORS):
-                        LOG.info("Application manifest %s was successfully "
-                                 "applied/re-applied." % manifest_file)
+                        if self._is_armada_running():
+                            LOG.info("Application manifest %s was successfully "
+                                     "applied/re-applied." % manifest_file)
+                        else:
+                            rc = False
+                            LOG.info("Failed to apply application manifest. Armada "
+                                     "service has exited unexpectedly.")
                     else:
                         rc = False
                         LOG.error("Failed to apply application manifest: %s" %
                                   exec_logs)
                 elif request == 'delete':
-                    cmd = 'armada delete --debug --manifest ' + manifest_file
+                    cmd = "/bin/bash -c 'armada delete --debug --manifest " +\
+                          manifest_file + " | tee manifest-delete.log'"
                     exec_logs = armada_svc.exec_run(cmd)
                     if not any(str in exec_logs for str in ARMADA_ERRORS):
-                        LOG.info("Application charts were successfully "
-                                 "deleted.")
+                        if self._is_armada_running():
+                            LOG.info("Application charts were successfully "
+                                     "deleted.")
+                        else:
+                            rc = False
+                            LOG.info("Failed to delete the application manifest. "
+                                     "Armada service has exited unexpectedly.")
                     else:
                         rc = False
                         LOG.error("Delete the application manifest failed: %s" %
