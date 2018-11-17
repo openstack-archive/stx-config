@@ -15,6 +15,10 @@ if is_service_enabled stx-config; then
         install_sysinv_depends
         echo_summary "Installing sysinv service"
         install_sysinv
+        if is_service_enabled sysinv_agent; then
+            echo_summary "Installing sysinv-agent service"
+            install_sysinv_agent
+        fi
     elif [[ "$1" == "stack" && "$2" == "post-config" ]]; then
         # Configure after the other layer 1 and 2 services have been configured
         echo_summary "Configure sysinv"
