@@ -7556,11 +7556,12 @@ class ConductorManager(service.PeriodicService):
         cmd = []
         try:
             if delayed:
-                # Wait for drbd connect
+                # Wait for drbd connect.
+                # It's also fine if drbd sync starts already.
                 cmd = ["drbdadm", "cstate", constants.CINDER_LVM_DRBD_RESOURCE]
                 stdout, __ = cutils.execute(*cmd, run_as_root=True)
                 if utils.get_system_mode(self.dbapi) != constants.SYSTEM_MODE_SIMPLEX:
-                    if "Connected" not in stdout:
+                    if "Connected" not in stdout and "SyncSource" not in stdout:
                         return constants.CINDER_RESIZE_FAILURE
                 else:
                     # For simplex we just need to have drbd up
