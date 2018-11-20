@@ -705,8 +705,8 @@ class DockerHelper(object):
             if armada_svc:
                 if request == 'validate':
                     cmd = 'armada validate ' + manifest_file
-                    exec_logs = armada_svc.exec_run(cmd)
-                    if "Successfully validated" in exec_logs:
+                    (exit_code, exec_logs) = armada_svc.exec_run(cmd)
+                    if exit_code == 0:
                         LOG.info("Manifest file %s was successfully validated." %
                                  manifest_file)
                     else:
@@ -716,8 +716,8 @@ class DockerHelper(object):
                 elif request == 'apply':
                     cmd = 'armada apply --debug ' + manifest_file + overrides_str
                     LOG.info("Armada apply command = %s" % cmd)
-                    exec_logs = armada_svc.exec_run(cmd)
-                    if not any(str in exec_logs for str in ARMADA_ERRORS):
+                    (exit_code, exec_logs) = armada_svc.exec_run(cmd)
+                    if exit_code == 0:
                         LOG.info("Application manifest %s was successfully "
                                  "applied/re-applied." % manifest_file)
                     else:
@@ -726,8 +726,8 @@ class DockerHelper(object):
                                   exec_logs)
                 elif request == 'delete':
                     cmd = 'armada delete --debug --manifest ' + manifest_file
-                    exec_logs = armada_svc.exec_run(cmd)
-                    if not any(str in exec_logs for str in ARMADA_ERRORS):
+                    (exit_code, exec_logs) = armada_svc.exec_run(cmd)
+                    if exit_code == 0:
                         LOG.info("Application charts were successfully "
                                  "deleted.")
                     else:
