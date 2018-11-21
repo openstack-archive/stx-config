@@ -185,8 +185,8 @@ def do_host_sensorgroup_relearn(cc, args):
 
     isensorgroups = cc.isensorgroup.relearn(ihost.uuid)
 
-    print ("%s sensor model and any related alarm assertions are being "
-           "deleted." % (args.hostnameorid))
+    print(("%s sensor model and any related alarm assertions are being "
+           "deleted." % (args.hostnameorid)))
     print ("Any sensor suppression settings at the group or sensor levels "
            "will be lost.")
     print ("Will attempt to preserve customized group actions and monitor "
@@ -238,5 +238,5 @@ def donot_host_sensorgroup_delete(cc, args):
     ihost = ihost_utils._find_ihost(cc, args.hostnameorid)
     i = _find_sensorgroup(cc, ihost, args.sensorgroup_uuid)
     cc.isensorgroup.delete(i.uuid)
-    print ('Deleted sensorgroup: host %s sensorgroup %s' %
-           (args.hostnameorid, args.sensorgroup_uuid))
+    print(('Deleted sensorgroup: host %s sensorgroup %s' %
+           (args.hostnameorid, args.sensorgroup_uuid)))

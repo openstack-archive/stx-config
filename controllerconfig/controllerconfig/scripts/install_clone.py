@@ -37,7 +37,7 @@ def console_log(str, err=False):
         LOG.error(str)
     else:
         LOG.info(str)
-    print("\n" + str)
+    print(("\n" + str))
 
 
 def persist(key, value):
