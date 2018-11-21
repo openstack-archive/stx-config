@@ -88,7 +88,7 @@ class FunctionalTest(base.TestCase):
                   path_prefix=PATH_PREFIX):
         full_path = path_prefix + path
         if DEBUG_PRINTING:
-            print('%s: %s %s' % (method.upper(), full_path, params))
+            print(('%s: %s %s' % (method.upper(), full_path, params)))
         response = getattr(self.app, "%s_json" % method)(
             str(full_path),
             params=params,
@@ -98,7 +98,7 @@ class FunctionalTest(base.TestCase):
             expect_errors=expect_errors
         )
         if DEBUG_PRINTING:
-            print('GOT:%s' % response)
+            print(('GOT:%s' % response))
         return response
 
     def put_json(self, *args, **kwargs):
@@ -124,14 +124,14 @@ class FunctionalTest(base.TestCase):
                extra_environ=None, status=None, path_prefix=PATH_PREFIX):
         full_path = path_prefix + path
         if DEBUG_PRINTING:
-            print('DELETE: %s' % (full_path))
+            print(('DELETE: %s' % (full_path)))
         response = self.app.delete(str(full_path),
                                    headers=headers,
                                    status=status,
                                    extra_environ=extra_environ,
                                    expect_errors=expect_errors)
         if DEBUG_PRINTING:
-            print('GOT: %s' % response)
+            print(('GOT: %s' % response))
         return response
 
     def get_json(self, path, expect_errors=False, headers=None,
@@ -149,7 +149,7 @@ class FunctionalTest(base.TestCase):
         if q:
             all_params.update(query_params)
         if DEBUG_PRINTING:
-            print('GET: %s %r' % (full_path, all_params))
+            print(('GET: %s %r' % (full_path, all_params)))
         response = self.app.get(full_path,
                                 params=all_params,
                                 headers=headers,
@@ -158,5 +158,5 @@ class FunctionalTest(base.TestCase):
         if not expect_errors:
             response = response.json
         if DEBUG_PRINTING:
-            print('GOT:%s' % response)
+            print(('GOT:%s' % response))
         return response

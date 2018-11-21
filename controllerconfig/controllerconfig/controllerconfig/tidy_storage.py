@@ -124,10 +124,10 @@ class OpenStack(object):
 
 
 def show_help():
-    print ("Usage: %s  <user_action_log_file>" % sys.argv[0])
-    print textwrap.fill(
+    print(("Usage: %s  <user_action_log_file>" % sys.argv[0]))
+    print(textwrap.fill(
         "Tidy storage post system restore. Check user actions "
-        "in the generated user_action_log_file.", 80)
+        "in the generated user_action_log_file.", 80))
 
 
 def tidy_storage(result_file):
@@ -180,14 +180,14 @@ def tidy_storage(result_file):
 
         rbd_image_l = [i for i in output.split('\n') if i != ""]
 
-        print("Images in Glance images DB: %s \n" % image_id_l)
-        print("Images in rbd images pool:  %s \n" % rbd_image_l)
+        print(("Images in Glance images DB: %s \n" % image_id_l))
+        print(("Images in rbd images pool:  %s \n" % rbd_image_l))
 
         in_glance_only = np.setdiff1d(image_id_l, rbd_image_l)
         in_rbd_image_only = np.setdiff1d(rbd_image_l, image_id_l)
 
-        print("Images in Glance images DB only: %s \n" % in_glance_only)
-        print("Images in rbd images pool only:  %s \n" % in_rbd_image_only)
+        print(("Images in Glance images DB only: %s \n" % in_glance_only))
+        print(("Images in rbd images pool only:  %s \n" % in_rbd_image_only))
 
         if in_rbd_image_only.size != 0:
             output = subprocess.check_output(
@@ -219,7 +219,7 @@ def tidy_storage(result_file):
                     'rbd://{}/images/{}/snap'.format(ceph_cluster[0],
                                                      image)
 
-                print ("Creating a Glance image %s ...\n " % fields['name'])
+                print(("Creating a Glance image %s ...\n " % fields['name']))
                 g_client_v1.images.create(**fields)
             except subprocess.CalledProcessError:
                 LOG.error("Failed to access rbd image %s" % image)
@@ -242,7 +242,7 @@ def tidy_storage(result_file):
 
         snaps_no_backend_vol = []
         for snap in snap_l:
-            print ("Check if volume snapshot %s has backend " % snap.name)
+            print(("Check if volume snapshot %s has backend " % snap.name))
             try:
                 output = subprocess.check_output(
                     ["rbd", "ls", "--pool", "cinder-volumes"],
@@ -278,8 +278,8 @@ def tidy_storage(result_file):
 
                 if not keep_snap:
                     try:
-                        print ("Volume snapshot %s has no backend data. "
-                               "Deleting it from Cinder...\n" % snap.name)
+                        print(("Volume snapshot %s has no backend data. "
+                               "Deleting it from Cinder...\n" % snap.name))
 
                         c_client.volume_snapshots.delete(c_utils.find_resource(
                             c_client.volume_snapshots, snap.id), force=True)
@@ -330,17 +330,17 @@ def tidy_storage(result_file):
 
         rbd_volume_l = [i[7:] for i in output.split('\n') if i != ""]
 
-        print("Volumes in Cinder volumes DB: %s \n" % cinder_volume_l)
-        print("Volumes in rbd pool: %s \n" % rbd_volume_l)
+        print(("Volumes in Cinder volumes DB: %s \n" % cinder_volume_l))
+        print(("Volumes in rbd pool: %s \n" % rbd_volume_l))
 
         in_cinder_only = np.setdiff1d(cinder_volume_l, rbd_volume_l)
         in_rbd_volume_only = np.setdiff1d(rbd_volume_l, cinder_volume_l)
         in_cinder_and_rbd = np.intersect1d(cinder_volume_l, rbd_volume_l)
 
-        print("Volumes in Cinder volumes DB only: %s \n" % in_cinder_only)
-        print("Volumes in rbd pool only: %s \n" % in_rbd_volume_only)
-        print("Volumes in Cinder volumes DB and rbd pool: %s \n"
-              % in_cinder_and_rbd)
+        print(("Volumes in Cinder volumes DB only: %s \n" % in_cinder_only))
+        print(("Volumes in rbd pool only: %s \n" % in_rbd_volume_only))
+        print(("Volumes in Cinder volumes DB and rbd pool: %s \n"
+              % in_cinder_and_rbd))
 
         for vol_id in in_rbd_volume_only:
             volume = 'cinder-volumes/volume-{}'.format(vol_id)
@@ -357,7 +357,7 @@ def tidy_storage(result_file):
                         break
 
                 # Find out if the volume has any snapshots.
-                print("Checking if volume %s has snapshots...\n" % vol_id)
+                print(("Checking if volume %s has snapshots...\n" % vol_id))
                 output = subprocess.check_output(
                     ["rbd", "snap", "list", volume], stderr=subprocess.STDOUT)
 
@@ -375,8 +375,8 @@ def tidy_storage(result_file):
                         availability_zone=avail_z,
                         bootable=bootable)
 
-                    print("Creating volume found-volume-%s in Cinder...\n"
-                          % vol_id)
+                    print(("Creating volume found-volume-%s in Cinder...\n"
+                          % vol_id))
                 except Exception as e:
                     LOG.exception(e)
                     raise TidyStorageFail("Failed to manage volume")
@@ -387,9 +387,9 @@ def tidy_storage(result_file):
                         # supported in rbd. So we just remove the snapshot.
 
                         # Remove the snapshot
-                        print (textwrap.fill(
+                        print((textwrap.fill(
                                "Removing snapshot %s from volume %s "
-                               "in rbd...\n" % (snap, vol_id), 76))
+                               "in rbd...\n" % (snap, vol_id), 76)))
                         del_snap = '{}@{}'.format(volume, snap)
                         output = subprocess.check_output(
                             ["rbd", "snap", "unprotect", del_snap],
@@ -411,7 +411,7 @@ def tidy_storage(result_file):
             try:
                 c_client.volumes.reset_state(
                     c_utils.find_volume(c_client, vol), state='error')
-                print("Setting state to error for volume %s \n" % vol)
+                print(("Setting state to error for volume %s \n" % vol))
             except Exception as e:
                 LOG.error("Failed to update volume to error state for %s"
                           % vol)
@@ -430,7 +430,7 @@ def tidy_storage(result_file):
             volume = 'cinder-volumes/volume-{}'.format(vol_id)
             try:
                 # Find out if the volume has any snapshots.
-                print("Checking if volume %s has snapshots...\n" % vol_id)
+                print(("Checking if volume %s has snapshots...\n" % vol_id))
                 output = subprocess.check_output(
                     ["rbd", "snap", "list", volume],
                     stderr=subprocess.STDOUT)
@@ -440,8 +440,8 @@ def tidy_storage(result_file):
 
                 for snap in snap_l:
                     if snap not in cinder_snap_l:
-                        print ("Creating volume snapshot found-%s "
-                               "in Cinder...\n" % snap)
+                        print(("Creating volume snapshot found-%s "
+                               "in Cinder...\n" % snap))
 
                         c_client.volume_snapshots.manage(
                             volume_id=vol_id,

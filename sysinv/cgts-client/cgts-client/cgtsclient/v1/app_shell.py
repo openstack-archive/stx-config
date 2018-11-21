@@ -97,6 +97,6 @@ def do_application_delete(cc, args):
     """Remove the uninstalled application from the system"""
     try:
         cc.app.delete(args.name)
-        print('Application %s deleted.' % args.name)
+        print(('Application %s deleted.' % args.name))
     except exc.HTTPNotFound:
         raise exc.CommandError('Application not found: %s' % args.name)

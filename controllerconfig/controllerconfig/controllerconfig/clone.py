@@ -9,6 +9,7 @@ Clone a Configured System and Install the image on another
 identical hardware or the same hardware.
 """
 
+from __future__ import print_function
 import os
 import re
 import glob
@@ -62,11 +63,11 @@ def clone_status():
                 break  # one file was found, skip the other file
     if result != "unknown":
         if result == OK:
-            print("\nInstallation of cloned image [{}] was successful at {}\n"
-                  .format(name, installed_at))
+            print(("\nInstallation of cloned image [{}] was successful at {}\n"
+                  .format(name, installed_at)))
         elif result == FAIL:
-            print("\nInstallation of cloned image [{}] failed at {}\n"
-                  .format(name, installed_at))
+            print(("\nInstallation of cloned image [{}] failed at {}\n"
+                  .format(name, installed_at)))
         else:
             print("\ninstall-clone is in progress.\n")
     else:
@@ -116,11 +117,11 @@ def check_size(archive_dir):
         utils.filesystem_get_free_space(archive_dir)
 
     if clone_size > archive_dir_free_space:
-        print ("\nArchive directory (%s) does not have enough free "
+        print(("\nArchive directory (%s) does not have enough free "
                "space (%s), estimated size to create image is %s." %
                (archive_dir,
                 utils.print_bytes(archive_dir_free_space),
-                utils.print_bytes(clone_size)))
+                utils.print_bytes(clone_size))))
         raise CloneFail("Not enough free space.\n")
 
 
@@ -449,7 +450,7 @@ def create_iso(iso_name, archive_dir):
             stderr=subprocess.STDOUT)
         LOG.debug("implantisomd5: {}".format(output))
         utils.progress(total_steps, step, 'checksum implanted', 'DONE')
-        print("Cloned iso image created: {}".format(iso_file))
+        print(("Cloned iso image created: {}".format(iso_file)))
 
     except Exception as e:
         LOG.exception(e)
@@ -475,7 +476,7 @@ def find_and_replace_in_file(target, find, replace):
                 fpat = r'\b' + find + r'\b'
                 line = re.sub(fpat, replace, line)
                 found = True
-            print line,
+            print(line, end=' ')
 
     except Exception as e:
         LOG.error("Failed to replace [{}] with [{}] in [{}]: {}"
