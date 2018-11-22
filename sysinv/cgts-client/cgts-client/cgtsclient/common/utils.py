@@ -23,6 +23,7 @@ except Exception:
 import argparse
 import copy
 import dateutil
+import math
 import os
 import prettytable
 import re
@@ -749,10 +750,12 @@ def extract_keypairs(args):
     return attributes
 
 
-# Convert size from BYTE to KiB, MiB, GiB, TiB, PiB
-# 1 - KiB, 2 - MiB, 3 - GiB, 4 - TiB, 5 - PiB
-def convert_size_from_bytes(bytes, type):
-    return '%.2f' % (float(bytes) / (1024 ** type))
+# Convert size from a smaller unit (e.g. KiB) to a larger
+# unit (e.g. GiB). Each 1024 is 1 step. e.g. From BYTE to
+# MiB is 2 steps. From MiB to GiB is 1 step. The return value
+# is a float with 3 digits after the decimal point.
+def size_unit_conversion(size, step):
+    return math.floor(float(size) / (1024 ** step) * 1000) / 1000.0
 
 
 def _get_system_info(cc):
