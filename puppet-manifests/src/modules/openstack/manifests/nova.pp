@@ -587,7 +587,9 @@ class openstack::nova::api
 
   if $::openstack::nova::params::configure_endpoint {
     include ::openstack::nova::firewall
-    include ::openstack::nova::haproxy
+    if $::platform::kubernetes::params::enabled != true {
+      include ::openstack::nova::haproxy
+    }
   }
 }
 
