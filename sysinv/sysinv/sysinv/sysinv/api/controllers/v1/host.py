@@ -4085,36 +4085,6 @@ class HostController(rest.RestController):
                         constants.LVG_NOVA_BACKING_IMAGE,
                         constants.LVG_NOVA_BACKING_REMOTE]:
                     return
-                elif instance_backing == constants.LVG_NOVA_BACKING_LVM:
-                    if constants.LVG_NOVA_PARAM_INST_LV_SZ not in lvg_capabilities:
-                        raise wsme.exc.ClientSideError(
-                            _("A host with compute functionality and a "
-                              "nova-local volume group requires that a valid "
-                              "size be specifed for the instances logical "
-                              "volume."))
-                    elif lvg_capabilities[constants.LVG_NOVA_PARAM_INST_LV_SZ] == 0:
-                        raise wsme.exc.ClientSideError(
-                            _("A host with compute functionality and a "
-                              "nova-local volume group requires that a valid "
-                              "size be specifed for the instances logical "
-                              "volume. The current value is 0."))
-                    else:
-                        # Sanity check the current VG size against the
-                        # current instances logical volume size in case
-                        # PV's have been deleted
-                        size = pv_api._get_vg_size_from_pvs(
-                            nova_local_storage_lvg)
-                        if (lvg_capabilities[constants.LVG_NOVA_PARAM_INST_LV_SZ] >
-                                size):
-
-                            raise wsme.exc.ClientSideError(
-                                _("A host with compute functionality and a "
-                                  "nova-local volume group requires that a "
-                                  "valid size be specifed for the instances "
-                                  "logical volume. Current value: %d > %d.") %
-                                (lvg_capabilities[
-                                    constants.LVG_NOVA_PARAM_INST_LV_SZ],
-                                 size))
                 else:
                     raise wsme.exc.ClientSideError(
                         _("A host with compute functionality and a "
