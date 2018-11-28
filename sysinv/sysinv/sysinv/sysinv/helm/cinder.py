@@ -93,8 +93,8 @@ class CinderHelm(openstack.OpenstackBaseHelm):
                     'chunk_size': 8
                 },
                 'volume': {
-                    # We don't use the chart to configure the cinder-volumes
-                    # pool, so these values don't have any impact right now.
+                    # The cinder chart doesn't currently support specifying
+                    # the config for multiple volume/backup pools.
                     'replication': replication,
                     'crush_rule': ruleset,
                     'chunk_size': 8

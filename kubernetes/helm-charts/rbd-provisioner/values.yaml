@@ -25,6 +25,7 @@ global:
   # Defines Provisioner's image name including container registry.
   #
   image: quay.io/external_storage/rbd-provisioner:latest
+  helper_image: docker.io/port/ceph-config-helper:v1.10.3
   #
   # Defines whether to reuse an already defined RBAC policy.
   # Make sure that the serviceAccount defined in the RBAC section matches the one
@@ -137,6 +138,3 @@ classes:
   userId: kube
   # K8 secret name with key for accessing the Ceph pool
   userSecretName: ceph-secret-kube
-
-
-
