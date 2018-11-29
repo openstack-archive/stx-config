@@ -75,7 +75,9 @@ class AppOperator(object):
                 self._remove_chart_overrides(app.mfile_abs)
 
             os.unlink(app.armada_mfile_abs)
-            shutil.rmtree(app.path)
+            os.unlink(app.imgfile_abs)
+            if os.path.exists(app.path):
+                shutil.rmtree(app.path)
         except OSError as e:
             LOG.exception(e)
 
@@ -94,7 +96,7 @@ class AppOperator(object):
     def _abort_operation(self, app, operation):
         if (app.status == constants.APP_UPLOAD_IN_PROGRESS):
             self._update_app_status(app, constants.APP_UPLOAD_FAILURE,
-                                    constants.APP_PRORESS_ABORTED)
+                                    constants.APP_PROGRESS_ABORTED)
         elif (app.status == constants.APP_APPLY_IN_PROGRESS):
             self._update_app_status(app, constants.APP_APPLY_FAILURE,
                                     constants.APP_PROGRESS_ABORTED)
@@ -109,9 +111,12 @@ class AppOperator(object):
                 name=app.name,
                 reason="failed to extract tarfile content.")
         try:
+            # One time set up of install path per controller
             if not os.path.isdir(constants.APP_INSTALL_PATH):
-                # One time set up
                 os.makedirs(constants.APP_INSTALL_PATH)
+
+            # One time set up of Armada manifest path for the system
+            if not os.path.isdir(constants.APP_MANIFEST_PATH):
                 os.makedirs(constants.APP_MANIFEST_PATH)
 
             if not os.path.isdir(app.path):
@@ -171,9 +176,10 @@ class AppOperator(object):
             # Either this chart does not have overrides file or image tags are
             # not in its overrides file, walk the chart path to find image tags
             chart_path = os.path.join(app_path, chart.name)
-            tags = self._get_image_tags_by_path(chart_path)
-            if tags:
-                image_tags.extend(tags)
+            if os.path.exists(chart_path):
+                tags = self._get_image_tags_by_path(chart_path)
+                if tags:
+                    image_tags.extend(tags)
 
         return list(set(image_tags))
 
@@ -193,11 +199,15 @@ class AppOperator(object):
             name=app.name,
             reason="embedded images are not yet supported.")
 
-    def _download_images(self, app):
-        if os.path.isdir(app.images_dir):
-            return self._register_embedded_images(app)
-
+    def _save_images_list(self, app):
+        # Extract the list of images from the charts and overrides where
+        # applicable. Save the list to the same location as the armada manifest
+        # so it can be sync'ed.
         if app.system_app:
+            LOG.info("Generating application overrides...")
+            self._helm.generate_helm_application_overrides(
+                app.name, cnamespace=None, armada_format=True, combined=True)
+            app.charts = self._get_list_of_charts(app.armada_mfile_abs)
             # Grab the image tags from the overrides. If they don't exist
             # then mine them from the chart paths.
             images_to_download = self._get_image_tags_by_charts(app.charts_dir,
@@ -206,10 +216,39 @@ class AppOperator(object):
             # For custom apps, mine image tags from application path
             images_to_download = self._get_image_tags_by_path(app.path)
 
-        if images_to_download is None:
-            raise exception.KubeAppApplyFailure(
+        if not images_to_download:
+            raise exception.KubeAppUploadFailure(
                 name=app.name,
                 reason="charts specify no docker images.")
+
+        with open(app.imgfile_abs, 'wb') as f:
+            yaml.safe_dump(images_to_download, f, explicit_start=True,
+                           default_flow_style=False)
+
+    def _retrieve_images_list(self, app_images_file):
+        with open(app_images_file, 'rb') as f:
+            images_list = yaml.load(f)
+        return images_list
+
+    def _download_images(self, app):
+        if os.path.isdir(app.images_dir):
+            return self._register_embedded_images(app)
+
+        if app.system_app:
+            # Some images could have been overwritten via user overrides
+            # between upload and apply, or between applies. Refresh the
+            # saved images list.
+            saved_images_list = self._retrieve_images_list(app.imgfile_abs)
+            combined_images_list = saved_images_list
+            combined_images_list.extend(
+                self._get_image_tags_by_charts(app.charts_dir, app.charts))
+            images_to_download = list(set(combined_images_list))
+            if saved_images_list != images_to_download:
+                with open(app.imgfile_abs, 'wb') as f:
+                    yaml.safe_dump(images_to_download, f, explicit_start=True,
+                                   default_flow_style=False)
+        else:
+            images_to_download = self._retrieve_images_list(app.imgfile_abs)
 
         total_count = len(images_to_download)
         threads = min(MAX_DOWNLOAD_THREAD, total_count)
@@ -577,6 +616,8 @@ class AppOperator(object):
                 # user can upload helm charts
                 os.chmod('/scratch', 0o755)
                 self._upload_helm_charts(app)
+
+            self._save_images_list(app)
             self._update_app_status(app, constants.APP_UPLOAD_SUCCESS)
             LOG.info("Application (%s) upload completed." % app.name)
         except Exception as e:
@@ -612,7 +653,7 @@ class AppOperator(object):
         overrides_str = ''
         ready = True
         try:
-            app.charts = self._get_list_of_charts(app.mfile_abs)
+            app.charts = self._get_list_of_charts(app.armada_mfile_abs)
             if app.system_app:
                 self._update_app_status(
                     app, new_progress=constants.APP_PROGRESS_GENERATE_OVERRIDES)
@@ -668,7 +709,7 @@ class AppOperator(object):
         app = AppOperator.Application(rpc_app)
         LOG.info("Application (%s) remove started." % app.name)
 
-        app.charts = self._get_list_of_charts(app.mfile_abs)
+        app.charts = self._get_list_of_charts(app.armada_mfile_abs)
         self._update_app_status(
             app, new_progress=constants.APP_PROGRESS_DELETE_MANIFEST)
 
@@ -748,6 +789,9 @@ class AppOperator(object):
                 os.path.join(constants.APP_INSTALL_PATH,
                              self._kube_app.get('name'),
                              self._kube_app.get('manifest_file'))
+            self.imgfile_abs =\
+                os.path.join(constants.APP_MANIFEST_PATH,
+                             self._kube_app.get('name') + "-images.yaml")
             self.charts = []
 
         @property
@@ -788,8 +832,8 @@ class DockerHelper(object):
             try:
                 # First make kubernetes config accessible to Armada. This
                 # is a work around the permission issue in Armada container.
-                install_dir = constants.APP_INSTALL_PATH
-                kube_config = os.path.join(install_dir, 'admin.conf')
+                kube_config = os.path.join(constants.APP_MANIFEST_PATH,
+                                           'admin.conf')
                 shutil.copy('/etc/kubernetes/admin.conf', kube_config)
                 os.chown(kube_config, 1000, grp.getgrnam("wrs").gr_gid)
 
