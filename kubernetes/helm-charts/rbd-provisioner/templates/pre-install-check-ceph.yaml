@@ -182,4 +182,18 @@ spec:
             - name: config-volume-{{- $root.Values.global.name }}
               mountPath: {{ $mount }}
         {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ceph-etc
+  namespace: openstack
+data:
+  ceph.conf: |
+    [global]
+    auth_supported = none
+    {{ $monitors := $defaults.monitors }}{{ range $index, $element := $monitors}}
+    [mon.{{- $index }}]
+    mon_addr = {{ $element }}
+    {{- end }}
 {{- end }}
