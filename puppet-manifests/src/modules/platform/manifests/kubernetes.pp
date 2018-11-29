@@ -302,7 +302,7 @@ class platform::kubernetes::worker
 class platform::kubernetes::firewall::params (
   $transport = 'tcp',
   $table = 'nat',
-  $dports = [80, 443],
+  $dports = [80, 443, 9001],
   $chain = 'POSTROUTING',
   $jump = 'SNAT',
 ) {}
