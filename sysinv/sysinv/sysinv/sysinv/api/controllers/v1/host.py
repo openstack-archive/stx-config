@@ -2077,7 +2077,7 @@ class HostController(rest.RestController):
 
             if hostupdate.ihost_patch['operational'] == \
                     constants.OPERATIONAL_ENABLED:
-                self._update_add_ceph_state()
+                self._update_add_ceph_state(ihost_obj)
 
             if hostupdate.notify_availability:
                 if (hostupdate.notify_availability ==
@@ -4472,7 +4472,7 @@ class HostController(rest.RestController):
             return False
 
     @staticmethod
-    def _update_add_ceph_state():
+    def _update_add_ceph_state(ihost_obj):
         api = pecan.request.dbapi
 
         backend = StorageBackendConfig.get_configuring_backend(api)
@@ -4520,8 +4520,8 @@ class HostController(rest.RestController):
                 LOG.info(
                     'Apply new Ceph manifest to provisioned worker nodes.'
                 )
-                pecan.request.rpcapi.config_worker_for_ceph(
-                    pecan.request.context
+                pecan.request.rpcapi.update_ceph_base_config(
+                    pecan.request.context, personalities=[constants.WORKER]
                 )
                 # mark all tasks completed after updating the manifests for
                 # all worker nodes.
