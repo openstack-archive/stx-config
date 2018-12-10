@@ -439,7 +439,8 @@ class platform::ceph::rgw::keystone::auth(
 }
 
 
-class platform::ceph::controller::runtime {
+
+class platform::ceph::runtime {
   include ::platform::ceph::monitor
   include ::platform::ceph
 

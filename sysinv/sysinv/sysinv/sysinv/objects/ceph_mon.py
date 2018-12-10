@@ -23,13 +23,15 @@ class CephMon(base.SysinvObject):
 
               'device_path': utils.str_or_none,
               'ceph_mon_gib': utils.int_or_none,
+              'state': utils.str_or_none,
+              'task': utils.str_or_none,
 
               'forihostid': utils.int_or_none,
               'hostname': utils.str_or_none,
     }
 
     _foreign_fields = {
-        'hostname': 'host:hostname',
+        'hostname': 'host:hostname'
     }
 
     @base.remotable_classmethod
