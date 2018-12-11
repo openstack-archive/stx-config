@@ -341,11 +341,11 @@ def _check_host(partition, ihost, idisk):
         raise wsme.exc.ClientSideError(_("Host %s has uninitialized "
                                          "personality.") %
                                        ihost.hostname)
-    elif ihost.personality not in [constants.CONTROLLER, constants.COMPUTE]:
+    elif ihost.personality not in [constants.CONTROLLER, constants.WORKER]:
         raise wsme.exc.ClientSideError(_("Host personality must be a one of "
                                          "[%s, %s]") %
                                        (constants.CONTROLLER,
-                                        constants.COMPUTE))
+                                        constants.WORKER))
 
     # The disk must be present on the specified host.
     if ihost['id'] != idisk['forihostid']:

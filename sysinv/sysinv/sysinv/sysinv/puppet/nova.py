@@ -340,7 +340,7 @@ class NovaPuppet(openstack.OpenstackBasePuppet):
 
     def get_host_config(self, host):
         config = {}
-        if constants.COMPUTE in host.subfunctions:
+        if constants.WORKER in host.subfunctions:
             # nova storage and compute configuration is required for hosts
             # with a compute function only
             config.update(self._get_compute_config(host))
@@ -569,7 +569,7 @@ class NovaPuppet(openstack.OpenstackBasePuppet):
 
     def _get_vcpu_pin_set(self, host):
         vm_cpus = self._get_host_cpu_list(
-            host, function=constants.VM_FUNCTION, threads=True)
+            host, function=constants.APPLICATION_FUNCTION, threads=True)
         cpu_list = [c.cpu for c in vm_cpus]
         return "\"%s\"" % utils.format_range_set(cpu_list)
 

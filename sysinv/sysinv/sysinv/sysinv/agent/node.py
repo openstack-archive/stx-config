@@ -300,19 +300,19 @@ class NodeOperator(object):
 
         imemory = []
 
-        initial_compute_config_completed = \
-            os.path.exists(tsc.INITIAL_COMPUTE_CONFIG_COMPLETE)
+        initial_worker_config_completed = \
+            os.path.exists(tsc.INITIAL_WORKER_CONFIG_COMPLETE)
 
         # check if it is initial report before the huge pages are allocated
-        initial_report = not initial_compute_config_completed
+        initial_report = not initial_worker_config_completed
 
-        # do not send report if the initial compute config is completed and
-        # compute config has not finished, i.e.during subsequent
+        # do not send report if the initial worker config is completed and
+        # worker config has not finished, i.e.during subsequent
         # reboot before the manifest allocates the huge pages
-        compute_config_completed = \
-            os.path.exists(tsc.VOLATILE_COMPUTE_CONFIG_COMPLETE)
-        if (initial_compute_config_completed and
-                not compute_config_completed):
+        worker_config_completed = \
+            os.path.exists(tsc.VOLATILE_WORKER_CONFIG_COMPLETE)
+        if (initial_worker_config_completed and
+                not worker_config_completed):
             return imemory
 
         for node in range(self.num_nodes):
@@ -464,11 +464,11 @@ class NodeOperator(object):
             # need to multiply total_mb by 1024 to match compute_huge
             node_total_kb = total_hp_mb * SIZE_KB + free_kb + pss_mb * SIZE_KB
 
-            # Read base memory from compute_reserved.conf
+            # Read base memory from worker_reserved.conf
             base_mem_mb = 0
-            with open('/etc/nova/compute_reserved.conf', 'r') as infile:
+            with open('/etc/platform/worker_reserved.conf', 'r') as infile:
                 for line in infile:
-                    if "COMPUTE_BASE_RESERVED" in line:
+                    if "WORKER_BASE_RESERVED" in line:
                         val = line.split("=")
                         base_reserves = val[1].strip('\n')[1:-1]
                         for reserve in base_reserves.split():
@@ -597,7 +597,7 @@ class NodeOperator(object):
         imemory = []
 
         # if CONF.compute_hugepages:
-        if os.path.isfile("/etc/nova/compute_reserved.conf"):
+        if os.path.isfile("/etc/platform/worker_reserved.conf"):
             imemory = self._inode_get_memory_hugepages()
         else:
             imemory = self._inode_get_memory_nonhugepages()
