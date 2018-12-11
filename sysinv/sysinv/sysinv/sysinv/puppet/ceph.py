@@ -172,7 +172,7 @@ class CephPuppet(openstack.OpenstackBasePuppet):
 
         # if it is a compute node and on an secondary region,
         # check if ceph mon configuration is required
-        if constants.COMPUTE in host.subfunctions and self._region_config():
+        if constants.WORKER in host.subfunctions and self._region_config():
             from sysinv.conductor import openstack
             op = openstack.OpenStackOperator(self.dbapi)
             if self._is_ceph_mon_required(host, op):

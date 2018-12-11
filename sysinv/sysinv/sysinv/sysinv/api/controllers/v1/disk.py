@@ -405,10 +405,10 @@ def _semantic_checks_format(idisk):
     ihost_uuid = idisk.get('ihost_uuid')
     # Check the disk belongs to a controller or compute host.
     ihost = pecan.request.dbapi.ihost_get(ihost_uuid)
-    if ihost.personality not in [constants.CONTROLLER, constants.COMPUTE]:
+    if ihost.personality not in [constants.CONTROLLER, constants.WORKER]:
         raise wsme.exc.ClientSideError(
             _("ERROR: Host personality must be a one of %s, %s]") %
-            (constants.CONTROLLER, constants.COMPUTE))
+            (constants.CONTROLLER, constants.WORKER))
 
     # Check disk is not the rootfs disk.
     capabilities = idisk['capabilities']
