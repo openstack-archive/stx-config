@@ -1227,7 +1227,7 @@ def restore_complete():
               (utils.get_controller_hostname()))
         print("Node will reboot on completion.")
 
-        sysinv.do_compute_config_complete(utils.get_controller_hostname())
+        sysinv.do_worker_config_complete(utils.get_controller_hostname())
 
         # show in-progress log on console every 30 seconds
         # until self reboot or timeout

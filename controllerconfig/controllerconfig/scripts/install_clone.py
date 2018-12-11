@@ -193,18 +193,18 @@ def config_compute():
         console_log("Applying compute manifests for {}. "
                     "Node will reboot on completion."
                     .format(utils.get_controller_hostname()))
-        sysinv.do_compute_config_complete(utils.get_controller_hostname())
+        sysinv.do_worker_config_complete(utils.get_controller_hostname())
         time.sleep(30)
         # compute-config-complete has no logs to console. So, wait
         # for some time before showing the login prompt.
         for i in range(1, 10):
             console_log("compute-config in progress..")
             time.sleep(30)
-        console_log("Timed out on do_compute_config_complete")
-        raise CloneFail("Timed out on do_compute_config_complete")
+        console_log("Timed out on do_worker_config_complete")
+        raise CloneFail("Timed out on do_worker_config_complete")
         return True
     else:
-        # compute_config_complete is not needed.
+        # worker_config_complete is not needed.
         return False
 
 
@@ -303,7 +303,7 @@ if os.path.exists(INI_FILE):
                 finalize_install()
                 set_result(clone.OK)
                 if not config_compute():
-                    # do cleanup if compute_config_complete is not required
+                    # do cleanup if worker_config_complete is not required
                     cleanup()
             elif last_result == clone.OK:
                 # Installation completed successfully before last reboot
