@@ -58,8 +58,16 @@ def timestamped(dname, fmt='{dname}_%Y-%m-%d-%H-%M-%S'):
 
 
 def prompt_for(prompt_text, default_input, validator):
-    valid = False
-    while not valid:
+    """
+    :param prompt_text: text for the prompt
+    :param default_input: default input if user hit enter directly
+    :param validator: validator function to validate user input,
+                      validator should return error message in case
+                      of invalid input, or None if input is valid.
+    :return: return a valid user input
+    """
+    error_msg = None
+    while True:
         user_input = input(prompt_text)
         if user_input.lower() == 'q':
             raise UserQuit
@@ -67,12 +75,12 @@ def prompt_for(prompt_text, default_input, validator):
             user_input = default_input
 
         if validator:
-            valid = validator(user_input)
-        else:
-            valid = True
+            error_msg = validator(user_input)
 
-        if not valid:
-            print("Invalid choice")
+        if error_msg is not None:
+            print(error_msg)
+        else:
+            break
 
     return user_input
 
@@ -374,6 +382,8 @@ class ConfigAssistant():
         self.storage_hostname_prefix = "storage-"
         self.use_entire_mgmt_subnet = True
         self.dynamic_address_allocation = True
+        self.pxeboot_start_address = None
+        self.pxeboot_end_address = None
         self.management_start_address = IPAddress("192.168.204.2")
         self.management_end_address = IPAddress("192.168.204.254")
         self.management_multicast_subnet = \
@@ -668,7 +678,7 @@ class ConfigAssistant():
         }
         user_input = prompt_for(
             "System mode [duplex-direct]: ", '1',
-            lambda text: text in value_mapping
+            lambda text: "Invalid choice" if text not in value_mapping else None
         )
         self.system_mode = value_mapping[user_input.lower()]
 
@@ -683,7 +693,7 @@ class ConfigAssistant():
         }
         user_input = prompt_for(
             "Configure Distributed Cloud System Controller [y/N]: ", 'n',
-            lambda text: text in value_mapping
+            lambda text: "Invalid choice" if text not in value_mapping else None
         )
         self.system_dc_role = value_mapping[user_input.lower()]
 
@@ -781,6 +791,9 @@ class ConfigAssistant():
         self.controller_pxeboot_address_1 = \
             IPAddress(self.pxeboot_subnet[4])
 
+        self.pxeboot_start_address = str(self.pxeboot_subnet[2])
+        self.pxeboot_end_address = str(self.pxeboot_subnet[-2])
+
     def input_pxeboot_config(self):
         """Allow user to input pxeboot config and perform validation."""
 
@@ -846,11 +859,73 @@ class ConfigAssistant():
                     break
                 except AddrFormatError:
                     print("Invalid subnet - please enter a valid IPv4 subnet")
+
+            value_mapping = {
+                "y": True,
+                "n": False,
+            }
+
+            user_input = prompt_for(
+                "Use entire PXEBoot subnet [Y/n]: ", 'Y',
+                lambda text: "Invalid choice"
+                             if text.lower() not in value_mapping
+                             else None
+            )
+            self.use_entire_pxeboot_subnet = value_mapping[user_input.lower()]
+
+            if not self.use_entire_pxeboot_subnet:
+                def validate_input_address(text, error_header):
+                    try:
+                        validate_address_str(text, self.pxeboot_subnet)
+                        return None
+                    except ValidateFail as e:
+                        return "%s\n Reason: %s" % (error_header, e)
+
+                while True:
+                    self.pxeboot_start_address = str(self.pxeboot_subnet[2])
+                    self.pxeboot_end_address = str(self.pxeboot_subnet[-2])
+                    self.pxeboot_start_address = prompt_for(
+                        "PXEBoot network start address [" +
+                        self.pxeboot_start_address +
+                        "]: ", self.pxeboot_start_address,
+                        lambda text: validate_input_address(text, "Invalid start address.")
+                    )
+
+                    self.pxeboot_end_address = prompt_for(
+                        "PXEBoot network end address [" +
+                        self.pxeboot_end_address +
+                        "]: ", self.pxeboot_end_address,
+                        lambda text: validate_input_address(text, "Invalid end address.")
+                    )
+
+                    if not self.pxeboot_start_address < \
+                            self.pxeboot_end_address:
+                        print "Start address not less than end address. "
+                        continue
+
+                    address_range = IPRange(
+                            str(self.pxeboot_start_address),
+                            str(self.pxeboot_end_address))
+
+                    min_addresses = 8
+                    if not address_range.size >= min_addresses:
+                        print (
+                            "Address range must contain at least "
+                            "%d addresses." % min_addresses)
+                        continue
+                    print
+                    break
+            else:
+                self.pxeboot_start_address = str(self.pxeboot_subnet[2])
+                self.pxeboot_end_address = str(self.pxeboot_subnet[-2])
         else:
             # Use private subnet for pxe booting
             self.pxeboot_subnet = self.private_pxeboot_subnet
+            self.pxeboot_start_address = str(self.pxeboot_subnet[2])
+            self.pxeboot_end_address = str(self.pxeboot_subnet[-2])
 
-        default_controller_pxeboot_float_ip = self.pxeboot_subnet[2]
+        default_controller_pxeboot_float_ip = self.pxeboot_start_address
+
         ip_input = IPAddress(default_controller_pxeboot_float_ip)
         if not self.is_valid_pxeboot_address(ip_input):
             raise ConfigFail("Unable to create controller PXEBoot "
@@ -2948,20 +3023,25 @@ class ConfigAssistant():
         if not self.separate_pxeboot_network:
             print("Separate PXEBoot network not configured")
         else:
-            print("PXEBoot subnet: " + str(self.pxeboot_subnet.cidr))
-            print("PXEBoot floating address: " +
-                  str(self.controller_pxeboot_floating_address))
-            print("Controller 0 PXEBoot address: " +
-                  str(self.controller_pxeboot_address_0))
-            print("Controller 1 PXEBoot address: " +
-                  str(self.controller_pxeboot_address_1))
-        print("PXEBoot Controller floating hostname: " +
-              str(self.pxecontroller_floating_hostname))
+            print ("PXEBoot subnet: " + str(self.pxeboot_subnet.cidr))
+            print ("PXEBoot floating address: " +
+                   str(self.controller_pxeboot_floating_address))
+            print ("Controller 0 PXEBoot address: " +
+                   str(self.controller_pxeboot_address_0))
+            print ("Controller 1 PXEBoot address: " +
+                   str(self.controller_pxeboot_address_1))
+            if not self.use_entire_pxeboot_subnet:
+                print "PXEBoot start address: " + \
+                      str(self.pxeboot_start_address)
+                print "PXEBoot end address: " + \
+                      str(self.pxeboot_end_address)
+        print ("PXEBoot Controller floating hostname: " +
+               str(self.pxecontroller_floating_hostname))
 
-        print("\nManagement Network Configuration")
-        print("--------------------------------")
-        print("Management interface name: " + self.management_interface_name)
-        print("Management interface: " + self.management_interface)
+        print ("\nManagement Network Configuration")
+        print ("--------------------------------")
+        print ("Management interface name: " + self.management_interface_name)
+        print ("Management interface: " + self.management_interface)
         if self.management_vlan:
             print("Management vlan: " + self.management_vlan)
         print("Management interface MTU: " + self.management_mtu)
@@ -4103,8 +4183,8 @@ class ConfigAssistant():
             'name': 'pxeboot',
             'network': str(self.pxeboot_subnet.network),
             'prefix': self.pxeboot_subnet.prefixlen,
-            'ranges': [(str(self.pxeboot_subnet[2]),
-                        str(self.pxeboot_subnet[-2]))],
+            'ranges': [(self.pxeboot_start_address,
+                       self.pxeboot_end_address)],
         }
         pool = client.sysinv.address_pool.create(**values)
 
