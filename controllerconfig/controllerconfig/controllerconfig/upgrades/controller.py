@@ -44,7 +44,7 @@ from controllerconfig.common import log
 from controllerconfig import utils as cutils
 from controllerconfig import backup_restore
 
-import utils
+from . import utils
 
 LOG = log.get_logger(__name__)
 

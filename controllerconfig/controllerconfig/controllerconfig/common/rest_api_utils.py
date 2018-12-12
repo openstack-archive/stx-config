@@ -8,10 +8,10 @@ import httplib
 import json
 import urllib2
 
-from exceptions import KeystoneFail
-import dcmanager
-import keystone
-import log
+from .exceptions import KeystoneFail
+from . import dcmanager
+from . import keystone
+from . import log
 
 LOG = log.get_logger(__name__)
 

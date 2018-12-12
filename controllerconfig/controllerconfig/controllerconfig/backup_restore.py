@@ -26,14 +26,14 @@ from fm_api import constants as fm_constants
 from fm_api import fm_api
 from sysinv.common import constants as sysinv_constants
 
-from common import log
-from common import constants
-from common.exceptions import BackupFail, RestoreFail
-from common.exceptions import KeystoneFail, SysInvFail
-import openstack
+from .common import log
+from .common import constants
+from .common.exceptions import BackupFail, RestoreFail
+from .common.exceptions import KeystoneFail, SysInvFail
+from . import openstack
 import tsconfig.tsconfig as tsconfig
-import utils
-import sysinv_api as sysinv
+from . import utils
+from . import sysinv_api as sysinv
 from six.moves import input
 
 LOG = log.get_logger(__name__)
