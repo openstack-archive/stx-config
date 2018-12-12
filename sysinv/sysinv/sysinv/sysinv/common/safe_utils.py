@@ -20,6 +20,7 @@
 """Utilities and helper functions that won't produce circular imports."""
 
 import inspect
+import six
 
 
 def getcallargs(function, *args, **kwargs):
@@ -38,8 +39,14 @@ def getcallargs(function, *args, **kwargs):
     if 'self' in argnames[0] or 'cls' == argnames[0]:
         # The function may not actually be a method or have im_self.
         # Typically seen when it's stubbed with mox.
-        if inspect.ismethod(function) and hasattr(function, 'im_self'):
-            keyed_args[argnames[0]] = function.im_self
+        if six.PY2:
+            method_self = 'im_self'
+            func_self = function.im_self
+        else:
+            method_self = '__self__'
+            func_self = function.__self__
+        if inspect.ismethod(function) and hasattr(function, method_self):
+            keyed_args[argnames[0]] = func_self
         else:
             keyed_args[argnames[0]] = None
 
