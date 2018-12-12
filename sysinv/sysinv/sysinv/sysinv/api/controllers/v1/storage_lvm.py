@@ -48,7 +48,7 @@ from sysinv.openstack.common import log
 from sysinv.openstack.common import uuidutils
 from sysinv.openstack.common.gettextutils import _
 
-import controller_fs as controller_fs_api
+from . import controller_fs as controller_fs_api
 
 LOG = log.getLogger(__name__)
 

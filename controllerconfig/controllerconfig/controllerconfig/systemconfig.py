@@ -12,17 +12,17 @@ import readline
 import sys
 import textwrap
 
-from common import constants
-from common import log
-from common.exceptions import (BackupFail, RestoreFail, UserQuit, CloneFail)
+from .common import constants
+from .common import log
+from .common.exceptions import (BackupFail, RestoreFail, UserQuit, CloneFail)
 from configutilities import lag_mode_to_str, Network, validate
 from configutilities import ConfigFail
 from configutilities import DEFAULT_CONFIG, REGION_CONFIG, SUBCLOUD_CONFIG
 from configutilities import MGMT_TYPE, HP_NAMES, DEFAULT_NAMES
-from configassistant import ConfigAssistant
-import backup_restore
-import utils
-import clone
+from .configassistant import ConfigAssistant
+from . import backup_restore
+from . import utils
+from . import clone
 
 # Temporary file for building cgcs_config
 TEMP_CGCS_CONFIG_FILE = "/tmp/cgcs_config"

@@ -12,10 +12,10 @@ import os
 import time
 import subprocess
 
-from common import log
-from common.exceptions import SysInvFail
-from common.rest_api_utils import get_token
-import sysinv_api as sysinv
+from .common import log
+from .common.exceptions import SysInvFail
+from .common.rest_api_utils import get_token
+from . import sysinv_api as sysinv
 
 
 LOG = log.get_logger(__name__)

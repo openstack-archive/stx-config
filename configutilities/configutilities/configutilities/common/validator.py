@@ -4,15 +4,15 @@ Copyright (c) 2015-2017 Wind River Systems, Inc.
 SPDX-License-Identifier: Apache-2.0
 
 """
-from configobjects import DEFAULT_NAMES, NETWORK_PREFIX_NAMES, OAM_TYPE, \
+from .configobjects import DEFAULT_NAMES, NETWORK_PREFIX_NAMES, OAM_TYPE, \
     MGMT_TYPE, Network, REGION_CONFIG, INFRA_TYPE, \
     DEFAULT_DOMAIN_NAME, HP_NAMES, SUBCLOUD_CONFIG
 from netaddr import IPRange
-from utils import lag_mode_to_str, validate_network_str, \
+from .utils import lag_mode_to_str, validate_network_str, \
     check_network_overlap, is_mtu_valid, get_service, \
     get_optional, validate_address_str
 
-from exceptions import ConfigFail, ValidateFail
+from .exceptions import ConfigFail, ValidateFail
 
 
 # Constants

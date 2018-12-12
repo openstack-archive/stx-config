@@ -9,9 +9,9 @@ from __future__ import print_function
 import sys
 import os
 from six.moves import configparser
-from common.validator import validate
-from common.configobjects import DEFAULT_CONFIG, REGION_CONFIG
-from common.exceptions import ConfigFail, ValidateFail
+from .common.validator import validate
+from .common.configobjects import DEFAULT_CONFIG, REGION_CONFIG
+from .common.exceptions import ConfigFail, ValidateFail
 
 
 def parse_config(config_file):

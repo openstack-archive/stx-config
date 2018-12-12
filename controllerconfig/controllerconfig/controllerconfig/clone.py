@@ -20,14 +20,14 @@ import tempfile
 import fileinput
 import subprocess
 
-from common import constants
+from .common import constants
 from sysinv.common import constants as si_const
-import sysinv_api
+from . import sysinv_api
 import tsconfig.tsconfig as tsconfig
-from common import log
-from common.exceptions import CloneFail, BackupFail
-import utils
-import backup_restore
+from .common import log
+from .common.exceptions import CloneFail, BackupFail
+from . import utils
+from . import backup_restore
 
 DEBUG = False
 LOG = log.get_logger(__name__)

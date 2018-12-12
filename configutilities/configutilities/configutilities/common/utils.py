@@ -12,7 +12,7 @@ from netaddr import (IPNetwork,
                      IPAddress,
                      AddrFormatError)
 
-from exceptions import ValidateFail
+from .exceptions import ValidateFail
 
 EXPECTED_SERVICE_NAME_AND_TYPE = (
     {"KEYSTONE_SERVICE_NAME": "keystone",

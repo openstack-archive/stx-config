@@ -32,15 +32,15 @@ from netaddr import (IPNetwork,
 from sysinv.common import constants as sysinv_constants
 from tsconfig.tsconfig import SW_VERSION
 
-import openstack
-import sysinv_api as sysinv
-import utils
-import progress
+from . import openstack
+from . import sysinv_api as sysinv
+from . import utils
+from . import progress
 
-from common import constants
-from common import log
-from common.exceptions import KeystoneFail, SysInvFail
-from common.exceptions import UserQuit
+from .common import constants
+from .common import log
+from .common.exceptions import KeystoneFail, SysInvFail
+from .common.exceptions import UserQuit
 from six.moves import input
 
 LOG = log.get_logger(__name__)
