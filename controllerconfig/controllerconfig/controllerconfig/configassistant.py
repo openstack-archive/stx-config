@@ -21,7 +21,7 @@ import time
 
 import pyudev
 from configutilities import ConfigFail, ValidateFail
-from configutilities import is_valid_vlan, is_mtu_valid, is_speed_valid, \
+from configutilities import is_valid_vlan, is_mtu_valid, \
     validate_network_str, validate_address_str, validate_address, \
     ip_version_to_string, validate_openstack_password
 from configutilities import DEFAULT_DOMAIN_NAME
@@ -961,23 +961,6 @@ class ConfigAssistant():
                 continue
 
         while True:
-            user_input = input(
-                "Management interface link capacity Mbps [" +
-                str(self.management_link_capacity) + "]: ")
-            if user_input.lower() == 'q':
-                raise UserQuit
-            elif user_input == '':
-                break
-            elif is_speed_valid(user_input,
-                                valid_speeds=constants.VALID_LINK_SPEED_MGMT):
-                self.management_link_capacity = user_input
-                break
-            else:
-                print("Invalid choice, select from: %s"
-                      % (', '.join(map(str, constants.VALID_LINK_SPEED_MGMT))))
-                continue
-
-        while True:
             if not self.lag_management_interface:
                 break
 
@@ -1565,23 +1548,6 @@ class ConfigAssistant():
                 break
             else:
                 print("MTU is invalid/unsupported")
-                continue
-
-        while True:
-            user_input = input(
-                "Infrastructure interface link capacity Mbps [" +
-                str(self.infrastructure_link_capacity) + "]: ")
-            if user_input.lower() == 'q':
-                raise UserQuit
-            elif user_input == '':
-                break
-            elif is_speed_valid(user_input,
-                                valid_speeds=constants.VALID_LINK_SPEED_INFRA):
-                self.infrastructure_link_capacity = user_input
-                break
-            else:
-                print("Invalid choice, select from: %s" %
-                      (', '.join(map(str, constants.VALID_LINK_SPEED_INFRA))))
                 continue
 
         while True:
@@ -2478,12 +2444,6 @@ class ConfigAssistant():
                     'cMGMT', 'MANAGEMENT_INTERFACE')
                 self.management_mtu = config.get(
                     'cMGMT', 'MANAGEMENT_MTU')
-                cvalue = config.get('cMGMT', 'MANAGEMENT_LINK_CAPACITY')
-                if cvalue is not None and cvalue != 'NC':
-                    try:
-                        self.management_link_capacity = int(cvalue)
-                    except (ValueError, TypeError):
-                        pass
                 self.management_subnet = IPNetwork(config.get(
                     'cMGMT', 'MANAGEMENT_SUBNET'))
                 if config.has_option('cMGMT', 'MANAGEMENT_GATEWAY_ADDRESS'):
@@ -2565,12 +2525,6 @@ class ConfigAssistant():
             if self.infrastructure_interface:
                 self.infrastructure_mtu = config.get(
                     'cINFRA', 'INFRASTRUCTURE_MTU')
-                cvalue = config.get('cINFRA', 'INFRASTRUCTURE_LINK_CAPACITY')
-                if cvalue is not None and cvalue != 'NC':
-                    try:
-                        self.infrastructure_link_capacity = int(cvalue)
-                    except (ValueError, TypeError):
-                        pass
                 self.infrastructure_vlan = ''
                 if config.has_option('cINFRA',
                                      'INFRASTRUCTURE_INTERFACE_NAME'):
@@ -2965,8 +2919,6 @@ class ConfigAssistant():
         if self.management_vlan:
             print("Management vlan: " + self.management_vlan)
         print("Management interface MTU: " + self.management_mtu)
-        print("Management interface link capacity Mbps: " +
-              str(self.management_link_capacity))
         if self.lag_management_interface:
             print("Management ae member 0: " +
                   self.lag_management_interface_member0)
@@ -3013,8 +2965,6 @@ class ConfigAssistant():
             if self.infrastructure_vlan:
                 print("Infrastructure vlan: " + self.infrastructure_vlan)
             print("Infrastructure interface MTU: " + self.infrastructure_mtu)
-            print("Infrastructure interface link capacity Mbps: " +
-                  str(self.infrastructure_link_capacity))
             if self.lag_infrastructure_interface:
                 print("Infrastructure ae member 0: " +
                       self.lag_infrastructure_interface_member0)
@@ -3517,18 +3467,6 @@ class ConfigAssistant():
             LOG.error("Failed to create pxelinux.cfg/default or "
                       "grub.cfg symlink")
             raise ConfigFail("Failed to persist config files")
-
-    def verify_link_capacity_config(self):
-        """ Verify the configuration of the management link capacity"""
-        if not self.infrastructure_interface_configured and \
-                int(self.management_link_capacity) < \
-                sysinv_constants.LINK_SPEED_10G:
-            print('')
-            print(textwrap.fill(
-                  "Warning: The infrastructure network was not configured, "
-                  "and the management interface link capacity is less than "
-                  "10000 Mbps. This is not a supported configuration and "
-                  "will result in unacceptable DRBD sync times.", 80))
 
     def verify_branding(self):
         """ Verify the constraints for custom branding procedure """
@@ -4648,9 +4586,6 @@ class ConfigAssistant():
 
         if display_config:
             self.display_config()
-
-        # Verify the management link capacity
-        self.verify_link_capacity_config()
 
         # Validate Openstack passwords loaded in via config
         if configfile:
