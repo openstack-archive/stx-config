@@ -56,6 +56,10 @@ class PuppetOperator(object):
         thread_context = eventlet.greenthread.getcurrent()
         return getattr(thread_context, '_puppet_context')
 
+    @property
+    def config(self):
+        return self.context.get('config', {})
+
     @puppet_context
     def create_static_config(self):
         """
@@ -136,7 +140,7 @@ class PuppetOperator(object):
         """Update the host hiera configuration files for the supplied host"""
 
         self.config_uuid = config_uuid
-        config = {}
+        self.context['config'] = config = {}
         for puppet_plugin in self.puppet_plugins:
             config.update(puppet_plugin.obj.get_host_config(host))
 
