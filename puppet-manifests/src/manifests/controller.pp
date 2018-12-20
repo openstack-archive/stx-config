@@ -133,6 +133,9 @@ include ::platform::dcmanager::api
 
 include ::platform::dcorch::snmp
 
+include ::platform::dbsync
+include ::platform::dbsync::api
+
 include ::platform::smapi
 
 include ::openstack::swift
