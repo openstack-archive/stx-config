@@ -22,6 +22,7 @@ Requires: puppet-sysinv
 Requires: puppet-sshd
 Requires: puppet-smapi
 Requires: puppet-fm
+Requires: puppet-dbsync
 
 # Openstack puppet modules
 Requires: puppet-aodh
