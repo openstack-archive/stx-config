@@ -198,3 +198,25 @@
     vars:
       tox_envlist: pylint
       tox_extra_args: -c sysinv/cgts-client/cgts-client/tox.ini
+
+- job:
+    name: puppet-manifests-lint
+    parent: tox
+    description: |
+      Run puppetlint test for puppet-manifests
+    files:
+      - puppet-manifests/*
+    vars:
+      tox_envlist: puppetlint
+      tox_extra_args: -c puppet-manifests/tox.ini
+
+- job:
+    name: puppet-modules-lint
+    parent: tox
+    description: |
+      Run puppetlint test for puppet-modules
+    files:
+      - puppet-modules/*
+    vars:
+      tox_envlist: puppetlint
+      tox_extra_args: -c puppet-modules/tox.ini
