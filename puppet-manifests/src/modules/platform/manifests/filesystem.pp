@@ -239,7 +239,7 @@ class platform::filesystem::compute {
 
   if $::platform::kubernetes::params::enabled {
     class {'platform::filesystem::docker::params' :
-      fs_use_all => true
+      lv_size => 16
     }
     -> class {'platform::filesystem::docker' :
     }
