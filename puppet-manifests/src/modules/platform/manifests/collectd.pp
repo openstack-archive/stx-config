@@ -31,6 +31,7 @@ class platform::collectd
 
   # ensure that collectd is running
   -> service { 'collectd':
+    require  => Anchor['platform::networking'],
     ensure   => running,
     enable   => true,
     provider => 'systemd'
@@ -54,7 +55,20 @@ class platform::collectd::runtime {
 class platform::collectd::restart {
   include ::platform::collectd
   exec { 'collectd-restart':
-      command => '/usr/local/sbin/pmon-restart collect'
+      command => '/usr/local/sbin/pmon-restart collectd'
   }
 }
 
+# enable and start target
+class platform::collectd::start {
+  include ::platform::collectd
+
+  exec { 'collectd-enable':
+      command => 'systemctl enable collectd',
+      unless => 'systemctl is-enabled collectd'
+  }
+  -> exec { 'collectd-start':
+      command => 'systemctl start collectd',
+      unless => 'systemctl is-active collectd'
+  }
+}
