@@ -61,11 +61,27 @@ class platform::influxdb
   }
 }
 
-
 class platform::influxdb::runtime {
   include ::platform::influxdb
 }
 
+# enable and start target
+class platform::influxdb::start {
+  exec { "influxdb-enable":
+      command => 'systemctl enable influxdb'
+  }
+  exec { "influxdb-start":
+      command => 'systemctl start influxdb'
+  }
+}
+
+class platform::influxdb::startup {
+  include ::platform::influxdb
+
+  class {'::platform::influxdb::start':
+    stage => post,
+  }
+}
 
 class platform::influxdb::logrotate::params (
   $log_file_name = undef,

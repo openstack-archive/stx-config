@@ -53,8 +53,25 @@ class platform::collectd::runtime {
 # restart target
 class platform::collectd::restart {
   include ::platform::collectd
-  exec { 'collectd-restart':
-      command => '/usr/local/sbin/pmon-restart collect'
+  exec { "collectd-restart":
+      command => '/usr/local/sbin/pmon-restart collectd'
   }
 }
 
+# enable and start target
+class platform::collectd::start {
+  exec { "collectd-enable":
+      command => 'systemctl enable collectd'
+  }
+  exec { "collectd-start":
+      command => 'systemctl start collectd'
+  }
+}
+
+class platform::collectd::startup {
+  include ::platform::collectd
+
+  class {'::platform::collectd::start':
+    stage => post,
+  }
+}

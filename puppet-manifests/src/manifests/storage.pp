@@ -25,7 +25,7 @@ include ::platform::remotelogging
 include ::platform::mtce
 include ::platform::sysinv
 include ::platform::grub
-include ::platform::collectd
+include ::platform::collectd::startup
 include ::platform::filesystem::storage
 include ::platform::docker
 

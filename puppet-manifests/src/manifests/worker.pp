@@ -29,7 +29,7 @@ include ::platform::sysinv
 include ::platform::ceph
 include ::platform::devices
 include ::platform::grub
-include ::platform::collectd
+include ::platform::collectd::startup
 include ::platform::filesystem::compute
 include ::platform::docker
 include ::platform::dockerdistribution::compute

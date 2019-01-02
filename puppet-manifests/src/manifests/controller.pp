@@ -60,9 +60,9 @@ include ::platform::ceph::monitor
 include ::platform::ceph::storage
 include ::platform::ceph::rgw
 
-include ::platform::influxdb
+include ::platform::influxdb::startup
 include ::platform::influxdb::logrotate
-include ::platform::collectd
+include ::platform::collectd::startup
 
 include ::platform::fm
 include ::platform::fm::api
