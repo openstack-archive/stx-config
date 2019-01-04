@@ -22,9 +22,6 @@ class IngressHelm(base.BaseHelm):
         common.HELM_NS_OPENSTACK
     ]
 
-    def get_namespaces(self):
-        return self.SUPPORTED_NAMESPACES
-
     def get_overrides(self, namespace=None):
         # Currently have conflicts with ports 80 and 8080, use 8081 for now
         overrides = {

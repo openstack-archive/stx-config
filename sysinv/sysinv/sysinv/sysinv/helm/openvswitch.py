@@ -21,9 +21,6 @@ class OpenvswitchHelm(openstack.OpenstackBaseHelm):
         common.HELM_NS_OPENSTACK
     ]
 
-    def get_namespaces(self):
-        return self.SUPPORTED_NAMESPACES
-
     def get_overrides(self, namespace=None):
         overrides = {
             common.HELM_NS_OPENSTACK: {

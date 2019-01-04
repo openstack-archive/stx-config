@@ -23,13 +23,6 @@ class HorizonHelm(openstack.OpenstackBaseHelm):
 
     SERVICE_NAME = 'horizon'
 
-    @property
-    def docker_repo_source(self):
-        return common.DOCKER_SRC_LOC
-
-    def get_namespaces(self):
-        return self.SUPPORTED_NAMESPACES
-
     def get_overrides(self, namespace=None):
         overrides = {
             common.HELM_NS_OPENSTACK: {

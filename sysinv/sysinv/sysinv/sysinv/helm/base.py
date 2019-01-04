@@ -40,8 +40,12 @@ class BaseHelm(object):
         return self._operator.context
 
     @property
+    def get_namespaces(self):
+        return self.SUPPORTED_NAMESPACES
+
+    @property
     def docker_repo_source(self):
-        return self._operator.docker_repo_source
+        return common.DOCKER_SRC_LOC
 
     @property
     def docker_repo_tag(self):
