@@ -220,6 +220,7 @@ class platform::filesystem::img_conversions
 class platform::filesystem::storage {
 
   include ::platform::kubernetes::params
+  include ::platform::ceph::params
 
   if $::platform::kubernetes::params::enabled {
     class {'platform::filesystem::docker::params' :
@@ -236,6 +237,7 @@ class platform::filesystem::storage {
 class platform::filesystem::compute {
 
   include ::platform::kubernetes::params
+  include ::platform::ceph::params
 
   if $::platform::kubernetes::params::enabled {
     class {'platform::filesystem::docker::params' :
