@@ -111,6 +111,9 @@ def do_ceph_mon_add(cc, args):
 
     if ceph_mon and len(ceph_mon.ceph_mon):
         suuid = ceph_mon.ceph_mon[0].get('uuid', '')
+    else:
+        raise exc.CommandError(
+            "Created ceph_mon has invalid data.")
     try:
         ceph_mon = cc.ceph_mon.get(suuid)
     except exc.HTTPNotFound:
