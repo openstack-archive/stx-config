@@ -37,6 +37,7 @@ class platform::ceph::params(
   $rgw_gc_processor_period = '300',
   $restapi_public_addr = undef,
   $configure_ceph_mon_info = false,
+  $ceph_config_file = '/etc/ceph/ceph.conf',
   $ceph_config_ready_path = '/var/run/.ceph_started',
   $node_ceph_configured_flag = '/etc/platform/.node_ceph_configured',
 ) { }
@@ -58,7 +59,7 @@ class platform::ceph
         $mon_initial_members = $floating_mon_host
       }
     } else {
-      # Multinode, any 2 monitors form a cluster
+      # Multinode & standard, any 2 monitors form a cluster
       $mon_initial_members = undef
     }
 
@@ -89,15 +90,48 @@ class platform::ceph
         }
       }
     } else {
-      # Multinode has 3 monitors.
+      # Multinode & standard have 3 monitors
       Class['::ceph']
       -> ceph_config {
         "mon.${mon_0_host}/host":      value => $mon_0_host;
         "mon.${mon_0_host}/mon_addr":  value => $mon_0_addr;
         "mon.${mon_1_host}/host":      value => $mon_1_host;
         "mon.${mon_1_host}/mon_addr":  value => $mon_1_addr;
-        "mon.${mon_2_host}/host":      value => $mon_2_host;
-        "mon.${mon_2_host}/mon_addr":  value => $mon_2_addr;
+      }
+      if $mon_2_host {
+        Class['::ceph']
+        -> ceph_config {
+          "mon.${mon_2_host}/host":      value => $mon_2_host;
+          "mon.${mon_2_host}/mon_addr":  value => $mon_2_addr;
+        }
+      }
+    }
+
+    # Remove old, no longer in use, monitor hosts from Ceph's config file
+    $valid_monitors = [ $mon_0_host, $mon_1_host, $mon_2_host ]
+
+    $::get_ceph_monitors.each |Integer $index, String $monitor| {
+      if ! ($monitor in $valid_monitors) {
+        notice("Removing ${monitor} from ${ceph_config_file}")
+
+        # Remove all monitor settings of a section
+        $mon_settings = {
+          "mon.${monitor}" => {
+            'public_addr' => { 'ensure' => 'absent' },
+            'host'        =>  { 'ensure' => 'absent' },
+            'mon_addr'    => { 'ensure' => 'absent' },
+          }
+        }
+        $defaults = { 'path' => $ceph_config_file }
+        create_ini_settings($mon_settings, $defaults)
+
+        # Remove section header
+        Ini_setting<| |>
+        -> file_line { "[mon.${monitor}]":
+          ensure => absent,
+          path   => $ceph_config_file,
+          line   => "[mon.${monitor}]"
+        }
       }
     }
   }
@@ -130,8 +164,10 @@ class platform::ceph::post
 class platform::ceph::monitor
   inherits ::platform::ceph::params {
 
+  include ::platform::kubernetes::params
   $system_mode = $::platform::params::system_mode
   $system_type = $::platform::params::system_type
+  $k8s_enabled = $::platform::kubernetes::params::enabled
 
   if $service_enabled {
     if $system_type == 'All-in-one' and 'duplex' in $system_mode {
@@ -145,11 +181,27 @@ class platform::ceph::monitor
       }
     } else {
       # Simplex, multinode. Ceph is pmon managed.
-      $configure_ceph_mon = true
+      if $::hostname == $mon_0_host or $::hostname == $mon_1_host or $::hostname == $mon_2_host {
+        $configure_ceph_mon = true
+      } else {
+        $configure_ceph_mon = false
+      }
     }
-  }
-  else {
+  } else {
     $configure_ceph_mon = false
+  }
+
+  if $::personality == 'worker' and ! $configure_ceph_mon and $k8s_enabled {
+    # Reserve space for ceph-mon on all worker nodes.
+    # Logical volume for docker (docker-lv) uses all free space in cgts-vg.
+    # So, without this reservation, adding ceph-mon would be possible only
+    # before first unlock as there will not be any space left later on.
+    include ::platform::filesystem::params
+    logical_volume { $mon_lv_name:
+      ensure       => present,
+      volume_group => $::platform::filesystem::params::vg_name,
+      size         => '20G',
+    } -> Class['platform::filesystem::docker']
   }
 
   if $configure_ceph_mon {
@@ -173,6 +225,10 @@ class platform::ceph::monitor
         fs_options => $mon_fs_options,
       } -> Class['::ceph']
 
+      if $k8s_enabled and $::personality == 'worker' {
+        Platform::Filesystem[$mon_lv_name] -> Class['platform::filesystem::docker']
+      }
+
       file { '/etc/pmon.d/ceph.conf':
         ensure => link,
         target => '/etc/ceph/ceph.conf.pmon',
@@ -185,19 +241,11 @@ class platform::ceph::monitor
     # ensure configuration is complete before creating monitors
     Class['::ceph'] -> Ceph::Mon <| |>
 
-    # Start service on AIO SX and on active controller
-    # to allow in-service configuration.
-    if str2bool($::is_controller_active) or $system_type == 'All-in-one' {
-      $service_ensure = 'running'
-    } else {
-      $service_ensure = 'stopped'
-    }
-
     # default configuration for all ceph monitor resources
     Ceph::Mon {
       fsid => $cluster_uuid,
       authentication_type => $authentication_type,
-      service_ensure => $service_ensure,
+      service_ensure => 'running'
     }
 
     if $system_type == 'All-in-one' and 'duplex' in $system_mode {
@@ -452,8 +500,4 @@ class platform::ceph::runtime {
       command => '/etc/init.d/ceph-rest-api start'
     }
   }
-}
-
-class platform::ceph::compute::runtime {
-  include ::platform::ceph
 }
