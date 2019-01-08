@@ -142,7 +142,7 @@ class StorageBackendConfig(object):
     @staticmethod
     def has_backend_configured(dbapi, target, service=None,
                                check_only_defaults=True, rpcapi=None):
-        """ Check is a backend is configured. """
+        """ Check if a backend is configured. """
         # If cinder is a shared service on another region and
         # we want to know if the ceph backend is configured,
         # send a rpc to conductor which sends a query to the primary
@@ -220,7 +220,7 @@ class StorageBackendConfig(object):
             '%s-%s' % (constants.CONTROLLER_1_HOSTNAME,
                        network_type): 'ceph-mon-1-ip',
         }
-        
+
         ceph_mons = dbapi.ceph_mon_get_list()
         for ceph_mon in ceph_mons:
             if ceph_mon['hostname'] == constants.CONTROLLER_0_HOSTNAME:
@@ -232,11 +232,11 @@ class StorageBackendConfig(object):
             else:
                 targets.update({'%s-%s' % (ceph_mon['hostname'],
                                            network_type): 'ceph-mon-2-ip'})
-                
+
         ceph_mon['ceph_mon_gib'] = ceph_mons[0]['ceph_mon_gib']
 
         LOG.info(">>> targets: %s" % targets)
-        
+
         results = {}
         addrs = dbapi.addresses_get_all()
         for addr in addrs:
