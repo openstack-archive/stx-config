@@ -7,6 +7,7 @@
 import keyring
 import subprocess
 
+from Crypto.PublicKey import RSA
 from sysinv.helm import base
 from sysinv.helm import common
 
@@ -227,3 +228,42 @@ class OpenstackBaseHelm(base.BaseHelm):
                 service, user, pw_format=common.PASSWORD_FORMAT_CEPH)
 
         return passwords[service][user]
+
+    def _get_or_generate_ssh_keys(self, chart, namespace):
+        try:
+            override = self.dbapi.helm_override_get(name=chart,
+                                                    namespace=namespace)
+        except exception.HelmOverrideNotFound:
+            # Override for this chart not found, so create one
+            try:
+                values = {
+                    'name': chart,
+                    'namespace': namespace,
+                }
+                override = self.dbapi.helm_override_create(values=values)
+            except Exception as e:
+                LOG.exception(e)
+                return 'null', 'null'
+
+        privatekey = override.system_overrides.get('privatekey', None)
+        publickey = override.system_overrides.get('publickey', None)
+
+        if privatekey and publickey:
+            return str(privatekey), str(publickey)
+
+        # ssh keys are not set so generate them and store in overrides
+        key = RSA.generate(2048)
+        pubkey = key.publickey()
+        newprivatekey = key.exportKey('PEM')
+        newpublickey = pubkey.exportKey('OpenSSH')
+        values = {'system_overrides': override.system_overrides}
+        values['system_overrides'].update({'privatekey': newprivatekey,
+                                           'publickey': newpublickey})
+        try:
+            self.dbapi.helm_override_update(
+                name=chart, namespace=namespace, values=values)
+        except Exception as e:
+            LOG.exception(e)
+            return 'null', 'null'
+
+        return newprivatekey, newpublickey
