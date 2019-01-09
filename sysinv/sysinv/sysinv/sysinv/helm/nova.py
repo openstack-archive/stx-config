@@ -7,6 +7,7 @@
 import copy
 import os
 
+from Crypto.PublicKey import RSA
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.common import utils
@@ -52,6 +53,8 @@ class NovaHelm(openstack.OpenstackBaseHelm):
     def get_overrides(self, namespace=None):
         scheduler_filters = SCHEDULER_FILTERS_COMMON
 
+        key = RSA.generate(2048)
+        pubkey = key.publickey()
         overrides = {
             common.HELM_NS_OPENSTACK: {
                 'pod': {
@@ -156,10 +159,18 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                         'nova_compute': {
                             'hosts': self._get_per_host_overrides()
                         }
-                    }
+                    },
+                    'ssh_private': key.exportKey('PEM'),
+                    'ssh_public': pubkey.exportKey('OpenSSH'),
                 },
                 'endpoints': self._get_endpoints_overrides(),
                 'images': self._get_images_overrides(),
+                'network': {
+                    'sshd': {
+                        'enabled': True,
+                        'from_subnet': self._get_ssh_subnet(),
+                    }
+                }
             }
         }
 
@@ -356,6 +367,12 @@ class NovaHelm(openstack.OpenstackBaseHelm):
 
         libvirt_config.update({'live_migration_inbound_addr': cluster_host_ip})
         vnc_config.update({'vncserver_proxyclient_address': cluster_host_ip})
+
+    def _get_ssh_subnet(self):
+        cluster_host_network = self.dbapi.network_get_by_type(
+            constants.NETWORK_TYPE_CLUSTER_HOST)
+        address_pool = self.dbapi.address_pool_get(cluster_host_network.pool_uuid)
+        return '%s/%s' % (str(address_pool.network), str(address_pool.prefix))
 
     def _update_host_memory(self, host, default_config):
         vswitch_2M_pages = []
