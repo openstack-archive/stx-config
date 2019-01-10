@@ -241,8 +241,8 @@ def is_host_simplex_controller(host):
            os.path.isfile(tsc.PLATFORM_SIMPLEX_FLAG)
 
 
-def is_aio_simplex_host_unlocked(host):
-    return (get_system_mode() == constants.SYSTEM_MODE_SIMPLEX and
+def is_aio_simplex_host_unlocked(host, dbapi=None):
+    return (get_system_mode(dbapi) == constants.SYSTEM_MODE_SIMPLEX and
             host['administrative'] != constants.ADMIN_LOCKED and
             host['invprovision'] != constants.PROVISIONING)
 
