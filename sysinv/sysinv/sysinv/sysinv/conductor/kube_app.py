@@ -27,6 +27,7 @@ from eventlet import queue
 from eventlet import Timeout
 from oslo_config import cfg
 from oslo_log import log as logging
+from sysinv.api.controllers.v1 import utils
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.common import kubernetes
@@ -536,6 +537,8 @@ class AppOperator(object):
 
     def _assign_host_labels(self, hosts, labels):
         for host in hosts:
+            if host.administrative != constants.ADMIN_LOCKED:
+                continue
             for label_str in labels:
                 k, v = label_str.split('=')
                 try:
@@ -557,6 +560,8 @@ class AppOperator(object):
 
     def _remove_host_labels(self, hosts, labels):
         for host in hosts:
+            if host.administrative != constants.ADMIN_LOCKED:
+                continue
             null_labels = {}
             for label_str in labels:
                 lbl_obj = self._find_label(host.uuid, label_str)
