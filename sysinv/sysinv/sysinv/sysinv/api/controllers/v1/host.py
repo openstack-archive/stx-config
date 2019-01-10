@@ -1951,6 +1951,15 @@ class HostController(rest.RestController):
                                              'bm_username': None,
                                              'bm_password': None})
 
+        # Trigger a system app reapply if the host is transitioning to
+        # Available after a host unlock
+        if (utils.is_kubernetes_config() and
+            'availability' in hostupdate.delta and
+            hostupdate.ihost_orig['availability'] == constants.AVAILABILITY_INTEST and
+            hostupdate.ihost_patch['availability'] in
+                [constants.AVAILABILITY_AVAILABLE, constants.AVAILABILITY_DEGRADED]):
+            self._reapply_system_app()
+
         if hostupdate.ihost_val_prenotify:
             # update value in db  prior to notifications
             LOG.info("update ihost_val_prenotify: %s" %
@@ -2262,6 +2271,14 @@ class HostController(rest.RestController):
             raise wsme.exc.ClientSideError(_(
                 "host-delete rejected: not allowed at this upgrade stage"))
 
+        openstack_worker = False
+        if utils.is_kubernetes_config():
+            labels = objects.label.get_by_host_id(pecan.request.context, ihost.uuid)
+            for l in labels:
+                if (constants.COMPUTE_NODE_LABEL ==
+                        str(l.label_key) + '=' + str(l.label_value)):
+                    openstack_worker = True
+
         personality = ihost.personality
         # allow deletion of unprovisioned locked disabled & offline storage hosts
         skip_ceph_checks = (
@@ -2458,6 +2475,32 @@ class HostController(rest.RestController):
             self._ceph.host_crush_remove(ihost.hostname)
 
         pecan.request.dbapi.ihost_destroy(ihost_id)
+
+        # If the host being removed was an openstack worker node, trigger
+        # a reapply
+        if openstack_worker:
+            self._reapply_system_app()
+
+    def _reapply_system_app(self):
+        try:
+            db_app = objects.kube_app.get_by_name(
+                pecan.request.context, constants.HELM_APP_OPENSTACK)
+
+            if db_app.status == constants.APP_APPLY_SUCCESS:
+                LOG.info(
+                    "Reapplying the %s app" % constants.HELM_APP_OPENSTACK)
+                db_app.status = constants.APP_APPLY_IN_PROGRESS
+                db_app.progress = None
+                db_app.save()
+                pecan.request.rpcapi.perform_app_apply(
+                    pecan.request.context, db_app)
+            else:
+                LOG.info("%s system app is present but not applied, "
+                         "skipping re-apply" % constants.HELM_APP_OPENSTACK)
+        except exception.KubeAppNotFound:
+            LOG.info(
+                "%s system app not present, skipping re-apply" %
+                constants.HELM_APP_OPENSTACK)
 
     def _check_upgrade_provision_order(self, personality, hostname):
         LOG.info("_check_upgrade_provision_order personality=%s, hostname=%s" %
