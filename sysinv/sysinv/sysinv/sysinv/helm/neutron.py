@@ -16,6 +16,7 @@ from sqlalchemy.orm.exc import NoResultFound
 LOG = logging.getLogger(__name__)
 
 DATA_NETWORK_TYPES = [constants.NETWORK_TYPE_DATA]
+SRIOV_NETWORK_TYPES = [constants.NETWORK_TYPE_PCI_SRIOV]
 
 
 class NeutronHelm(openstack.OpenstackBaseHelm):
@@ -44,12 +45,13 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                     },
                     'replicas': {
                         'server': self._num_controllers()
-                    }
+                    },
                 },
                 'network': {
                     'interface': {
                         'tunnel': 'docker0'
                     },
+                    'backend': ['openvswitch', 'sriov'],
                 },
                 'conf': {
                     'neutron': self._get_neutron_config(),
@@ -82,6 +84,9 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                             'hosts': self._get_per_host_overrides()
                         },
                         'neutron_metadata-agent': {
+                            'hosts': self._get_per_host_overrides()
+                        },
+                        'neutron_sriov-agent': {
                             'hosts': self._get_per_host_overrides()
                         },
                     }
@@ -155,7 +160,8 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                         'name': hostname,
                         'conf': {
                             'plugins': {
-                                'openvswitch_agent': self._get_dynamic_ovs_agent_config(host)
+                                'openvswitch_agent': self._get_dynamic_ovs_agent_config(host),
+                                'sriov_agent': self._get_dynamic_sriov_agent_config(host),
                             }
                         }
                     }
@@ -217,6 +223,26 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
             'securitygroup': {
                 'firewall_driver': 'noop',
             },
+        }
+
+    def _get_dynamic_sriov_agent_config(self, host):
+        physical_device_mappings = ""
+        for iface in sorted(self.dbapi.iinterface_get_by_ihost(host.id),
+                            key=self._interface_sort_key):
+            if self._is_sriov_network_type(iface):
+                # obtain the assigned providernets for interface
+                providernets = self._get_interface_providernets(iface)
+                for providernet in providernets:
+                    physical_device_mappings += ('%s:%s,' % (providernet, iface.ifname))
+        sriov_nic = {
+            'physical_device_mappings': str(physical_device_mappings),
+        }
+
+        return {
+            'securitygroup': {
+                'firewall_driver': 'noop',
+            },
+            'sriov_nic': sriov_nic,
         }
 
     def _get_neutron_config(self):
@@ -283,6 +309,10 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
     def _is_data_network_type(self, iface):
         networktypelist = utils.get_network_type_list(iface)
         return bool(any(n in DATA_NETWORK_TYPES for n in networktypelist))
+
+    def _is_sriov_network_type(self, iface):
+        networktypelist = utils.get_network_type_list(iface)
+        return bool(any(n in SRIOV_NETWORK_TYPES for n in networktypelist))
 
     def _get_interface_providernets(self, iface):
         """
