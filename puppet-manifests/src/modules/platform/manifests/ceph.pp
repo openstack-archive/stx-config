@@ -488,12 +488,12 @@ class platform::ceph::runtime {
   include ::platform::ceph::monitor
   include ::platform::ceph
 
-  # Make sure ceph-rest-api is running as it is needed by sysinv config
+  # Make sure mgr-restful-plugin is running as it is needed by sysinv config
   # TODO(oponcea): Remove when sm supports in-service config reload
   if str2bool($::is_controller_active) {
     Ceph::Mon <| |>
-    -> exec { '/etc/init.d/ceph-rest-api start':
-      command => '/etc/init.d/ceph-rest-api start'
+    -> exec { '/etc/init.d/mgr-restful-plugin start':
+      command => '/etc/init.d/mgr-restful-plugin start'
     }
   }
 }
