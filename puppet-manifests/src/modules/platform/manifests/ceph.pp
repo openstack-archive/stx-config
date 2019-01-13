@@ -35,7 +35,6 @@ class platform::ceph::params(
   $rgw_gc_obj_min_wait = '600',
   $rgw_gc_processor_max_time = '300',
   $rgw_gc_processor_period = '300',
-  $restapi_public_addr = undef,
   $configure_ceph_mon_info = false,
   $ceph_config_ready_path = '/var/run/.ceph_started',
   $node_ceph_configured_flag = '/etc/platform/.node_ceph_configured',
@@ -69,7 +68,6 @@ class platform::ceph
     }
     -> ceph_config {
       'mon/mon clock drift allowed': value => '.1';
-      'client.restapi/public_addr':  value => $restapi_public_addr;
     }
     if $system_type == 'All-in-one' {
       # 1 and 2 node configurations have a single monitor
