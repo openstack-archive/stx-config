@@ -238,10 +238,18 @@ class platform::ceph::monitor
         ceph::mon { $mon_1_host:
           public_addr => $mon_1_ip,
         }
+        ceph_config {
+          "mon.${mon_1_host}/host":      value => $mon_1_host;
+          "mon.${mon_1_host}/mon_addr":  value => $mon_1_addr;
+        }
       }
       elsif $::hostname == $mon_2_host {
         ceph::mon { $mon_2_host:
           public_addr => $mon_2_ip,
+        }
+        ceph_config {
+          "mon.${mon_2_host}/host":      value => $mon_2_host;
+          "mon.${mon_2_host}/mon_addr":  value => $mon_2_addr;
         }
       }
     }
