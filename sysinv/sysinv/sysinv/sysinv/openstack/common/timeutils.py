@@ -46,12 +46,13 @@ def isotime(at=None, subsecond=False):
 
 def parse_isotime(timestr):
     """Parse time from ISO 8601 format"""
+    print('The parse_isotime %s' % timestr)
     try:
         return iso8601.parse_date(timestr)
     except iso8601.ParseError as e:
-        raise ValueError(e.message)
+        raise ValueError(str(e))
     except TypeError as e:
-        raise ValueError(e.message)
+        raise ValueError(str(e))
 
 
 def strtime(at=None, fmt=PERFECT_TIME_FORMAT):
