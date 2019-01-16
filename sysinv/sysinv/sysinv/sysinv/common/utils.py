@@ -1848,3 +1848,16 @@ def find_manifest_file(path):
                 return None
 
     return mfiles
+
+
+def has_openstack_compute(labels):
+    """Returns true if the host has the openstack compute label set """
+    if not labels:
+        return False
+
+    for label in labels:
+        if label.label_key == constants.COMPUTE_NODE_LABEL_KEY:
+            return 'enabled' == label.label_value.lower()
+
+    # We haven't found the openstack compute node key. Return False
+    return False
