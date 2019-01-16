@@ -7,7 +7,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 # coding=utf-8
 #
-
 from sysinv.common import constants
 from sysinv.db import api as db_api
 from sysinv.objects import base
@@ -81,10 +80,16 @@ def get_host_uuid(field, db_server):
 
 def get_networks(field, db_object):
     result = []
-    if hasattr(db_object, 'interface_networks'):
-        for entry in getattr(db_object, 'interface_networks', []):
-            id_str = str(entry.network_id)
-            result.append(id_str)
+    try:
+        if getattr(db_object, 'interface_networks', None):
+            for entry in getattr(db_object, 'interface_networks', []):
+                id_str = str(entry.network_id)
+                result.append(id_str)
+    except exc.DetachedInstanceError:
+        # instrument and return empty network
+        LOG.exception("DetachedInstanceError unable to get networks for %s" %
+                      db_object)
+        pass
     return result
 
 
