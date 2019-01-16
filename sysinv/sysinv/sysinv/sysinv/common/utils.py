@@ -1938,3 +1938,16 @@ def get_http_port(dbapi):
             constants.SERVICE_PARAM_SECTION_HTTP_CONFIG,
             constants.SERVICE_PARAM_HTTP_PORT_HTTP))
     return http_port
+
+
+def has_openstack_compute(labels):
+    """Returns true if the host has the openstack compute label set """
+    if not labels:
+        return False
+
+    for label in labels:
+        if label.label_key == constants.COMPUTE_NODE_LABEL_KEY:
+            return 'enabled' == label.label_value.lower()
+
+    # We haven't found the openstack compute node key. Return False
+    return False

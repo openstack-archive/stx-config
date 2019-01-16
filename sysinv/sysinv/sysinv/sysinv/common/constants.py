@@ -1580,6 +1580,7 @@ APP_TARFILE_NAME_PLACEHOLDER = 'tarfile-placeholder'
 # Default node labels
 CONTROL_PLANE_LABEL = 'openstack-control-plane=enabled'
 COMPUTE_NODE_LABEL = 'openstack-compute-node=enabled'
+COMPUTE_NODE_LABEL_KEY = 'openstack-compute-node'
 OPENVSWITCH_LABEL = 'openvswitch=enabled'
 SRIOV_LABEL = 'sriov=enabled'
 
