@@ -281,6 +281,9 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                 'policy_file': '/etc/neutron/policy.json',
                 'service_plugins': 'router',
                 'dns_domain': 'openstacklocal',
+                'enable_new_agents': False,
+                'allow_automatic_dhcp_failover': True,
+                'allow_automatic_l3agent_failover': True,
             },
             'vhost': {
                 'vhost_user_enabled': True,
