@@ -1385,6 +1385,28 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
                                        service_name=service_name,
                                        username=username))
 
+    def create_barbican_secret(self, context, name, payload):
+        """Calls Barbican API to create a secret
+
+        :param context: request context.
+        :param name: secret name
+        :param payload: secret payload
+        """
+        return self.call(context,
+                         self.make_msg('create_barbican_secret',
+                                       name=name,
+                                       payload=payload))
+
+    def delete_barbican_secret(self, context, name):
+        """Calls Barbican API to delete a secret
+
+        :param context: request context.
+        :param name: secret name
+        """
+        return self.call(context,
+                         self.make_msg('delete_barbican_secret',
+                                       name=name))
+
     def update_snmp_config(self, context):
         """Synchronously, have a conductor configure the SNMP configuration.
 
