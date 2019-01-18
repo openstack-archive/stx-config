@@ -9392,6 +9392,24 @@ class ConductorManager(service.PeriodicService):
         except keyring.errors.PasswordDeleteError:
             pass
 
+    def create_barbican_secret(self, context, name, payload):
+        """Calls Barbican API to create a secret
+
+        :param context: request context.
+        :param name: secret name
+        :param payload: secret payload
+        """
+        self._openstack.create_barbican_secret(context=context,
+                                               name=name, payload=payload)
+
+    def delete_barbican_secret(self, context, name):
+        """Calls Barbican API to delete a secret
+
+        :param context: request context.
+        :param name: secret name
+        """
+        self._openstack.delete_barbican_secret(context=context, name=name)
+
     def update_snmp_config(self, context):
         """Update the snmpd configuration"""
         personalities = [constants.CONTROLLER]
