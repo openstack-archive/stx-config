@@ -69,6 +69,8 @@ except ImportError:
     SW_VERSION = "unknown"
 
 
+CONF = cfg.CONF
+
 utils_opts = [
     cfg.StrOpt('rootwrap_config',
                default="/etc/sysinv/rootwrap.conf",
@@ -78,9 +80,21 @@ utils_opts = [
                default=None,
                help='Explicitly specify the temporary working directory'),
 ]
-
-CONF = cfg.CONF
 CONF.register_opts(utils_opts)
+
+
+datanetworks_group = cfg.OptGroup(
+    'datanetworks',
+    title='DataNetworks Options',
+    help="Configuration options for the datanetworks configuration")
+
+datanetworks_opts = [
+    cfg.StrOpt('enabled',
+               default='True',
+               help="Determines whether datanetworks are enabled."),
+]
+CONF.register_group(datanetworks_group)
+CONF.register_opts(datanetworks_opts, group=datanetworks_group)
 
 LOG = logging.getLogger(__name__)
 
@@ -422,6 +436,18 @@ def is_valid_ipv6_cidr(address):
         str(netaddr.IPNetwork(address, version=6).cidr)
         return True
     except Exception:
+        return False
+
+
+def validate_ip_multicast_address(address, valid_values=None):
+    """
+    Validates that an IP address is a multicast address.
+    """
+    try:
+        return netaddr.IPAddress(address).is_multicast()
+    except Exception:
+        msg = _("'%s' is not a valid multicast IP address") % address
+        LOG.debug(msg)
         return False
 
 
@@ -1848,3 +1874,11 @@ def find_manifest_file(path):
                 return None
 
     return mfiles
+
+
+def datanetworks_supported():
+    enabled = CONF.datanetworks.enabled
+    if enabled == 'True':
+        return True
+
+    return False

@@ -131,7 +131,7 @@
     <xs:attribute name="mode" type="Ipv6Mode" use="required" />
   </xs:complexType>
 
-  <xs:complexType name="dataNetwork">
+  <xs:complexType name="dataclassNetwork">
     <xs:sequence>
       <xs:element name="providerNetworks" type="providerNetworks" minOccurs="1" maxOccurs="unbounded">
       </xs:element>
@@ -198,7 +198,7 @@
           <xs:complexType>
             <xs:sequence>
               <xs:choice minOccurs="1" maxOccurs="2">
-                <xs:element name="dataNetwork" type="dataNetwork" maxOccurs="1">
+                <xs:element name="dataclassNetwork" type="dataclassNetwork" maxOccurs="1">
                 </xs:element>
                 <xs:element name="infraNetwork" type="externalNetwork" maxOccurs="1">
                 </xs:element>
@@ -235,7 +235,7 @@
                 </xs:element>
                 <xs:element name="oamNetwork" type="externalNetwork" maxOccurs="1">
                 </xs:element>
-                <xs:element name="dataNetwork" type="dataNetwork" maxOccurs="1">
+                <xs:element name="dataclassNetwork" type="dataclassNetwork" maxOccurs="1">
                 </xs:element>
                 <xs:element name="infraNetwork" type="externalNetwork" maxOccurs="1">
                 </xs:element>
@@ -260,7 +260,7 @@
                 </xs:element>
                 <xs:element name="oamNetwork" type="externalNetwork" maxOccurs="1">
                 </xs:element>
-                <xs:element name="dataNetwork" type="dataNetwork" maxOccurs="1">
+                <xs:element name="dataclassNetwork" type="dataclassNetwork" maxOccurs="1">
                 </xs:element>
                 <xs:element name="infraNetwork" type="externalNetwork" maxOccurs="1">
                 </xs:element>

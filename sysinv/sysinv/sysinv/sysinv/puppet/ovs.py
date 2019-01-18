@@ -4,11 +4,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from oslo_log import log
 from sysinv.common import constants
 from sysinv.common import utils
 
 from sysinv.puppet import base
 from sysinv.puppet import interface
+
+LOG = log.getLogger(__name__)
 
 
 class OVSPuppet(base.BasePuppet):
@@ -90,28 +93,45 @@ class OVSPuppet(base.BasePuppet):
 
                 index += 1
 
-                # currently only one provider network is supported per
-                # interface, therefore obtain first entry
-                providernet = interface.get_interface_providernets(iface)[0]
+                if utils.datanetworks_supported():
+                    datanets = interface.get_interface_datanets(self.context, iface)
 
-                # setup tunnel address if assigned provider network is vxlan
-                if self._is_vxlan_providernet(providernet):
-                    address = interface.get_interface_primary_address(
-                        self.context, iface)
-                    if address:
-                        ovs_addresses[brname] = {
-                            'ifname': brname,
-                            'address': address['address'],
-                            'prefixlen': address['prefix'],
-                        }
+                    # setup tunnel address if assigned provider network is vxlan
+                    if datanets and self._is_vxlan_datanet(datanets[0]):
+                        address = interface.get_interface_primary_address(
+                            self.context, iface)
+                        if address:
+                            ovs_addresses[brname] = {
+                                'ifname': brname,
+                                'address': address['address'],
+                                'prefixlen': address['prefix'],
+                            }
+                else:
+                    # currently only one provider network is supported per
+                    # interface, therefore obtain first entry
+                    providernet = interface.get_interface_providernets(iface)[0]
 
-        return {
+                    # setup tunnel address if assigned provider network is vxlan
+                    if self._is_vxlan_providernet(providernet):
+                        address = interface.get_interface_primary_address(
+                            self.context, iface)
+                        if address:
+                            ovs_addresses[brname] = {
+                                'ifname': brname,
+                                'address': address['address'],
+                                'prefixlen': address['prefix'],
+                            }
+        ovs_dict = {
             'platform::vswitch::ovs::devices': ovs_devices,
             'platform::vswitch::ovs::bridges': ovs_bridges,
             'platform::vswitch::ovs::ports': ovs_ports,
             'platform::vswitch::ovs::addresses': ovs_addresses,
             'platform::vswitch::ovs::flows': ovs_flows,
         }
+
+        LOG.debug("_get_port_config=%s" % ovs_dict)
+
+        return ovs_dict
 
     def _get_ethernet_device(self, iface):
         if interface.is_a_mellanox_device(self.context, iface):
@@ -355,6 +375,13 @@ class OVSPuppet(base.BasePuppet):
             })
         return config
 
+    def _get_datanet_type(self, datanet):
+        return datanet.get('datanetwork_type')
+
+    def _is_vxlan_datanet(self, datanet):
+        datanet_type = self._get_datanet_type(datanet)
+        return bool(datanet_type == constants.DATANETWORK_TYPE_VXLAN)
+
     def _get_neutron_config(self, host):
         local_ip = None
         tunnel_types = set()
@@ -364,24 +391,43 @@ class OVSPuppet(base.BasePuppet):
                 # obtain the assigned bridge for interface
                 brname = iface.get('_ovs_bridge')
                 if brname:
-                    providernets = interface.get_interface_providernets(iface)
-                    for providernet in providernets:
-                        if self._is_vxlan_providernet(providernet):
-                            address = interface.get_interface_primary_address(
-                                self.context, iface)
-                            if address:
-                                local_ip = address['address']
-                            tunnel_types.add(
-                                constants.NEUTRON_PROVIDERNET_VXLAN)
-                        else:
-                            bridge_mappings.append('%s:%s' %
-                                                   (providernet, brname))
+                    if utils.datanetworks_supported():
+                        datanets = interface.get_interface_datanets(
+                            self.context, iface)
+                        for datanet in datanets:
+                            if self._is_vxlan_datanet(datanet):
+                                address = \
+                                    interface.get_interface_primary_address(
+                                        self.context, iface)
+                                if address:
+                                    local_ip = address['address']
+                                tunnel_types.add(
+                                    constants.DATANETWORK_TYPE_VXLAN)
+                            else:
+                                bridge_mappings.append('%s:%s' %
+                                                       (datanet['name'], brname))
+                    else:
+                        providernets = interface.get_interface_providernets(iface)
+                        for providernet in providernets:
+                            if self._is_vxlan_providernet(providernet):
+                                address = interface.get_interface_primary_address(
+                                    self.context, iface)
+                                if address:
+                                    local_ip = address['address']
+                                tunnel_types.add(
+                                    constants.NEUTRON_PROVIDERNET_VXLAN)
+                            else:
+                                bridge_mappings.append('%s:%s' %
+                                                       (providernet, brname))
 
-        return {
+        neutron_dict = {
             'neutron::agents::ml2::ovs::local_ip': local_ip,
             'neutron::agents::ml2::ovs::tunnel_types': list(tunnel_types),
             'neutron::agents::ml2::ovs::bridge_mappings': bridge_mappings
         }
+        LOG.debug("OVS get_neutron_config neutron_dict=%s" % neutron_dict)
+
+        return neutron_dict
 
     def _get_providernet_type(self, name):
         if name in self.context['providernets']:

@@ -80,6 +80,7 @@ from sysinv.api.controllers.v1 import state
 from sysinv.api.controllers.v1 import types
 from sysinv.api.controllers.v1 import utils
 from sysinv.api.controllers.v1 import interface_network
+from sysinv.api.controllers.v1 import interface_datanetwork
 from sysinv.api.controllers.v1 import vim_api
 from sysinv.api.controllers.v1 import patch_api
 
@@ -1080,6 +1081,10 @@ class HostController(rest.RestController):
     interface_networks = interface_network.InterfaceNetworkController(
         parent="ihosts")
     "Expose interface_networks as a sub-element of ihosts"
+
+    interface_datanetworks = interface_datanetwork.InterfaceDataNetworkController(
+        parent="ihosts")
+    "Expose interface_datanetworks as a sub-element of ihosts"
 
     _custom_actions = {
         'detail': ['GET'],
@@ -3174,6 +3179,61 @@ class HostController(rest.RestController):
             raise wsme.exc.ClientSideError(msg)
 
     @staticmethod
+    def _semantic_check_interface_datanets(interface):
+        """
+        Perform data network semantics on a specific interface to ensure
+        that any data networks that have special requirements on the
+        interface have been satisfied.
+        """
+
+        if interface.ifclass != constants.NETWORK_TYPE_DATA:
+            return
+
+        ifdatanets = \
+            pecan.request.dbapi.interface_datanetwork_get_by_interface(
+                interface.uuid)
+
+        # Check for VXLAN data networks that require IP addresses
+        for ifdn in ifdatanets:
+            if ifdn.datanetwork_datanetwork_type != \
+                    constants.DATANETWORK_TYPE_VXLAN:
+                continue
+
+            dn = pecan.request.dbapi.datanetwork_get(ifdn.datanetwork_uuid)
+            if not dn.multicast_group:
+                # static range; fallback to generic check
+                continue
+
+            # Check for address family specific ranges
+            address = netaddr.IPAddress(dn.multicast_group)
+            if ((address.version == constants.IPV4_FAMILY) and
+                    (interface.ipv4_mode == constants.IPV4_DISABLED)):
+                msg = (_("Interface %(ifname)s is associated to VXLAN "
+                         "data network %(name)s which requires an "
+                         "IPv4 address") %
+                       {'ifname': interface.ifname,
+                        'name': ifdn.datanetwork_name})
+                raise wsme.exc.ClientSideError(msg)
+            if ((address.version == constants.IPV6_FAMILY) and
+                    (interface.ipv6_mode == constants.IPV6_DISABLED)):
+                msg = (_("Interface %(ifname)s is associated to VXLAN "
+                         "data network %(name)s which requires an "
+                         "IPv6 address") %
+                       {'ifname': interface.ifname,
+                        'name': ifdn.datanetwork_name})
+                raise wsme.exc.ClientSideError(msg)
+
+            # Check for at least 1 address if no ranges exist yet
+            if ((interface.ipv4_mode == constants.IPV4_DISABLED) and
+                    (interface.ipv6_mode == constants.IPV6_DISABLED)):
+                msg = (_("Interface %(ifname)s is associated to VXLAN "
+                         "data network %(name)s which requires an IP "
+                         "address") %
+                       {'ifname': interface.ifname,
+                        'name': ifdn.datanetwork_name})
+                raise wsme.exc.ClientSideError(msg)
+
+    @staticmethod
     def _semantic_check_interface_providernets(ihost, interface):
         """
         Perform provider network semantics on a specific interface to ensure
@@ -3258,11 +3318,14 @@ class HostController(rest.RestController):
             if ((vswitch_type == constants.VSWITCH_TYPE_OVS_DPDK) and
                     (iif.ifclass == constants.INTERFACE_CLASS_DATA)):
                 self._semantic_check_non_accelerated_interface_support(iif)
-            self._semantic_check_interface_providernets(ihost, iif)
+            if cutils.datanetworks_supported():
+                self._semantic_check_interface_datanets(iif)
+            else:
+                self._semantic_check_interface_providernets(ihost, iif)
             self._semantic_check_interface_addresses(ihost, iif)
-            if not iif.networktype:
+            if not iif.ifclass:
                 continue
-            if any(n in [constants.NETWORK_TYPE_DATA] for n in iif.networktype.split(",")):
+            if iif.ifclass == constants.NETWORK_TYPE_DATA:
                 data_interface_configured = True
 
         if not data_interface_configured:
