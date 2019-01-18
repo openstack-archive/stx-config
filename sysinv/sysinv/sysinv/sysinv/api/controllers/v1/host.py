@@ -2423,13 +2423,12 @@ class HostController(rest.RestController):
 
         # tell conductor to delete the keystore entry associated
         # with this host (if present)
-        try:
-            pecan.request.rpcapi.unconfigure_keystore_account(
-                                            pecan.request.context,
-                                            KEYRING_BM_SERVICE,
-                                            ihost.uuid)
-        except exception.NotFound:
-            pass
+        if not pecan.request.rpcapi.delete_barbican_secret(
+                                               pecan.request.context,
+                                               ihost.uuid):
+            raise wsme.exc.ClientSideError(_("Barbican rejected delete request."
+                                             "Please retry and if problem persists then contact your "
+                                             "system administrator."))
 
         # Notify patching to drop the host
         if ihost.hostname is not None:
@@ -3748,7 +3747,7 @@ class HostController(rest.RestController):
                 raise wsme.exc.ClientSideError(
                     _("Host-add Rejected: bm_ip %s already exists") % phost['bm_ip'])
 
-        # Update keyring with updated board management credentials (if supplied)
+        # Update barbican with updated board management credentials (if supplied)
         if (ohost['bm_username'] and phost['bm_username'] and
                 (ohost['bm_username'] != phost['bm_username'])):
             if not password_exists:
@@ -3759,12 +3758,14 @@ class HostController(rest.RestController):
                        ohost['bm_username'],
                        phost['bm_username'])))
 
-        if password_exists:
-            # The conductor will handle creating the keystore acct
-            pecan.request.rpcapi.configure_keystore_account(pecan.request.context,
-                                                            KEYRING_BM_SERVICE,
+        if password_exists and patch_bm_password:
+            if not pecan.request.rpcapi.create_barbican_secret(pecan.request.context,
                                                             phost['uuid'],
-                                                            patch_bm_password)
+                                                            patch_bm_password):
+                raise wsme.exc.ClientSideError(_("Barbican rejected create request."
+                                             "Please retry and if problem persists then contact your "
+                                             "system administrator."))
+
         LOG.info("%s bm semantic checks for user_agent %s passed" %
                  (phost['hostname'], pecan.request.user_agent))
 
