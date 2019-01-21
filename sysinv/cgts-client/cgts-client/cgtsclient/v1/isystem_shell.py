@@ -60,7 +60,7 @@ def do_show(cc, args):
            help='The name of the system')
 @utils.arg('-s', '--sdn_enabled',
            metavar='<sdn_enabled>',
-           choices=['true', 'false'],
+           choices=['true', 'false', 'True', 'False'],
            help='The SDN enabled or disabled flag')
 @utils.arg('-t', '--timezone',
            metavar='<timezone>',
@@ -79,7 +79,7 @@ def do_show(cc, args):
            help='The location of the system')
 @utils.arg('-p', '--https_enabled',
            metavar='<https_enabled>',
-           choices=['true', 'false'],
+           choices=['true', 'false', 'True', 'False'],
            help='The HTTPS enabled or disabled flag')
 @utils.arg('-v', '--vswitch_type',
            metavar='<vswitch_type>',
@@ -132,6 +132,12 @@ def do_modify(cc, args):
             print("Operation cancelled.")
             return
         print('Please follow the admin guide to complete the reconfiguration.')
+
+    # make sure https_enabled or sdn_enabled is lowercase
+    if args.https_enabled is not None:
+        args.https_enabled = args.https_enabled.lower()
+    if args.sdn_enabled is not None:
+        args.sdn_enabled = args.sdn_enabled.lower()
 
     field_list = ['name', 'system_mode', 'description', 'location', 'contact',
                   'timezone', 'sdn_enabled', 'https_enabled', 'vswitch_type', 'security_feature']
