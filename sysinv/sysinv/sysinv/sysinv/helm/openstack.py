@@ -14,6 +14,7 @@ from sysinv.helm import common
 from oslo_log import log
 from sysinv.common import constants
 from sysinv.common import exception
+from sqlalchemy.orm.exc import NoResultFound
 
 LOG = log.getLogger(__name__)
 
@@ -26,6 +27,36 @@ class OpenstackBaseHelm(base.BaseHelm):
         if service not in configs:
             configs[service] = self._get_service(service)
         return configs[service]
+
+    def _get_service_parameters(self, service=None):
+        service_parameters = []
+        if self.dbapi is None:
+            return service_parameters
+        try:
+            service_parameters = self.dbapi.service_parameter_get_all(
+                service=service)
+        # the service parameter has not been added
+        except NoResultFound:
+            pass
+        return service_parameters
+
+    def _get_service_parameter_configs(self, service):
+        configs = self.context.setdefault('_service_params', {})
+        if service not in configs:
+            params = self._get_service_parameters(service)
+            if params:
+                configs[service] = params
+            else:
+                return None
+        return configs[service]
+
+    @staticmethod
+    def _service_parameter_lookup_one(service_parameters, section, name,
+                                      default):
+        for param in service_parameters:
+            if param['section'] == section and param['name'] == name:
+                return param['value']
+        return default
 
     def _get_admin_user_name(self):
         keystone_operator = self._operator.chart_operators[

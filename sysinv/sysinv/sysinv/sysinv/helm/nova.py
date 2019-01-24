@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import collections
 import copy
 import os
 
@@ -13,6 +14,8 @@ from sysinv.common import utils
 from sysinv.openstack.common import log as logging
 from sysinv.helm import common
 from sysinv.helm import openstack
+
+from oslo_serialization import jsonutils
 
 LOG = logging.getLogger(__name__)
 
@@ -32,6 +35,34 @@ SCHEDULER_FILTERS_COMMON = [
     'PciPassthroughFilter',
     'DiskFilter',
 ]
+
+
+DEFAULT_NOVA_PCI_ALIAS = [
+    {"vendor_id": constants.NOVA_PCI_ALIAS_QAT_PF_VENDOR,
+     "product_id": constants.NOVA_PCI_ALIAS_QAT_DH895XCC_PF_DEVICE,
+     "name": constants.NOVA_PCI_ALIAS_QAT_DH895XCC_PF_NAME},
+    {"vendor_id": constants.NOVA_PCI_ALIAS_QAT_VF_VENDOR,
+     "product_id": constants.NOVA_PCI_ALIAS_QAT_DH895XCC_VF_DEVICE,
+     "name": constants.NOVA_PCI_ALIAS_QAT_DH895XCC_VF_NAME},
+    {"vendor_id": constants.NOVA_PCI_ALIAS_QAT_PF_VENDOR,
+     "product_id": constants.NOVA_PCI_ALIAS_QAT_C62X_PF_DEVICE,
+     "name": constants.NOVA_PCI_ALIAS_QAT_C62X_PF_NAME},
+    {"vendor_id": constants.NOVA_PCI_ALIAS_QAT_VF_VENDOR,
+     "product_id": constants.NOVA_PCI_ALIAS_QAT_C62X_VF_DEVICE,
+     "name": constants.NOVA_PCI_ALIAS_QAT_C62X_VF_NAME},
+    {"class_id": constants.NOVA_PCI_ALIAS_GPU_CLASS,
+     "name": constants.NOVA_PCI_ALIAS_GPU_NAME}
+]
+
+SERVICE_PARAM_NOVA_PCI_ALIAS = [
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU,
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU_PF,
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_GPU_VF,
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_DH895XCC_PF,
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_DH895XCC_VF,
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_C62X_PF,
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_QAT_C62X_VF,
+                constants.SERVICE_PARAM_NAME_NOVA_PCI_ALIAS_USER]
 
 
 class NovaHelm(openstack.OpenstackBaseHelm):
@@ -151,6 +182,9 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                         },
                         'vnc': {
                             'novncproxy_base_url': self._get_novncproxy_base_url(),
+                        },
+                        'pci_extended': {
+                            'alias': self._get_pci_alias(),
                         },
                         'upgrade_levels': 'None'
                     },
@@ -288,6 +322,159 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                 "%r:%r" % (node, cpu) for node, cpu in shared_cpu_map.items())
             default_config.update({'shared_pcpu_map': shared_cpu_fmt})
 
+    def _get_port_interface_id_index(self, host):
+        """
+        Builds a dictionary of ports indexed by interface id.
+        """
+        ports = {}
+        for port in self.dbapi.ethernet_port_get_by_host(host.id):
+            ports[port.interface_id] = port
+        return ports
+
+    def _get_interface_name_index(self, host):
+        """
+        Builds a dictionary of interfaces indexed by interface name.
+        """
+        interfaces = {}
+        for iface in self.dbapi.iinterface_get_by_ihost(host.id):
+            interfaces[iface.ifname] = iface
+        return interfaces
+
+    def _get_address_interface_name_index(self, host):
+        """
+        Builds a dictionary of address lists indexed by interface name.
+        """
+        addresses = collections.defaultdict(list)
+        for address in self.dbapi.addresses_get_by_host(host.id):
+            addresses[address.ifname].append(address)
+        return addresses
+
+    def get_interface_port(self, iface_context, iface):
+        """
+        Determine the port of the underlying device.
+        """
+        assert iface['iftype'] == constants.INTERFACE_TYPE_ETHERNET
+        return iface_context['ports'][iface['id']]
+
+    def _get_pci_pt_whitelist(self, host, iface_context):
+        # Process all configured PCI passthrough interfaces and add them to
+        # the list of devices to whitelist
+        devices = []
+        for iface in iface_context['interfaces'].values():
+            if iface['ifclass'] in [constants.INTERFACE_CLASS_PCI_PASSTHROUGH]:
+                port = self.get_interface_port(iface_context, iface)
+                device = {
+                    'address': port['pciaddr'],
+                    'physical_network': iface['providernetworks']
+                }
+                devices.append(device)
+
+        # Process all enabled PCI devices configured for PT and SRIOV and
+        # add them to the list of devices to whitelist.
+        # Since we are now properly initializing the qat driver and
+        # restarting sysinv, we need to add VF devices to the regular
+        # whitelist instead of the sriov whitelist
+        pci_devices = self.dbapi.pci_device_get_by_host(host.id)
+        for pci_device in pci_devices:
+            if pci_device.enabled:
+                device = {
+                    'address': pci_device.pciaddr,
+                    'class_id': pci_device.pclass_id
+                }
+                devices.append(device)
+
+        return jsonutils.dumps(devices)
+
+    def _get_pci_sriov_whitelist(self, host, iface_context):
+        # Process all configured SRIOV passthrough interfaces and add them to
+        # the list of devices to whitelist
+        devices = []
+        for iface in iface_context['interfaces'].values():
+            if iface['ifclass'] in [constants.INTERFACE_CLASS_PCI_SRIOV]:
+                port = self.get_interface_port(iface_context, iface)
+                device = {
+                    'address': port['pciaddr'],
+                    'physical_network': iface['providernetworks'],
+                    'sriov_numvfs': iface['sriov_numvfs']
+                }
+                devices.append(device)
+
+        return jsonutils.dumps(devices) if devices else None
+
+    def _get_pci_alias(self):
+        """
+        Generate global PCI alias configuration for QAT and GPU devices
+        as JSON list of dict, since that format is compatible with helm
+        _write_overrides() yaml.dump(). This is an intermediate format
+        to pass data through helm.
+
+        Upstream nova does not support specification of multiple PCI aliases
+        as a list and requires one-alias-per-line 'alias = {...}', and that is
+        not YAML compatible.
+
+        Subsequent JSON unmarshalling and special formatting is performed by
+        nova chart.
+        """
+        service_parameters = self._get_service_parameter_configs(
+            constants.SERVICE_TYPE_NOVA)
+
+        alias_config = DEFAULT_NOVA_PCI_ALIAS[:]
+
+        if service_parameters is not None:
+            for p in SERVICE_PARAM_NOVA_PCI_ALIAS:
+                value = self._service_parameter_lookup_one(
+                    service_parameters,
+                    constants.SERVICE_PARAM_SECTION_NOVA_PCI_ALIAS,
+                    p, None)
+                if value is not None:
+                    # Replace any references to device_id with product_id
+                    # This is to align with the requirements of the
+                    # Nova PCI request alias schema.
+                    # (sysinv used device_id, nova uses product_id)
+                    value = value.replace("device_id", "product_id")
+
+                    aliases = value.rstrip(';').split(';')
+                    for alias_str in aliases:
+                        alias = dict((str(k), str(v)) for k, v in
+                                     (x.split('=') for x in
+                                      alias_str.split(',')))
+                        alias_config.append(alias)
+
+        return jsonutils.dumps(alias_config) if alias_config else None
+
+    def _update_host_pci(self, host, pci_config):
+        """
+        Generate per-host PCI passthrough and PCI SR-IOV configuration as
+        JSON list of dict for passthrough_whitelist, and JSON list of dict
+        for sriov_whitelist, since that format is compatible with helm
+        _write_overrides() yaml.dump().
+
+        Sending through two separate whitelists overcomes nova limitations:
+        - We need runtime initialization of SR-IOV VFs. Nova does not have
+          a specific sriov configuration parameter. We need a mechanism
+          to pass through this information.
+
+        Subsequent JSON unmarshalling and merging into a single whitelist,
+        and runtime initialization of SR-IOV number of VFs is performed by
+        nova init chart.
+        """
+        # obtain interface information specific to this host
+        iface_context = {
+            'ports': self._get_port_interface_id_index(host),
+            'interfaces': self._get_interface_name_index(host),
+            'addresses': self._get_address_interface_name_index(host),
+        }
+
+        # per-host PCI passthrough whitelist
+        pci_config.update(
+            {'passthrough_whitelist':
+                 self._get_pci_pt_whitelist(host, iface_context)})
+
+        # per-host PCI SR-IOV whitelist
+        pci_config.update(
+            {'sriov_whitelist':
+                 self._get_pci_sriov_whitelist(host, iface_context)})
+
     def _update_host_storage(self, host, default_config, libvirt_config):
         pvs = self.dbapi.ipv_get_by_ihost(host.id)
 
@@ -420,11 +607,13 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                     default_config = {}
                     vnc_config = {}
                     libvirt_config = {}
+                    pci_config = {}
                     self._update_host_cpu_maps(host, default_config)
                     self._update_host_storage(host, default_config, libvirt_config)
                     self._update_host_addresses(host, default_config, vnc_config,
                                                 libvirt_config)
                     self._update_host_memory(host, default_config)
+                    self._update_host_pci(host, pci_config)
                     host_nova = {
                         'name': hostname,
                         'conf': {
@@ -432,6 +621,7 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                                 'DEFAULT': default_config,
                                 'vnc': vnc_config,
                                 'libvirt': libvirt_config,
+                                'pci_extended': pci_config,
                             }
                         }
                     }
