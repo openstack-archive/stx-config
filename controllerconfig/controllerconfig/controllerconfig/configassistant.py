@@ -462,6 +462,12 @@ class ConfigAssistant():
         self.cluster_pod_subnet = IPNetwork("172.16.0.0/16")
         self.cluster_service_subnet = IPNetwork("10.96.0.0/12")
 
+        # Docker Proxy config
+        self.enable_docker_proxy = False
+        self.docker_http_proxy = ""
+        self.docker_https_proxy = ""
+        self.docker_no_proxy = ""
+
         # SDN config
         self.enable_sdn = False
 
@@ -2729,6 +2735,89 @@ class ConfigAssistant():
                     print("Invalid address - please enter a valid IPv4 "
                           "address")
 
+    def input_docker_proxy_config(self):
+        """Allow user to input docker proxy config."""
+
+        print("\nDocker Proxy:")
+        print("-------------------------\n")
+        print(textwrap.fill(
+              "Docker proxy is needed if host network is behind a proxy.", 80))
+        print('')
+        while True:
+            user_input = input(
+                "Configure docker proxy [y/N]: ")
+            if user_input.lower() == 'q':
+                raise UserQuit
+            elif user_input.lower() == 'y':
+                while True:
+                    user_input = input(
+                        "HTTP proxy (http://example.proxy:port): ")
+                    if user_input.lower() == 'q':
+                        raise UserQuit
+                    self.docker_http_proxy = user_input
+                    break
+
+                while True:
+                    user_input = input(
+                        "HTTPS proxy (https://example.proxy:port): ")
+                    if user_input.lower() == 'q':
+                        raise UserQuit
+                    self.docker_https_proxy = user_input
+                    break
+
+                if not self.docker_http_proxy and not self.docker_https_proxy:
+                    print("At least one proxy required")
+                    continue
+                else:
+                    self.enable_docker_proxy = True
+
+                while True:
+                    # TODO: Current Docker version 18.03.1-ce utilizes go-lang
+                    # net library for proxy setting. The go-lang net lib
+                    # doesn't support CIDR notation until this commit:
+                    #
+                    # https://github.com/golang/net/commit/
+                    #     c21de06aaf072cea07f3a65d6970e5c7d8b6cd6d
+                    #
+                    # After docker upgrades to a version that CIDR notation
+                    # supported pre_set_no_proxy will be simplified to subnets
+                    if self.system_mode == \
+                            sysinv_constants.SYSTEM_MODE_SIMPLEX:
+                        pre_set_no_proxy = "localhost,127.0.0.1," + \
+                            str(self.controller_floating_address) + "," + \
+                            str(self.controller_address_0) + "," + \
+                            str(self.controller_address_1) + "," + \
+                            str(self.external_oam_address_0)
+                    else:
+                        pre_set_no_proxy = "localhost,127.0.0.1," + \
+                            str(self.controller_floating_address) + "," + \
+                            str(self.controller_address_0) + "," + \
+                            str(self.controller_address_1) + "," + \
+                            str(self.external_oam_floating_address) + "," + \
+                            str(self.external_oam_address_0) + "," + \
+                            str(self.external_oam_address_1)
+
+                    user_input = input(
+                        "Additional NO proxy besides '" +
+                        pre_set_no_proxy +
+                        "'\n(Comma-separated addresses, " +
+                        "wildcard/subnet not allowed)\n:")
+                    if user_input.lower() == 'q':
+                        raise UserQuit
+                    if user_input == "":
+                        self.docker_no_proxy = pre_set_no_proxy
+                    else:
+                        self.docker_no_proxy = pre_set_no_proxy + \
+                            "," + user_input
+                    break
+                break
+            elif user_input.lower() in ('n', ''):
+                self.enable_docker_proxy = False
+                break
+            else:
+                print("Invalid choice")
+                continue
+
     def input_authentication_config(self):
         """Allow user to input authentication config and perform validation.
         """
@@ -2814,6 +2903,8 @@ class ConfigAssistant():
         self.input_external_oam_config()
         if self.kubernetes:
             self.input_dns_config()
+            # Docker proxy is only used in kubernetes config
+            self.input_docker_proxy_config()
         self.input_authentication_config()
 
     def is_valid_management_multicast_subnet(self, ip_subnet):
@@ -3423,6 +3514,18 @@ class ConfigAssistant():
                 raise ConfigFail("The option TIME_TO_LIVE is "
                                  "no longer supported")
 
+            # Kubernetes Configuration
+            if self.kubernetes:
+                if config.has_option('cDOCKER_PROXY', 'DOCKER_HTTP_PROXY'):
+                    self.docker_http_proxy = config.get(
+                        'cDOCKER_PROXY', 'DOCKER_HTTP_PROXY')
+                if config.has_option('cDOCKER_PROXY', 'DOCKER_HTTPS_PROXY'):
+                    self.docker_https_proxy = config.get(
+                        'cDOCKER_PROXY', 'DOCKER_HTTPS_PROXY')
+                if config.has_option('cDOCKER_PROXY', 'DOCKER_NO_PROXY'):
+                    self.docker_no_proxy = config.get(
+                        'cDOCKER_PROXY', 'DOCKER_NO_PROXY')
+
         except Exception:
             print("Error parsing answer file")
             raise
@@ -3660,6 +3763,17 @@ class ConfigAssistant():
                   str(self.system_controller_subnet.cidr))
             print("System controller floating ip: " +
                   str(self.system_controller_floating_ip))
+
+        if self.kubernetes and self.enable_docker_proxy:
+            if self.docker_http_proxy or self.docker_https_proxy:
+                print("\nKubernetes Configuraton")
+                print("----------------------")
+                if self.docker_http_proxy:
+                    print("Docker HTTP proxy: " + self.docker_http_proxy)
+                if self.docker_https_proxy:
+                    print("Docker HTTPS proxy: " + self.docker_https_proxy)
+                if self.docker_no_proxy:
+                    print("Docker NO proxy: " + self.docker_no_proxy)
 
     def write_config_file(self):
         """Write configuration to a text file for later reference."""
@@ -4066,6 +4180,20 @@ class ConfigAssistant():
                             str(self.system_controller_subnet))
                     f.write("SYSTEM_CONTROLLER_FLOATING_ADDRESS=%s\n" %
                             str(self.system_controller_floating_ip))
+
+                # Docker proxy configuration
+                if self.kubernetes and self.enable_docker_proxy:
+                    f.write("\n[cDOCKER_PROXY]")
+                    f.write("\n# Docker Proxy Configuration\n")
+                    f.write(
+                        "DOCKER_HTTP_PROXY=" +
+                        str(self.docker_http_proxy) + "\n")
+                    f.write(
+                        "DOCKER_HTTPS_PROXY=" +
+                        str(self.docker_https_proxy) + "\n")
+                    f.write(
+                        "DOCKER_NO_PROXY=" +
+                        str(self.docker_no_proxy) + "\n")
 
         except IOError:
             LOG.error("Failed to open file: %s", constants.CGCS_CONFIG_FILE)
@@ -5302,6 +5430,28 @@ class ConfigAssistant():
         patch = sysinv.dict_to_patch(values)
         client.sysinv.idns.update(dns_record.uuid, patch)
 
+    def _populate_docker_config(self, client):
+        # parameter value is mandatory
+        if not self.docker_http_proxy:
+            self.docker_http_proxy = "NONE"
+        if not self.docker_https_proxy:
+            self.docker_https_proxy = "NONE"
+        if not self.docker_no_proxy:
+            self.docker_no_proxy = "NONE"
+
+        parameter = {
+            'http_proxy': self.docker_http_proxy,
+            'https_proxy': self.docker_https_proxy,
+            'no_proxy': self.docker_no_proxy,
+        }
+        client.sysinv.service_parameter.create(
+            sysinv_constants.SERVICE_TYPE_DOCKER,
+            sysinv_constants.SERVICE_PARAM_SECTION_DOCKER_PROXY,
+            None,
+            None,
+            parameter
+        )
+
     def populate_initial_config(self):
         """Populate initial system inventory configuration"""
         try:
@@ -5315,6 +5465,9 @@ class ConfigAssistant():
                 # ceph_mon config requires controller host to be created
                 self._inventory_config_complete_wait(client, controller)
                 self._populate_interface_config(client, controller)
+                if self.kubernetes and self.enable_docker_proxy:
+                    # Docker proxy is only used in kubernetes config
+                    self._populate_docker_config(client)
 
         except (KeystoneFail, SysInvFail) as e:
             LOG.exception(e)

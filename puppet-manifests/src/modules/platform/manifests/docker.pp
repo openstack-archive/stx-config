@@ -1,5 +1,8 @@
 class platform::docker::params (
   $package_name    = 'docker-ce',
+  $http_proxy   = undef,
+  $https_proxy  = undef,
+  $no_proxy     = undef,
 ) { }
 
 class platform::docker::config
@@ -8,6 +11,31 @@ class platform::docker::config
   include ::platform::kubernetes::params
 
   if $::platform::kubernetes::params::enabled {
+
+    if $http_proxy == 'NONE' {
+        $http_proxy = undef
+    }
+    if $https_proxy == 'NONE' {
+        $https_proxy = undef
+    }
+    if $no_proxy == 'NONE' {
+        $no_proxy = undef
+    }
+    if $http_proxy or $https_proxy {
+      file { '/etc/systemd/system/docker.service.d':
+        ensure => 'directory',
+        owner  => 'root',
+        group  => 'root',
+        mode   => '0755',
+      }
+      -> file { '/etc/systemd/system/docker.service.d/http-proxy.conf':
+        ensure  => present,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => template('platform/dockerproxy.conf.erb'),
+      }
+    }
 
     Class['::platform::filesystem::docker'] ~> Class[$name]
 
