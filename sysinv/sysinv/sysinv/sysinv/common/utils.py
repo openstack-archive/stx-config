@@ -1797,6 +1797,22 @@ def is_url(url_str):
         return False
 
 
+def is_domain_or_ip(url_str):
+    r = re.compile(
+        r'^(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)'  # domain...
+        r'+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+    url = r.match(url_str)
+    if url:
+        return True
+    else:
+        return False
+
+
 def verify_checksum(path):
     """ Find and validate the checksum file in a given directory. """
     rc = True
