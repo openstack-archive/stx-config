@@ -556,6 +556,9 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
                     ceph_backend_type['type_enabled'] = True
                     enabled_backends.append(ceph_backend['backend_name'])
 
+                ceph_backend['image_volume_cache_enabled'] = True
+                ceph_backend['image_volume_cache_max_size_gb'] = storage_backend.capabilities['cinder_raw_cache_gib']
+
                 ceph_backend_configs.update({storage_backend.name: ceph_backend})
                 ceph_type_configs.update({storage_backend.name: ceph_backend_type})
             elif storage_backend.backend == constants.SB_TYPE_CEPH_EXTERNAL:
