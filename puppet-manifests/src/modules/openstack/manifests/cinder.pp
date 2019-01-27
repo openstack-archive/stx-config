@@ -190,6 +190,10 @@ class openstack::cinder
   include ::openstack::cinder::backup
   include ::platform::multipath::params
 
+  # Cinder internal tenant
+  $internal_project_id = generate("/bin/bash", "-c", "source /etc/nova/openrc && openstack project create cinder --domain= --or-show -f value -c id ")
+  $internal_user_id = generate("/bin/bash", "-c", "source /etc/nova/openrc && openstack user create cinder --password 'Madawaska1*' --domain= --or-show -f value -c id ")
+
   # TODO(mpeters): move to puppet module formal parameters
   cinder_config {
     'DEFAULT/my_ip': value => $controller_address;
@@ -201,6 +205,8 @@ class openstack::cinder
     'DEFAULT/executor_thread_pool_size': value => '32';
     'DEFAULT/enable_force_upload': value => true;
     'DEFAULT/use_multipath_for_image_xfer': value => $::platform::multipath::params::enabled;
+    'DEFAULT/cinder_internal_tenant_project_id': value => $internal_project_id;
+    'DEFAULT/cinder_internal_tenant_user_id': value => $internal_user_id;
     'backend_defaults/use_multipath_for_image_xfer': value => $::platform::multipath::params::enabled;
   }
 
@@ -460,6 +466,8 @@ define openstack::cinder::backend::ceph(
   $backend_enabled = false,
   $rbd_user = 'cinder',
   $rbd_ceph_conf = '/etc/ceph/ceph.conf'
+  $image_volume_cache_enabled = false,
+  $image_volume_cache_max_size_gb = '0'
 ) {
 
   if $backend_enabled {
@@ -468,6 +476,10 @@ define openstack::cinder::backend::ceph(
       rbd_pool      => $rbd_pool,
       rbd_user      => $rbd_user,
       rbd_ceph_conf => $rbd_ceph_conf,
+    }
+    cinder_config {
+      "${backend_name}/image_volume_cache_enabled": value => $image_volume_cache_enabled;
+      "${backend_name}/image_volume_cache_max_size_gb": value => $image_volume_cache_max_size_gb;
     }
   } else {
     cinder_config {
