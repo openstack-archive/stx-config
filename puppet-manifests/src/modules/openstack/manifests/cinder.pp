@@ -20,6 +20,9 @@ class openstack::cinder::params (
   $drbd_resource = 'drbd-cinder',
   $iscsi_ip_address = undef,
   $is_ceph_external = false,
+  # Cinder internal tenant
+  $internal_project_id = undef,
+  $internal_user_id = undef,
   # Flag files
   $initial_cinder_config_flag = "${::platform::params::config_path}/.initial_cinder_config_complete",
   $initial_cinder_lvm_config_flag = "${::platform::params::config_path}/.initial_cinder_lvm_config_complete",
@@ -201,6 +204,8 @@ class openstack::cinder
     'DEFAULT/executor_thread_pool_size': value => '32';
     'DEFAULT/enable_force_upload': value => true;
     'DEFAULT/use_multipath_for_image_xfer': value => $::platform::multipath::params::enabled;
+    'DEFAULT/cinder_internal_tenant_project_id': value => $internal_project_id;
+    'DEFAULT/cinder_internal_tenant_user_id': value => $internal_user_id;
     'backend_defaults/use_multipath_for_image_xfer': value => $::platform::multipath::params::enabled;
   }
 
@@ -460,6 +465,8 @@ define openstack::cinder::backend::ceph(
   $backend_enabled = false,
   $rbd_user = 'cinder',
   $rbd_ceph_conf = '/etc/ceph/ceph.conf'
+  $image_volume_cache_enabled = false,
+  $image_volume_cache_max_size_gb = '0'
 ) {
 
   if $backend_enabled {
@@ -468,6 +475,10 @@ define openstack::cinder::backend::ceph(
       rbd_pool      => $rbd_pool,
       rbd_user      => $rbd_user,
       rbd_ceph_conf => $rbd_ceph_conf,
+    }
+    cinder_config {
+      "${backend_name}/image_volume_cache_enabled": value => $image_volume_cache_enabled;
+      "${backend_name}/image_volume_cache_max_size_gb": value => $image_volume_cache_max_size_gb;
     }
   } else {
     cinder_config {

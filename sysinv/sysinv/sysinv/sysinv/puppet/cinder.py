@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
+import subprocess
 
 from sysinv.common import constants
 from sysinv.common import exception
@@ -390,6 +391,38 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
             'cinder::keystone::authtoken::password': kspass,
         }
 
+    def get_tenant_id(self):
+        get_project_id_sh = '/tmp/get_project_id.sh'
+        get_user_id_sh = '/tmp/get_user_id.sh'
+
+        str_project_id = [
+            '#!/usr/bin/env bash',
+            '',
+            'source /etc/nova/openrc',
+            'openstack project create cinder --domain= --or-show -f value -c id'
+        ]
+
+        str_user_id = [
+            '#!/usr/bin/env bash',
+            '',
+            'source /etc/nova/openrc',
+            'openstack user create cinder --password "Madawaska1*" --domain= --or-show -f value -c id'
+        ]
+
+        def gen_sh_and_run(fname, content):
+            f = open(fname, 'w')
+            f.writelines('\n'.join(content))
+            f.close()
+
+            ret = subprocess.check_output(['chmod', '777', fname])
+
+            ret = subprocess.check_output([fname])
+            return ret.strip()
+
+        project_id = gen_sh_and_run(get_project_id_sh, str_project_id)
+        user_id = gen_sh_and_run(get_user_id_sh, str_user_id)
+        return project_id, user_id
+
     def get_system_config(self):
         config_ksuser = True
         ksuser = self._get_service_user_name(self.SERVICE_NAME)
@@ -402,6 +435,8 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
                 config_ksuser = False
             else:
                 ksuser += self._region_name()
+
+        internal_project_id, internal_user_id = self.get_tenant_id()
 
         config = {
             'cinder::api::os_region_name': self._keystone_region_name(),
@@ -473,6 +508,10 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
                 self.get_service_type_v2(),
             'openstack::cinder::params::service_type_v3':
                 self.get_service_type_v3(),
+            'openstack::cinder::params::internal_project_id':
+                internal_project_id,
+            'openstack::cinder::params::internal_user_id':
+                internal_user_id,
         }
 
         # no need to configure cinder endpoints as the proxy provides
@@ -555,6 +594,9 @@ class CinderPuppet(openstack.OpenstackBasePuppet):
                     ceph_backend['backend_enabled'] = True
                     ceph_backend_type['type_enabled'] = True
                     enabled_backends.append(ceph_backend['backend_name'])
+
+                ceph_backend['image_volume_cache_enabled'] = True
+                ceph_backend['image_volume_cache_max_size_gb'] = storage_backend.capabilities['cinder_raw_cache_gib']
 
                 ceph_backend_configs.update({storage_backend.name: ceph_backend})
                 ceph_type_configs.update({storage_backend.name: ceph_backend_type})
