@@ -124,6 +124,16 @@ class platform::kubernetes::master::init
       command   => "kubectl --kubeconfig=/etc/kubernetes/admin.conf taint node ${::platform::params::hostname} node-role.kubernetes.io/master-", # lint:ignore:140chars
       logoutput => true,
     }
+
+    # override kubelet.service Restart option
+    -> exec { 'override Restart=no for kubelet':
+      command   => "ln -s /etc/kubernetes/kubelet-override-pmond.conf /etc/systemd/system/kubelet.service.d/kubelet-override-pmond.conf"
+    }
+
+    # systemctl daemon-reload and enable pmond monitoring kubelet
+    -> exec { 'systemctl daemon-reload':
+      command => "systemctl daemon-reload && ln -s /etc/kubernetes/kubelet-pmond.conf /etc/pmon.d/kubelet.conf"
+    }
   } else {
     if str2bool($::is_initial_config) {
       # For subsequent controller installs, install kubernetes using the
