@@ -188,3 +188,6 @@ class BaseHelm(object):
         address = self._get_address_by_name(
             constants.CONTROLLER_HOSTNAME, constants.NETWORK_TYPE_MGMT)
         return address.address
+
+    def get_meta_overrides(self, namespace):
+        return {}
