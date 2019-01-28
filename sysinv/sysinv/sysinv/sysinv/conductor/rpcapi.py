@@ -36,7 +36,6 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
     """Client side of the conductor RPC API.
 
     API version history:
-
         1.0 - Initial version.
         1.1 - Used for R5
     """
