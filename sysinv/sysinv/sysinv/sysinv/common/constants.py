@@ -1521,6 +1521,9 @@ COMPUTE_NODE_LABEL = 'openstack-compute-node=enabled'
 OPENVSWITCH_LABEL = 'openvswitch=enabled'
 SRIOV_LABEL = 'sriov=enabled'
 
+REMOTE_STORAGE_LABEL_KEY = 'remote-storage'
+REMOTE_STORAGE_LABEL_ENABLED = 'enabled'
+
 # Default DNS service domain
 DEFAULT_DNS_SERVICE_DOMAIN = 'cluster.local'
 DEFAULT_DNS_SERVICE_IP = '10.96.0.10'
