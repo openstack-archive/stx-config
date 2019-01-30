@@ -13,8 +13,25 @@ class platform::kubernetes::params (
 ) { }
 
 class platform::kubernetes::kubeadm {
+  include ::platform::docker::params
+
   $iptables_file = "net.bridge.bridge-nf-call-ip6tables = 1
     net.bridge.bridge-nf-call-iptables = 1"
+
+  if $::platform::docker::params::k8s_registry {
+    $k8s_registry = $::platform::docker::params::k8s_registry
+  } else {
+    $k8s_registry = undef
+  }
+
+  # kubelet use --pod-infra-container-image to indentify the specified image
+  # TODO: this is not needed after kubernetes upgraded to 1.13
+  if $k8s_registry {
+    file { '/etc/sysconfig/kubelet':
+      ensure  => file,
+      content => template('platform/kubelet.conf.erb'),
+    }
+  }
 
   # Update iptables config. This is required based on:
   # https://kubernetes.io/docs/tasks/tools/install-kubeadm
@@ -52,10 +69,23 @@ class platform::kubernetes::master::init
   inherits ::platform::kubernetes::params {
 
   include ::platform::params
+  include ::platform::docker::params
 
   if str2bool($::is_initial_config_primary) {
     # For initial controller install, configure kubernetes from scratch.
     $resolv_conf = '/etc/resolv.conf'
+
+    if $::platform::docker::params::k8s_registry {
+      $k8s_registry = $::platform::docker::params::k8s_registry
+    } else {
+      $k8s_registry = undef
+    }
+
+    if $::platform::docker::params::quay_registry {
+      $quay_registry = $::platform::docker::params::quay_registry
+    } else {
+      $quay_registry = 'quay.io'
+    }
 
     # Configure the master node.
     file { '/etc/kubernetes/kubeadm.yaml':
