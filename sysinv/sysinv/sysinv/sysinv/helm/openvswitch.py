@@ -24,11 +24,23 @@ class OpenvswitchHelm(openstack.OpenstackBaseHelm):
     def get_namespaces(self):
         return self.SUPPORTED_NAMESPACES
 
+    def _ovs_enabled(self):
+        if (self._get_vswitch_type() == constants.VSWITCH_TYPE_OVS_DPDK):
+            return "disabled"
+        else:
+            return "enabled"
+
     def get_overrides(self, namespace=None):
         overrides = {
             common.HELM_NS_OPENSTACK: {
+                'labels': {
+                    'ovs': {
+                        'node_selector_key': 'openvswitch',
+                        'node_selector_value': self._ovs_enabled(),
+                        }
+                    }
+                }
             }
-        }
 
         if namespace in self.SUPPORTED_NAMESPACES:
             return overrides[namespace]
