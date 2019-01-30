@@ -479,7 +479,7 @@ class ConfigAssistant():
         # HTTPS
         self.enable_https = False
         # Network config
-        self.vswitch_type = "ovs-dpdk"
+        self.vswitch_type = "none" if self.kubernetes else "ovs-dpdk"
 
         # Authentication config
         self.admin_username = "admin"

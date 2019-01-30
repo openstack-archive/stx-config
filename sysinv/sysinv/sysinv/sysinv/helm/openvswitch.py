@@ -18,9 +18,24 @@ class OpenvswitchHelm(openstack.OpenstackBaseHelm):
 
     CHART = constants.HELM_CHART_OPENVSWITCH
 
+    def _ovs_enabled(self):
+        # Schedule ovs containers to nodes with label openvswitch=enabled.
+        # For ovs-dpdk, we disable ovs container by scheduling it to none-exist
+        # node which has openvswitch=disabled
+        if self._get_vswitch_type() == constants.VSWITCH_TYPE_OVS_DPDK:
+            return "disabled"
+        else:
+            return "enabled"
+
     def get_overrides(self, namespace=None):
         overrides = {
             common.HELM_NS_OPENSTACK: {
+                'labels': {
+                    'ovs': {
+                        'node_selector_key': 'openvswitch',
+                        'node_selector_value': self._ovs_enabled(),
+                    }
+                }
             }
         }
 
