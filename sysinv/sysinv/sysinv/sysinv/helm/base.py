@@ -188,3 +188,9 @@ class BaseHelm(object):
         address = self._get_address_by_name(
             constants.CONTROLLER_HOSTNAME, constants.NETWORK_TYPE_MGMT)
         return address.address
+
+    def _get_vswitch_type(self):
+        if self.dbapi is None:
+            return None
+        system = self._get_system()
+        return system.capabilities.get('vswitch_type', None)
