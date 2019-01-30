@@ -53,10 +53,30 @@ class platform::kubernetes::master::init
   inherits ::platform::kubernetes::params {
 
   include ::platform::params
+  include ::platform::docker::params
 
   if str2bool($::is_initial_config_primary) {
     # For initial controller install, configure kubernetes from scratch.
     $resolv_conf = '/etc/resolv.conf'
+
+    if $::platform::docker::params::k8s_registry {
+      $k8s_registry = $::platform::docker::params::k8s_registry
+    } else {
+      $k8s_registry = undef
+    }
+
+    if $::platform::docker::params::quay_registry {
+      $quay_registry = $::platform::docker::params::quay_registry
+    } else {
+      $quay_registry = 'quay.io'
+    }
+
+    # kubelet use --pod-infra-container-image to indentify the specified image
+    if $k8s_registry {
+      exec { 'add k8s registry':
+        command => "sed -i 's|config.yaml|& --pod-infra-container-image=${k8s_registry}/pause:3.1|g' /etc/systemd/system/kubelet.service.d/kubeadm.conf", # lint:ignore:140chars
+      }
+    }
 
     # Configure the master node.
     file { '/etc/kubernetes/kubeadm.yaml':
