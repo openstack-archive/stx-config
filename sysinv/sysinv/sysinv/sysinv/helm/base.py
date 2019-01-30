@@ -231,3 +231,9 @@ class BaseHelm(object):
         May be left blank to indicate that there are no additional overrides.
         """
         return {}
+
+    def _get_vswitch_type(self):
+        if self.dbapi is None:
+            return None
+        system = self._get_system()
+        return system.capabilities.get('vswitch_type', None)

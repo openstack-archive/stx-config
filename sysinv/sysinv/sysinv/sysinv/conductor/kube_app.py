@@ -126,6 +126,10 @@ class AppOperator(object):
         self._kube = kubernetes.KubeOperator(self._dbapi)
         self._lock = threading.Lock()
 
+    def _get_vswitch_type(self):
+        system = self._dbapi.isystem_get_one()
+        return system.capabilities.get('vswitch_type', None)
+
     def _cleanup(self, app):
         """" Remove application directories and override files """
         try:
@@ -645,8 +649,9 @@ class AppOperator(object):
         if app.system_app:
             controller_labels_set.add(constants.CONTROL_PLANE_LABEL)
             compute_labels_set.add(constants.COMPUTE_NODE_LABEL)
-            compute_labels_set.add(constants.OPENVSWITCH_LABEL)
             compute_labels_set.add(constants.SRIOV_LABEL)
+            if self._get_vswitch_type() != constants.VSWITCH_TYPE_OVS_DPDK:
+                compute_labels_set.add(constants.OPENVSWITCH_LABEL)
 
         # Get controller host(s)
         controller_hosts =\
