@@ -184,12 +184,27 @@ def is_valid_ipv6(address):
 def is_valid_domain_or_ip(url_str):
     if is_valid_domain(url_str):
         return True
-    elif is_valid_ipv4(url_str):
-        return True
-    elif is_valid_ipv6(url_str):
-        return True
     else:
+        ip_with_port = url_str.split(':')
+        if len(ip_with_port) > 2:
+            # check ipv6
+            if len(ip_with_port) == 8:
+                return is_valid_ipv6(':'.join(ip_with_port))
+            elif len(ip_with_port) == 9:
+                return is_valid_ipv6(
+                    ':'.join(ip_with_port[0:len(ip_with_port) - 1]))
+            else:
+                return False
+        else:
+            # check ipv4
+            return is_valid_ipv4(ip_with_port[0])
         return False
+
+
+def is_valid_boolstr(val):
+    """Check if the provided string is a valid bool string or not."""
+    boolstrs = ('true', 'false')
+    return str(val).lower() in boolstrs
 
 
 def validate_address_str(ip_address_str, network):

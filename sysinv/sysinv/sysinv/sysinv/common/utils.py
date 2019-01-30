@@ -1826,6 +1826,26 @@ def is_valid_domain(url_str):
         return False
 
 
+def is_valid_domain_or_ip(url_str):
+    if is_valid_domain(url_str):
+        return True
+    else:
+        ip_with_port = url_str.split(':')
+        if len(ip_with_port) > 2:
+            # check ipv6
+            if len(ip_with_port) == 8:
+                return is_valid_ipv6(':'.join(ip_with_port))
+            elif len(ip_with_port) == 9:
+                return is_valid_ipv6(
+                    ':'.join(ip_with_port[0:len(ip_with_port) - 1]))
+            else:
+                return False
+        else:
+            # check ipv4
+            return is_valid_ipv4(ip_with_port[0])
+        return False
+
+
 def verify_checksum(path):
     """ Find and validate the checksum file in a given directory. """
     rc = True
