@@ -6,6 +6,7 @@
 
 from sysinv.common import constants
 from sysinv.common import exception
+from sysinv.common import utils
 from sysinv.openstack.common import log as logging
 from sysinv.helm import common
 from sysinv.helm import openstack
@@ -42,6 +43,7 @@ class LibvirtHelm(openstack.OpenstackBaseHelm):
         }
 
         self._get_images_overrides(overrides[common.HELM_NS_OPENSTACK])
+        self.update_dependency_options(overrides[common.HELM_NS_OPENSTACK])
 
         if namespace in self.SUPPORTED_NAMESPACES:
             return overrides[namespace]
@@ -57,6 +59,20 @@ class LibvirtHelm(openstack.OpenstackBaseHelm):
                 'images': {
                     'tags': {
                         'libvirt': self.docker_image
+                    }
+                }
+            })
+
+    def update_dependency_options(self, overrides):
+        if utils.get_vswitch_type(self.dbapi) != 'none':
+            overrides.update({
+                'dependencies': {
+                    'dynamic': {
+                        'targeted': {
+                            'openvswitch': {
+                                'libvirt': None
+                            }
+                        }
                     }
                 }
             })
