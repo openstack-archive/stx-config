@@ -974,7 +974,7 @@ class ConfigValidator(object):
             self.vswitch_type = self.conf.get('NETWORK',
                                               'VSWITCH_TYPE').upper()
         else:
-            self.vswitch_type = 'OVS-DPDK'
+            self.vswitch_type = 'NONE'
 
         if self.vswitch_type == 'NUAGE_VRS':
             metadata_proxy_shared_secret = self.conf.get(
