@@ -105,6 +105,7 @@ class NovaHelm(openstack.OpenstackBaseHelm):
             }
         }
 
+        self.update_dependency_options(overrides[common.HELM_NS_OPENSTACK])
         if namespace in self.SUPPORTED_NAMESPACES:
             return overrides[namespace]
         elif namespace:
@@ -112,6 +113,20 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                                                  namespace=namespace)
         else:
             return overrides
+
+    def update_dependency_options(self, overrides):
+        if utils.get_vswitch_type(self.dbapi) != 'none':
+            overrides.update({
+                'dependencies': {
+                    'dynamic': {
+                        'targeted': {
+                            'openvswitch': {
+                                'compute': None
+                            }
+                        }
+                    }
+                }
+            })
 
     def _get_images_overrides(self):
         heat_image = self._operator.chart_operators[
