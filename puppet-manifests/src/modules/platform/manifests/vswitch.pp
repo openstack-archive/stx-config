@@ -11,11 +11,13 @@ class platform::vswitch
 
   Class[$name] -> Class['::platform::network']
 
+  if $::platform::params::vswitch_type =~ '^ovs' {
   $enable_unsafe_noiommu_mode = bool2num(!$iommu_enabled)
 
   exec {'vfio-iommu-mode':
     command => "echo ${enable_unsafe_noiommu_mode} > /sys/module/vfio/parameters/enable_unsafe_noiommu_mode",
     require => Kmod::Load[$driver_type],
+  }
   }
 
   include $vswitch_class
