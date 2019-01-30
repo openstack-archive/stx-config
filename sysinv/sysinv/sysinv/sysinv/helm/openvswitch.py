@@ -19,6 +19,10 @@ class OpenvswitchHelm(openstack.OpenstackBaseHelm):
     CHART = constants.HELM_CHART_OPENVSWITCH
 
     def get_overrides(self, namespace=None):
+        # helm has an issue with installing release of no pod
+        # https://github.com/helm/helm/issues/4295
+        # once this is fixed, we can use 'manifests' instead of 'label' to
+        # control ovs enable or not
         overrides = {
             common.HELM_NS_OPENSTACK: {
             }
