@@ -1938,3 +1938,7 @@ def get_http_port(dbapi):
             constants.SERVICE_PARAM_SECTION_HTTP_CONFIG,
             constants.SERVICE_PARAM_HTTP_PORT_HTTP))
     return http_port
+
+def get_vswitch_type(dbapi):
+    system = dbapi.isystem_get_one()
+    return system.capabilities.get('vswitch_type', None)
