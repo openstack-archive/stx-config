@@ -118,14 +118,6 @@ class NovaHelm(openstack.OpenstackBaseHelm):
         heat_image = self._operator.chart_operators[
             constants.HELM_CHART_HEAT].docker_image
 
-        # TODO: Remove after ceph upgrade
-        # Format the name of the stx specific ceph config helper
-        ceph_config_helper_image = "{}:{}/{}/{}{}:{}".format(
-            self._get_management_address(), common.REGISTRY_PORT,
-            common.REPO_LOC,
-            common.DOCKER_SRCS[self.docker_repo_source][common.IMG_PREFIX_KEY],
-            'ceph-config-helper', self.docker_repo_tag)
-
         return {
             'tags': {
                 'bootstrap': heat_image,
@@ -148,7 +140,6 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                 'nova_scheduler': self.docker_image,
                 'nova_spiceproxy': self.docker_image,
                 'nova_spiceproxy_assets': self.docker_image,
-                'nova_storage_init': ceph_config_helper_image,
             }
         }
 
@@ -503,15 +494,18 @@ class NovaHelm(openstack.OpenstackBaseHelm):
             StorageBackendConfig.get_ceph_pool_replication(self.dbapi)
 
         # For now, the ephemeral pool will only be on the primary Ceph tier
-        # that's using the 0 crush ruleset.
-        ruleset = 0
+        rule_name = "{0}{1}{2}".format(
+            constants.SB_TIER_DEFAULT_NAMES[
+                constants.SB_TIER_TYPE_CEPH],
+            constants.CEPH_CRUSH_TIER_SUFFIX,
+            "-ruleset").replace('-', '_')
 
         # Form the dictionary with the info for the ephemeral pool.
         # If needed, multiple pools can be specified.
         ephemeral_pool = {
             'rbd_pool_name': constants.CEPH_POOL_EPHEMERAL_NAME,
             'rbd_user': RBD_POOL_USER,
-            'rbd_crush_rule': ruleset,
+            'rbd_crush_rule': rule_name,
             'rbd_replication': replication,
             'rbd_chunk_size': constants.CEPH_POOL_EPHEMERAL_PG_NUM
         }
