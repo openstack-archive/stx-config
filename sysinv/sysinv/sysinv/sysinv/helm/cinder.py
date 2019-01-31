@@ -61,9 +61,11 @@ class CinderHelm(openstack.OpenstackBaseHelm):
         replication, min_replication =\
             StorageBackendConfig.get_ceph_pool_replication(self.dbapi)
 
-        # We don't use the chart to configure the cinder-volumes
-        # pool, so these values don't have any impact right now.
-        ruleset = 0
+        rule_name = "{0}{1}{2}".format(
+            constants.SB_TIER_DEFAULT_NAMES[
+                constants.SB_TIER_TYPE_CEPH],
+            constants.CEPH_CRUSH_TIER_SUFFIX,
+            "-ruleset").replace('-', '_')
 
         conf_ceph = {
             'monitors': self._get_formatted_ceph_monitor_ips(),
@@ -74,13 +76,13 @@ class CinderHelm(openstack.OpenstackBaseHelm):
                     # it's safe to use the same replication as for the primary
                     # tier pools.
                     'replication': replication,
-                    'crush_rule': ruleset,
+                    'crush_rule': rule_name,
                 },
                 'volume': {
                     # The cinder chart doesn't currently support specifying
                     # the config for multiple volume/backup pools.
                     'replication': replication,
-                    'crush_rule': ruleset,
+                    'crush_rule': rule_name,
                 }
             }
         }
@@ -185,22 +187,13 @@ class CinderHelm(openstack.OpenstackBaseHelm):
         heat_image = self._operator.chart_operators[
             constants.HELM_CHART_HEAT].docker_image
 
-        # TODO: Remove after ceph upgrade
-        # Format the name of the stx specific ceph config helper
-        ceph_config_helper_image = "{}:{}/{}/{}{}:{}".format(
-            self._get_management_address(), common.REGISTRY_PORT, common.REPO_LOC,
-            common.DOCKER_SRCS[self.docker_repo_source][common.IMG_PREFIX_KEY],
-            'ceph-config-helper', self.docker_repo_tag)
-
         return {
             'tags': {
                 'bootstrap': heat_image,
                 'cinder_api': self.docker_image,
                 'cinder_backup': self.docker_image,
-                'cinder_backup_storage_init': ceph_config_helper_image,
                 'cinder_db_sync': self.docker_image,
                 'cinder_scheduler': self.docker_image,
-                'cinder_storage_init': ceph_config_helper_image,
                 'cinder_volume': self.docker_image,
                 'cinder_volume_usage_audit': self.docker_image,
                 'db_drop': heat_image,
