@@ -708,13 +708,6 @@ def _apply_backend_changes(op, sb_obj):
             pecan.request.rpcapi.update_ceph_config(pecan.request.context,
                                                     sb_obj.uuid,
                                                     services)
-
-        else:
-            # Enable the service(s) use of the backend
-            if constants.SB_SVC_CINDER in services:
-                pecan.request.rpcapi.update_ceph_services(
-                    pecan.request.context, sb_obj.uuid)
-
     elif op == constants.SB_API_OP_MODIFY:
         if sb_obj.name == constants.SB_DEFAULT_NAMES[
                 constants.SB_TYPE_CEPH]:
@@ -723,11 +716,6 @@ def _apply_backend_changes(op, sb_obj):
             pecan.request.rpcapi.update_ceph_config(pecan.request.context,
                                                     sb_obj.uuid,
                                                     services)
-        else:
-            # Services have been added or removed
-            pecan.request.rpcapi.update_ceph_services(
-                pecan.request.context, sb_obj.uuid)
-
     elif op == constants.SB_API_OP_DELETE:
         pass
 
