@@ -51,18 +51,12 @@ class GlanceHelm(openstack.OpenstackBaseHelm):
     def _get_images_overrides(self):
         heat_image = self._operator.chart_operators[
             constants.HELM_CHART_HEAT].docker_image
-        ceph_config_helper_image = "{}:{}/{}/{}{}:{}".format(
-            self._get_management_address(), common.REGISTRY_PORT,
-            common.REPO_LOC,
-            common.DOCKER_SRCS[self.docker_repo_source][common.IMG_PREFIX_KEY],
-            'ceph-config-helper', self.docker_repo_tag)
 
         return {
             'tags': {
                 'bootstrap': heat_image,
                 'db_drop': heat_image,
                 'db_init': heat_image,
-                'glance_storage_init': ceph_config_helper_image,
                 'glance_api': self.docker_image,
                 'glance_db_sync': self.docker_image,
                 'glance_registry': self.docker_image,
@@ -144,9 +138,12 @@ class GlanceHelm(openstack.OpenstackBaseHelm):
             replication, min_replication = \
                 StorageBackendConfig.get_ceph_pool_replication(self.dbapi)
 
-        # Only the primary Ceph tier is used for the glance images pool, so
-        # the crush ruleset is 0.
-        ruleset = 0
+        # Only the primary Ceph tier is used for the glance images pool
+        rule_name = "{0}{1}{2}".format(
+            constants.SB_TIER_DEFAULT_NAMES[
+                constants.SB_TIER_TYPE_CEPH],
+            constants.CEPH_CRUSH_TIER_SUFFIX,
+            "-ruleset").replace('-', '_')
 
         conf = {
             'glance': {
@@ -159,7 +156,7 @@ class GlanceHelm(openstack.OpenstackBaseHelm):
                     'rbd_store_pool': rbd_store_pool,
                     'rbd_store_user': rbd_store_user,
                     'rbd_store_replication': replication,
-                    'rbd_store_crush_rule': ruleset,
+                    'rbd_store_crush_rule': rule_name,
                 }
             }
         }
