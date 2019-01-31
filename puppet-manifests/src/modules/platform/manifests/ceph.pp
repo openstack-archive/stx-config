@@ -321,7 +321,8 @@ define platform_ceph_osd(
     mode   => '0755',
   }
   -> ceph::osd { $disk_path:
-    uuid => $osd_uuid,
+    uuid    => $osd_uuid,
+    osd__id => $osd_id,
   }
   -> exec { "configure journal location ${name}":
     logoutput => true,
