@@ -89,13 +89,18 @@ class platform::ceph
         }
       }
     } else {
-      # Multinode & standard have 3 monitors
+      # Multinode & standard have 3 monitors, configure the first one
       Class['::ceph']
       -> ceph_config {
         "mon.${mon_0_host}/host":      value => $mon_0_host;
         "mon.${mon_0_host}/mon_addr":  value => $mon_0_addr;
-        "mon.${mon_1_host}/host":      value => $mon_1_host;
-        "mon.${mon_1_host}/mon_addr":  value => $mon_1_addr;
+      }
+      if $mon_1_host {
+        Class['::ceph']
+        -> ceph_config {
+          "mon.${mon_1_host}/host":      value => $mon_1_host;
+          "mon.${mon_1_host}/mon_addr":  value => $mon_1_addr;
+        }
       }
       if $mon_2_host {
         Class['::ceph']
