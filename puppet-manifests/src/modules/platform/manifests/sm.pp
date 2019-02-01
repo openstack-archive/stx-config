@@ -1573,7 +1573,7 @@ class platform::sm
       command => 'sm-provision service-group-member storage-services mgr-restful-plugin',
     }
     -> exec { 'Provision mgr-restful-plugin (service mgr-restful-plugin)':
-      command => 'sm-provision service service mgr-restful-plugin',
+      command => 'sm-provision service mgr-restful-plugin',
     }
 
     # Ceph-Manager
