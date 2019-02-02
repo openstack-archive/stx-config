@@ -105,7 +105,7 @@ class AppOperator(object):
 
     def __init__(self, dbapi):
         self._dbapi = dbapi
-        self._docker = DockerHelper()
+        self._docker = DockerHelper(self._dbapi)
         self._helm = helm.HelmOperator(self._dbapi)
         self._kube = kubernetes.KubeOperator(self._dbapi)
         self._lock = threading.Lock()
@@ -1104,6 +1104,45 @@ class AppOperator(object):
 class DockerHelper(object):
     """ Utility class to encapsulate Docker related operations """
 
+    def __init__(self, dbapi=None):
+        self.k8s_registry = None
+        self.gcr_registry = None
+        self.quay_registry = None
+        self.docker_registry = None
+        self.dbapi = dbapi
+
+    def _get_docker_registry_by_name(self, registry_name):
+        try:
+            registry = self.dbapi.service_parameter_get_one(
+                            constants.SERVICE_TYPE_DOCKER,
+                            constants.SERVICE_PARAM_SECTION_DOCKER_REGISTRY,
+                            registry_name)
+            return registry.value
+        except Exception:
+            return None
+
+    def _retrieve_specified_registries(self):
+        k8s_registry = self._get_docker_registry_by_name("k8s")
+        if k8s_registry:
+            self.k8s_registry = k8s_registry
+        else:
+            self.k8s_registry = None
+        gcr_registry = self._get_docker_registry_by_name("gcr")
+        if gcr_registry:
+            self.gcr_registry = gcr_registry
+        else:
+            self.gcr_registry = None
+        quay_registry = self._get_docker_registry_by_name("quay")
+        if quay_registry:
+            self.quay_registry = quay_registry
+        else:
+            self.quay_registry = None
+        docker_registry = self._get_docker_registry_by_name("docker")
+        if docker_registry:
+            self.docker_registry = docker_registry
+        else:
+            self.docker_registry = None
+
     def _start_armada_service(self, client):
         try:
             container = client.containers.get(ARMADA_CONTAINER_NAME)
@@ -1130,6 +1169,11 @@ class DockerHelper(object):
                     kube_config: {'bind': '/armada/.kube/config', 'mode': 'ro'},
                     manifests_dir: {'bind': '/manifests', 'mode': 'ro'},
                     overrides_dir: {'bind': '/overrides', 'mode': 'ro'}}
+
+                # replace armada image tag with specified registry
+                #if self.quay_registry:
+                #    CONF.armada_image_tag = CONF.armada_image_tag.replace(
+                #        "quay.io", self.quay_registry)
 
                 container = client.containers.run(
                     CONF.armada_image_tag,
@@ -1229,9 +1273,50 @@ class DockerHelper(object):
                       (request, manifest_file, e))
         return rc
 
+    def _get_img_tag_with_registry(self, pub_img_tag):
+        registry_name = pub_img_tag[0:1 + pub_img_tag.find('/')]
+        img_name = pub_img_tag[1 + pub_img_tag.find('/'):]
+        if registry_name:
+            if 'k8s.gcr.io' in registry_name:
+                registry = self.k8s_registry
+            elif 'gcr.io' in registry_name:
+                registry = self.gcr_registry
+            elif 'quay.io' in registry_name:
+                registry = self.quay_registry
+            elif 'docker.io' in registry_name:
+                registry = self.docker_registry
+            else:
+                # try docker.io registry as default
+                # if other registries newly added
+                # or docker.io repository detected
+                LOG.info("Registry %s not recognized or docker.io repository "
+                         " detected. Pulling from docker public/private "
+                         "registry" % registry_name)
+                registry = self.docker_registry
+                if registry:
+                    return str(registry) + '/' + pub_img_tag
+                else:
+                    return pub_img_tag
+
+            # replace registry
+            if registry:
+                return str(registry) + '/' + img_name
+            else:
+                return pub_img_tag
+        else:
+            # docker.io registry as default
+            # if no registries specified in img tag
+            registry = self.docker_registry
+            if registry:
+                return str(registry) + '/' + pub_img_tag
+            else:
+                return pub_img_tag
+
     def download_an_image(self, loc_img_tag):
 
         rc = True
+        # retrieve user specified registries first
+        self._retrieve_specified_registries()
         start = time.time()
         try:
             # Pull image from local docker registry
@@ -1245,12 +1330,14 @@ class DockerHelper(object):
                 LOG.info("Image %s is not available in local registry, "
                          "download started from public registry" % loc_img_tag)
                 pub_img_tag = loc_img_tag[1 + loc_img_tag.find('/'):]
-                client.pull(pub_img_tag)
-                client.tag(pub_img_tag, loc_img_tag)
+                target_img_tag = self._get_img_tag_with_registry(pub_img_tag)
+                client.pull(target_img_tag)
+                client.tag(target_img_tag, loc_img_tag)
                 client.push(loc_img_tag)
             except Exception as e:
                 rc = False
-                LOG.error("Image %s download failed from public registry: %s" % (pub_img_tag, e))
+                LOG.error("Image %s download failed from public/private "
+                          "registry: %s" % (target_img_tag, e))
         except Exception as e:
             rc = False
             LOG.error("Image %s download failed from local registry: %s" % (loc_img_tag, e))
