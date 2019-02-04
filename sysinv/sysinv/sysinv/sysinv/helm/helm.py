@@ -62,19 +62,29 @@ class HelmOperator(object):
         # register chart operators for lookup
         self.chart_operators = {}
 
-        helm_plugins = extension.ExtensionManager(
-            namespace='systemconfig.helm_plugins',
-            invoke_on_load=True, invoke_args=(self,))
+        self.helm_applications = self.get_helm_applications()
 
-        for plugin in helm_plugins.extensions:
-            self.chart_operators.update({plugin.name: plugin.obj})
-            LOG.debug("Loaded helm plugin %s" % plugin.name)
+    def get_helm_applications(self):
+        """Build a dictionary of supported helm applications"""
 
-        # build the list of registered supported charts
-        self.implemented_charts = []
-        for chart in constants.SUPPORTED_HELM_CHARTS:
-            if chart in self.chart_operators.keys():
-                self.implemented_charts.append(chart)
+        helm_application_dict = {}
+        helm_applications = extension.ExtensionManager(namespace='systemconfig.helm_applications')
+        for entry_point in helm_applications.list_entry_points():
+            helm_application_dict[entry_point.name] = entry_point.module_name
+
+        supported_helm_applications = {}
+        for name, namespace in helm_application_dict.items():
+            supported_helm_applications[name] = []
+            helm_plugins = extension.ExtensionManager(namespace=namespace, invoke_on_load=True, invoke_args=(self,))
+            sorted_helm_plugins = sorted(helm_plugins.extensions, key=lambda x: x.name)
+            for plugin in sorted_helm_plugins:
+                plugin_name = plugin.name[4:]
+                self.chart_operators.update({plugin_name: plugin.obj})
+            for plugin in sorted_helm_plugins:
+                plugin_name = plugin.name[4:]
+                supported_helm_applications[name].append((plugin_name, self.chart_operators[plugin_name]))
+
+        return supported_helm_applications
 
     @property
     def context(self):
@@ -92,7 +102,7 @@ class HelmOperator(object):
         """
 
         namespaces = []
-        if chart_name in self.implemented_charts:
+        if chart_name in self.helm_applications:
             namespaces = self.chart_operators[chart_name].get_namespaces()
         return namespaces
 
@@ -136,9 +146,8 @@ class HelmOperator(object):
             }
         }
         """
-
         overrides = {}
-        if chart_name in self.implemented_charts:
+        if chart_name in self.chart_operators:
             try:
                 overrides.update(
                     self.chart_operators[chart_name].get_overrides(
@@ -160,9 +169,9 @@ class HelmOperator(object):
         """
 
         app_namespaces = {}
-        if app_name in constants.SUPPORTED_HELM_APP_NAMES:
-            for chart_name in constants.SUPPORTED_HELM_APP_CHARTS[app_name]:
-                if chart_name in self.implemented_charts:
+        if app_name in self.helm_applications:
+            for chart_name in self.helm_applications[app_name]:
+                if chart_name in self.helm_applications:
                     try:
                         app_namespaces.update({chart_name:
                                                self.get_helm_chart_namespaces(
@@ -217,18 +226,16 @@ class HelmOperator(object):
              }
         }
         """
-
         overrides = {}
-        if app_name in constants.SUPPORTED_HELM_APP_NAMES:
-            for chart_name in constants.SUPPORTED_HELM_APP_CHARTS[app_name]:
-                if chart_name in self.implemented_charts:
-                    try:
-                        overrides.update({chart_name:
-                                          self._get_helm_chart_overrides(
-                                              chart_name,
-                                              cnamespace)})
-                    except exception.InvalidHelmNamespace as e:
-                        LOG.info(e)
+        if app_name in self.helm_applications:
+            for chart_name, chart_class in self.helm_applications[app_name]:
+                try:
+                    overrides.update({chart_name:
+                                      self._get_helm_chart_overrides(
+                                          chart_name,
+                                          cnamespace)})
+                except exception.InvalidHelmNamespace as e:
+                    LOG.info(e)
         return overrides
 
     def _get_helm_chart_location(self, chart_name):
@@ -239,7 +246,7 @@ class HelmOperator(object):
         :param chart_name: name of the chart
         :returns: a URL as location or None if the chart is not supported
         """
-        if chart_name in self.implemented_charts:
+        if chart_name in self.chart_operators:
             return self.chart_operators[chart_name].get_chart_location(
                 chart_name)
         return None
@@ -342,7 +349,7 @@ class HelmOperator(object):
         :param cnamespace: (optional) namespace
         """
 
-        if chart_name in self.implemented_charts:
+        if chart_name in self.chart_operators:
             namespaces = self.chart_operators[chart_name].get_namespaces()
             if cnamespace and cnamespace not in namespaces:
                 LOG.exception("The %s chart does not support namespace: %s" %
@@ -367,7 +374,7 @@ class HelmOperator(object):
     @helm_context
     def generate_meta_overrides(self, chart_name, chart_namespace):
         overrides = {}
-        if chart_name in self.implemented_charts:
+        if chart_name in self.chart_operators:
             try:
                 overrides.update(
                     self.chart_operators[chart_name].get_meta_overrides(
@@ -396,7 +403,7 @@ class HelmOperator(object):
                          system overrides
         """
 
-        if app_name in constants.SUPPORTED_HELM_APP_NAMES:
+        if app_name in self.helm_applications:
             app_overrides = self._get_helm_application_overrides(app_name,
                                                                  cnamespace)
             for (chart_name, overrides) in iteritems(app_overrides):
@@ -438,7 +445,6 @@ class HelmOperator(object):
                         new_overrides = self._add_armada_override_header(
                             chart_name, key, overrides[key])
                         overrides[key] = new_overrides
-
                 self._write_chart_overrides(chart_name, cnamespace, overrides)
 
                 # Write any meta-overrides for this chart.  These will be in
@@ -459,7 +465,7 @@ class HelmOperator(object):
     def remove_helm_chart_overrides(self, chart_name, cnamespace=None):
         """Remove the overrides files for a chart"""
 
-        if chart_name in self.implemented_charts:
+        if chart_name in self.helm_applications:
             namespaces = self.chart_operators[chart_name].get_namespaces()
 
             filenames = []
