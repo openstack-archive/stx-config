@@ -6,6 +6,8 @@
 
 from sysinv.common import constants
 from sysinv.common import exception
+from sysinv.common.storage_backend_conf import StorageBackendConfig
+
 from sysinv.openstack.common import log as logging
 
 from sysinv.helm import common
@@ -126,9 +128,12 @@ class GlanceHelm(openstack.OpenstackBaseHelm):
         if not ceph_backend:
             rbd_store_pool = ""
             rbd_store_user = ""
+            replication = 1
         else:
             rbd_store_pool = constants.CEPH_POOL_IMAGES_NAME
             rbd_store_user = RBD_STORE_USER
+            replication, min_replication = \
+                StorageBackendConfig.get_ceph_pool_replication(self.dbapi)
 
         conf = {
             'glance': {
@@ -140,6 +145,7 @@ class GlanceHelm(openstack.OpenstackBaseHelm):
                     'filesystem_store_datadir': constants.GLANCE_IMAGE_PATH,
                     'rbd_store_pool': rbd_store_pool,
                     'rbd_store_user': rbd_store_user,
+                    'rbd_store_replication': replication,
                 }
             }
         }
