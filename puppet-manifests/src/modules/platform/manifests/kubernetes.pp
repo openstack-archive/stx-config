@@ -124,19 +124,20 @@ class platform::kubernetes::master::init
       logoutput => true,
     }
 
-    # Add a dependency to kubelet on config so it doesn't enter a bad state on subsequent boots
-    -> file { '/etc/systemd/system/kubelet.service.d/kube-stx-override.conf':
-      ensure  => file,
-      content => template('platform/kube-stx-override.conf.erb'),
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
+    # Add kubelet service override
+    -> exec { 'override kubelet service':
+      command   => 'ln -s /usr/share/starlingx/kubelet-stx-override.conf /etc/systemd/system/kubelet.service.d/kubelet-stx-override.conf'
     }
 
     # Reload systemd
     -> exec { 'perform systemctl daemon reload for kubelet override':
       command   => 'systemctl daemon-reload',
       logoutput => true,
+    }
+
+    # Enable pmond monitors kubelet
+    -> exec { 'Enable pmond monitor kubelet service':
+      command   => 'ln -s /usr/share/starlingx/kubelet-pmond.conf /etc/pmon.d//kubelet-pmond.conf'
     }
   } else {
     if str2bool($::is_initial_config) {
@@ -221,19 +222,20 @@ class platform::kubernetes::master::init
         logoutput => true,
       }
 
-      # Add a dependency to kubelet on config so it doesn't enter a bad state on subsequent boots
-      -> file { '/etc/systemd/system/kubelet.service.d/kube-stx-override.conf':
-        ensure  => file,
-        content => template('platform/kube-stx-override.conf.erb'),
-        owner   => 'root',
-        group   => 'root',
-        mode    => '0644',
+      # Add kubelet service override
+      -> exec { 'override kubelet service':
+        command   => 'ln -s /usr/share/starlingx/kubelet-stx-override.conf /etc/systemd/system/kubelet.service.d/kubelet-stx-override.conf'
       }
 
       # Reload systemd
       -> exec { 'perform systemctl daemon reload for kubelet override':
         command   => 'systemctl daemon-reload',
         logoutput => true,
+      }
+
+      # Enable pmond monitors kubelet
+      -> exec { 'Enable pmond monitor kubelet service':
+        command   => 'ln -s /usr/share/starlingx/kubelet-pmond.conf /etc/pmon.d//kubelet-pmond.conf'
       }
     }
   }
@@ -272,19 +274,20 @@ class platform::kubernetes::worker::init
     unless    => 'test -f /etc/kubernetes/kubelet.conf',
   }
 
-  # Add a dependency to kubelet on config so it doesn't enter a bad state
-  -> file { '/etc/systemd/system/kubelet.service.d/kube-stx-override.conf':
-    ensure  => file,
-    content => template('platform/kube-stx-override.conf.erb'),
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0644',
+  # Add kubelet service override
+  -> exec { 'override kubelet service':
+    command   => 'ln -s /usr/share/starlingx/kubelet-stx-override.conf /etc/systemd/system/kubelet.service.d/kubelet-stx-override.conf'
   }
 
   # Reload systemd
   -> exec { 'perform systemctl daemon reload for kubelet override':
     command   => 'systemctl daemon-reload',
     logoutput => true,
+  }
+
+  # Enable pmond monitors kubelet
+  -> exec { 'Enable pmond monitor kubelet service':
+    command   => 'ln -s /usr/share/starlingx/kubelet-pmond.conf /etc/pmon.d//kubelet-pmond.conf'
   }
 }
 
