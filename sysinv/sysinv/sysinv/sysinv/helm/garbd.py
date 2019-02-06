@@ -22,12 +22,6 @@ class GarbdHelm(base.BaseHelm):
     SERVICE_NAME = 'mariadb'
 
     CHART = constants.HELM_CHART_GARBD
-    SUPPORTED_NAMESPACES = [
-        common.HELM_NS_OPENSTACK
-    ]
-
-    def get_namespaces(self):
-        return self.SUPPORTED_NAMESPACES
 
     def get_meta_overrides(self, namespace):
 
