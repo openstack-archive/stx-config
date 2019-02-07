@@ -287,6 +287,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                 'enable_new_agents': False,
                 'allow_automatic_dhcp_failover': True,
                 'allow_automatic_l3agent_failover': True,
+                'network_segment_range ': True,
             },
             'vhost': {
                 'vhost_user_enabled': True,
