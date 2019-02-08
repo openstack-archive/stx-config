@@ -11,6 +11,7 @@
 
 import docker
 import grp
+import keyring
 import os
 import pwd
 import re
@@ -57,6 +58,9 @@ INSTALLATION_TIMEOUT = 3600
 MAX_DOWNLOAD_THREAD = 20
 TARFILE_DOWNLOAD_CONNECTION_TIMEOUT = 60
 TARFILE_TRANSFER_CHUNK_SIZE = 1024 * 512
+DOCKER_REGISTRY_USER = 'admin'
+DOCKER_REGISTRY_SERVICE = 'CGCS'
+DOCKER_REGISTRY_SECRET = 'default-registry-key'
 
 
 # Helper functions
@@ -97,6 +101,17 @@ def get_app_install_root_path_ownership():
     return (uid, gid)
 
 
+def get_docker_registry_auth():
+    registry_passord = keyring.get_password(
+        DOCKER_REGISTRY_SERVICE, DOCKER_REGISTRY_USER)
+    if not registry_passord:
+        raise exception.DockerRegistryCredentialNotFound(
+            name=DOCKER_REGISTRY_USER)
+
+    return dict(username=DOCKER_REGISTRY_USER,
+                password=registry_passord)
+
+
 Chart = namedtuple('Chart', 'name namespace')
 
 
@@ -105,7 +120,7 @@ class AppOperator(object):
 
     def __init__(self, dbapi):
         self._dbapi = dbapi
-        self._docker = DockerHelper()
+        self._docker = DockerHelper(self._dbapi)
         self._helm = helm.HelmOperator(self._dbapi)
         self._kube = kubernetes.KubeOperator(self._dbapi)
         self._lock = threading.Lock()
@@ -653,6 +668,89 @@ class AppOperator(object):
                 self._remove_host_labels(controller_hosts, controller_labels_set)
                 self._remove_host_labels(compute_hosts, compute_labels_set)
 
+    def _create_registry_secrets(self, namespaces):
+        # Temporary function to create default registry secret under each
+        # namespace which would be used by kubernetes to pull images from
+        # local registry.
+        # This should be removed after OSH supports the deployment with
+        # registry has authentication turned on.
+        # https://blueprints.launchpad.net/openstack-helm/+spec/
+        # support-docker-registry-with-authentication-turned-on
+
+        for namespace in namespaces:
+            try:
+                p1 = subprocess.Popen(
+                    ['kubectl', '--kubeconfig=/etc/kubernetes/admin.conf',
+                     'get', 'namespace', namespace],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                out, err = p1.communicate()
+                if "NotFound" in err:
+                    subprocess.check_call(
+                        ['kubectl', '--kubeconfig=/etc/kubernetes/admin.conf',
+                         'create', 'namespace', namespace])
+
+                p2 = subprocess.Popen(
+                    ['kubectl', '--kubeconfig=/etc/kubernetes/admin.conf',
+                     'get', 'secret', DOCKER_REGISTRY_SECRET, '-n', namespace],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                out, err = p2.communicate()
+                if out and not err:
+                    LOG.info("Secret %s already created under namespace "
+                             "%s" % (DOCKER_REGISTRY_SECRET, namespace))
+                    # Secret already exists
+                    continue
+
+                registry_server = self._docker.get_docker_registry_server()
+                registry_auth = get_docker_registry_auth()
+                p3 = subprocess.Popen(
+                    ['kubectl', '--kubeconfig=/etc/kubernetes/admin.conf',
+                     'create', 'secret', 'docker-registry', DOCKER_REGISTRY_SECRET,
+                     '--docker-server', registry_server,
+                     '--docker-username', registry_auth['username'],
+                     '--docker-password', registry_auth['password'],
+                     '-n', namespace],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                out, err = p3.communicate()
+                if out and not err:
+                    LOG.info("Secret %s created under namespace "
+                             "%s" % (DOCKER_REGISTRY_SECRET, namespace))
+                else:
+                    raise Exception
+            except Exception as e:
+                LOG.error("Failed to create Secret %s under namespace %s: "
+                          "%s" % (DOCKER_REGISTRY_SECRET, namespace, e))
+                raise
+
+    def _delete_registry_secrets(self, namespaces):
+        # Temporary function to delete default registry secret under each
+        # namespace which created before application-apply
+        # This should be removed after OSH supports the deployment with
+        # registry has authentication turned on.
+        # https://blueprints.launchpad.net/openstack-helm/+spec/
+        # support-docker-registry-with-authentication-turned-on
+
+        for namespace in namespaces:
+            try:
+                p1 = subprocess.Popen(
+                    ['kubectl', '--kubeconfig=/etc/kubernetes/admin.conf',
+                     'delete', 'secret', DOCKER_REGISTRY_SECRET, '-n', namespace],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                out, err = p1.communicate()
+                if out or ("NotFound" in err):
+                    LOG.info("Secret %s deleted under namespace %s" %
+                             (DOCKER_REGISTRY_SECRET, namespace))
+                else:
+                    LOG.error("Failed to clean up Secret %s under "
+                              "namespace %s after app removal." %
+                              (DOCKER_REGISTRY_SECRET, namespace))
+            except Exception as e:
+                LOG.exception("Failed to clean up Secret %s under "
+                              "namespace %s: %s" % (DOCKER_REGISTRY_SECRET, namespace, e))
+
     def _get_list_of_charts(self, manifest_file):
         charts = []
         with open(manifest_file, 'r') as f:
@@ -893,6 +991,8 @@ class AppOperator(object):
         try:
             app.charts = self._get_list_of_charts(app.armada_mfile_abs)
             if app.system_app:
+                self._create_registry_secrets([common.HELM_NS_OPENSTACK,
+                                               common.HELM_NS_KUBE_SYSTEM])
                 self._update_app_status(
                     app, new_progress=constants.APP_PROGRESS_GENERATE_OVERRIDES)
                 LOG.info("Generating application overrides...")
@@ -955,6 +1055,9 @@ class AppOperator(object):
 
         if self._make_armada_request_with_monitor(app, constants.APP_DELETE_OP):
             if app.system_app:
+
+                self._delete_registry_secrets([common.HELM_NS_OPENSTACK,
+                                               common.HELM_NS_KUBE_SYSTEM])
 
                 # TODO convert these kubectl commands to use the k8s api
                 p1 = subprocess.Popen(
@@ -1104,6 +1207,9 @@ class AppOperator(object):
 class DockerHelper(object):
     """ Utility class to encapsulate Docker related operations """
 
+    def __init__(self, dbapi):
+        self._dbapi = dbapi
+
     def _start_armada_service(self, client):
         try:
             container = client.containers.get(ARMADA_CONTAINER_NAME)
@@ -1229,34 +1335,60 @@ class DockerHelper(object):
                       (request, manifest_file, e))
         return rc
 
-    def download_an_image(self, loc_img_tag):
+    def get_docker_registry_server(self):
+        registry_ip = self._dbapi.address_get_by_name(
+            cutils.format_address_name(constants.CONTROLLER_HOSTNAME,
+                                   constants.NETWORK_TYPE_MGMT)
+        ).address
+        registry_server = '{}:{}'.format(registry_ip, common.REGISTRY_PORT)
+        return registry_server
+
+    def download_an_image(self, img_tag):
 
         rc = True
+        registry_server = self.get_docker_registry_server()
+
         start = time.time()
-        try:
-            # Pull image from local docker registry
-            LOG.info("Image %s download started from local registry" % loc_img_tag)
-            client = docker.APIClient(timeout=INSTALLATION_TIMEOUT)
-            client.pull(loc_img_tag)
-        except docker.errors.NotFound:
+        if img_tag.startswith(registry_server):
             try:
-                # Image is not available in local docker registry, get the image
-                # from the public registry and push to the local registry
-                LOG.info("Image %s is not available in local registry, "
-                         "download started from public registry" % loc_img_tag)
-                pub_img_tag = loc_img_tag[1 + loc_img_tag.find('/'):]
-                client.pull(pub_img_tag)
-                client.tag(pub_img_tag, loc_img_tag)
-                client.push(loc_img_tag)
+                LOG.info("Image %s download started from local registry" % img_tag)
+                registry_auth = get_docker_registry_auth()
+                client = docker.APIClient(timeout=INSTALLATION_TIMEOUT)
+                client.pull(img_tag, auth_config=registry_auth)
+            except docker.errors.NotFound:
+                try:
+                    # Pull the image from the public registry
+                    LOG.info("Image %s is not available in local registry, "
+                             "download started from public registry" % img_tag)
+                    pub_img_tag = img_tag.replace(registry_server + "/", "")
+                    client.pull(pub_img_tag)
+                except Exception as e:
+                    rc = False
+                    LOG.error("Image %s download failed from public registry: %s" % (pub_img_tag, e))
+                    return img_tag, rc
+
+                try:
+                    # Tag and push the image to the local registry
+                    client.tag(pub_img_tag, img_tag)
+                    client.push(img_tag, auth_config=registry_auth)
+                except Exception as e:
+                    rc = False
+                    LOG.error("Image %s push failed to local registry: %s" % (img_tag, e))
             except Exception as e:
                 rc = False
-                LOG.error("Image %s download failed from public registry: %s" % (pub_img_tag, e))
-        except Exception as e:
-            rc = False
-            LOG.error("Image %s download failed from local registry: %s" % (loc_img_tag, e))
-        elapsed_time = time.time() - start
+                LOG.error("Image %s download failed from local registry: %s" % (img_tag, e))
 
+        else:
+            try:
+                LOG.info("Image %s download started from public registry" % img_tag)
+                client = docker.APIClient(timeout=INSTALLATION_TIMEOUT)
+                client.pull(img_tag)
+            except Exception as e:
+                rc = False
+                LOG.error("Image %s download failed from public registry: %s" % (img_tag, e))
+
+        elapsed_time = time.time() - start
         if rc:
             LOG.info("Image %s download succeeded in %d seconds" %
-                     (loc_img_tag, elapsed_time))
-        return loc_img_tag, rc
+                     (img_tag, elapsed_time))
+        return img_tag, rc
