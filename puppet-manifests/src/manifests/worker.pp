@@ -36,8 +36,10 @@ include ::platform::kubernetes::worker
 include ::platform::multipath
 include ::platform::client
 
-include ::platform::ceph
-include ::platform::ceph::monitor
+if $::personality == 'worker' {
+  include ::platform::ceph
+  include ::platform::ceph::monitor
+}
 
 include ::openstack::client
 include ::openstack::neutron
