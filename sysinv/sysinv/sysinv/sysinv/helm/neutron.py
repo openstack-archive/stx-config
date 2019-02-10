@@ -288,7 +288,8 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                 'lock_path': '/var/run/neutron/lock',
                 'log_format': '[%(name)s] %(message)s',
                 'policy_file': '/etc/neutron/policy.json',
-                'service_plugins': 'router',
+                'service_plugins':
+                    'router' + ',' + constants.NEUTRON_PLUGIN_NETWORK_SEGMENT_RANGE,
                 'dns_domain': 'openstacklocal',
                 'enable_new_agents': False,
                 'allow_automatic_dhcp_failover': True,
