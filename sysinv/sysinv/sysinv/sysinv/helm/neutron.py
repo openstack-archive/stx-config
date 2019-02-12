@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 Wind River Systems, Inc.
+# Copyright (c) 2018-2019 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -32,40 +32,14 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
         overrides = {
             common.HELM_NS_OPENSTACK: {
                 'pod': {
-                    'user': {
-                        'neutron': {
-                            'uid': 0
-                        }
-                    },
                     'replicas': {
                         'server': self._num_controllers()
                     },
-                },
-                'network': {
-                    'interface': {
-                        'tunnel': 'docker0'
-                    },
-                    'backend': ['openvswitch', 'sriov'],
                 },
                 'conf': {
                     'neutron': self._get_neutron_config(),
                     'plugins': {
                         'ml2_conf': self._get_neutron_ml2_config(),
-                    },
-                    'dhcp_agent': {
-                        'DEFAULT': {
-                            'resync_interval': 30,
-                            'enable_isolated_metadata': True,
-                            'enable_metadata_network': False,
-                            'interface_driver': 'openvswitch',
-                        },
-                    },
-                    'l3_agent': {
-                        'DEFAULT': {
-                            'interface_driver': 'openvswitch',
-                            'agent_mode': 'dvr_snat',
-                            'metadata_port': 80,
-                        },
                     },
                     'overrides': {
                         'neutron_ovs-agent': {
