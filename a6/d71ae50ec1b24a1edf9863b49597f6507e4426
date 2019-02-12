@@ -1,0 +1,9 @@
+Code-Review+2: Al Bailey <al.bailey@windriver.com>
+Code-Review+2: John Kung <john.kung@windriver.com>
+Workflow+1: John Kung <john.kung@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 12 Feb 2019 15:19:52 +0000
+Reviewed-on: https://review.openstack.org/636344
+Project: openstack/stx-config
+Branch: refs/heads/master
