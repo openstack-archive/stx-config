@@ -103,14 +103,12 @@ class platform::ptp (
       command => '/usr/bin/systemctl enable phc2sys.service',
     }
     -> service { 'ptp4l':
-      ensure     => 'running',
       enable     => true,
       name       => 'ptp4l',
       hasstatus  => true,
       hasrestart => true,
     }
     -> service { 'phc2sys':
-      ensure     => 'running',
       enable     => true,
       name       => 'phc2sys',
       hasstatus  => true,
