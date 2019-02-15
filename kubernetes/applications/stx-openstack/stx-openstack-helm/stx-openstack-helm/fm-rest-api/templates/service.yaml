@@ -1,0 +1,25 @@
+{{/*
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+*/}}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fm-rest-api.fullname" . }}
+  labels:
+    app: {{ include "fm-rest-api.name" . }}
+    chart: {{ include "fm-rest-api.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 18003
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "fm-rest-api.name" . }}
+    release: {{ .Release.Name }}

@@ -1,0 +1,34 @@
+{{/*
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+*/}}
+
+{{- if .Values.manifests.configmap_etc }}
+{{- $envAll := . }}
+{{- if empty .Values.conf.fm.database.connection -}}
+{{- $_ := tuple "oslo_db" "internal" "fm" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.fm.database "connection" -}}
+{{- end -}}
+{{- if empty .Values.conf.fm.DEFAULT.sql_connection -}}
+{{- $_ := tuple "oslo_db" "internal" "fm" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.fm.DEFAULT "sql_connection" -}}
+{{- end -}}
+{{- if empty .Values.conf.fm.keystone_authtoken.auth_uri -}}
+{{- $_ := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.fm.keystone_authtoken "auth_uri" -}}
+{{- end -}}
+{{- if empty .Values.conf.fm.keystone_authtoken.auth_url -}}
+{{- $_ := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.fm.keystone_authtoken "auth_url" -}}
+{{- end -}}
+{{- if empty .Values.conf.fm.keystone_authtoken.password -}}
+{{- $_ := set .Values.conf.fm.keystone_authtoken "password" .Values.endpoints.identity.auth.fm.password -}}
+{{- end -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fm-rest-api-etc
+data:
+  api-paste.ini: |
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.paste | indent 4 }}
+  fm.conf: |
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.fm | indent 4 }}
+{{- end -}}
