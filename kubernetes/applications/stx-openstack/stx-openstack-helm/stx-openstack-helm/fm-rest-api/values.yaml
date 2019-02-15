@@ -1,0 +1,45 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Default values for fm-rest-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: starlingx/stx-fm-rest-api
+  tag: dev-centos-pike-build
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 18002
+
+ingress:
+  enabled: false
+  annotations: {}
+  paths: []
+  hosts:
+    - chart-example.local
+  tls: []
+
+conf:
+  paste:
+    app_factory: fm.api.app:app_factory
+    acl_public_routes: /, /v1
+    filter_factory_ath: fm.api.middleware.auth_token:AuthTokenMiddleware.factory
+    filter_factory: oslo_middleware:RequestId.factory
+    pipeline: request_id authtoken api_v1
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
