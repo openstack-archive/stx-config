@@ -1,0 +1,13 @@
+{{/*
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+*/}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fm-rest-api-bin
+data:
+  fm-rest-api.sh: |
+{{ tuple "bin/_fm-rest-api.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
