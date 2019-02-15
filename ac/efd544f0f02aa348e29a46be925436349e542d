@@ -1,0 +1,11 @@
+Code-Review+2: Al Bailey <al.bailey@windriver.com>
+Code-Review+1: Brent Rowsell <brent.rowsell@windriver.com>
+Code-Review+2: Bob Church <robert.church@windriver.com>
+Workflow+1: Bob Church <robert.church@windriver.com>
+Code-Review+1: Joseph Richard <joseph.richard@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 15 Feb 2019 17:51:23 +0000
+Reviewed-on: https://review.openstack.org/637051
+Project: openstack/stx-config
+Branch: refs/heads/master
