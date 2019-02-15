@@ -71,5 +71,23 @@ class NovaApiProxyHelm(openstack.OpenstackBaseHelm):
             'identity': {
                 'auth': self._get_endpoints_identity_overrides(
                     nova_service_name, self.AUTH_USERS),
-            }
+                'host_fqdn_override':
+                    self._get_endpoints_host_fqdn_overrides(
+                        constants.HELM_CHART_KEYSTONE),
+            },
+            'compute': {
+                'host_fqdn_override':
+                    self._get_endpoints_host_fqdn_overrides(
+                        constants.HELM_CHART_NOVA),
+            },
+            'image': {
+                'host_fqdn_override':
+                    self._get_endpoints_host_fqdn_overrides(
+                        constants.HELM_CHART_GLANCE),
+            },
+            'network': {
+                'host_fqdn_override':
+                    self._get_endpoints_host_fqdn_overrides(
+                        constants.HELM_CHART_NEUTRON),
+            },
         }

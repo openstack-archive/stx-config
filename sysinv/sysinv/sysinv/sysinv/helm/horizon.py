@@ -72,6 +72,16 @@ class HorizonHelm(openstack.OpenstackBaseHelm):
 
     def _get_endpoints_overrides(self):
         return {
+            'identity': {
+                'host_fqdn_override':
+                    self._get_endpoints_host_fqdn_overrides(
+                        constants.HELM_CHART_KEYSTONE),
+            },
+            'dashboard': {
+                'host_fqdn_override':
+                    self._get_endpoints_host_fqdn_overrides(
+                        constants.HELM_CHART_HORIZON),
+            },
             'oslo_db': {
                 'auth': self._get_endpoints_oslo_db_overrides(
                     self.SERVICE_NAME, [self.SERVICE_NAME])
