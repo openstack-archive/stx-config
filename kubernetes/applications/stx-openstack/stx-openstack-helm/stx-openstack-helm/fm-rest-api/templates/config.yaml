@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fm-rest-api-paste-etc
+data:
+  api-paste.ini: |+
+    [app:api_v1]
+    paste.app_factory={{ .Values.conf.paste.app_factory }}
+
+    [filter:authtoken]
+    acl_public_routes={{ .Values.conf.paste.acl_public_routes }}
+    paste.filter_factory={{ .Values.conf.paste.filter_factory_ath }}
+
+    [filter:request_id]
+    paste.filter_factory={{ .Values.conf.paste.filter_factory }}
+
+    [pipeline:fm-api]
+    pipeline={{ .Values.conf.paste.pipeline }}
