@@ -1298,6 +1298,12 @@ class InvalidHelmNamespace(Invalid):
     message = _("Invalid helm overrides namespace (%(namespace)s) for chart %(chart)s.")
 
 
+class LocalManagementPersonalityNone(Invalid):
+    message = _("Local management personality is none: "
+                "config_uuid=%(config_uuid)s, config_dict=%(config_dict)s, "
+                "host_personality=%(host_personality)s")
+
+
 class LocalManagementIpNotFound(NotFound):
     message = _("Local management IP not found: "
                 "config_uuid=%(config_uuid)s, config_dict=%(config_dict)s, "
