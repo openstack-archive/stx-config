@@ -619,8 +619,6 @@ data:
         nova:
           uid: 0
     conf:
-      ceph:
-        enabled: true
       nova:
         DEFAULT:
           default_mempages_size: 2048
