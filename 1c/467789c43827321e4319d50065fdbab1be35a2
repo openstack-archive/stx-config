@@ -1,0 +1,9 @@
+Code-Review+2: Chris Friesen <chris.friesen@windriver.com>
+Code-Review+2: Bart Wensley <barton.wensley@windriver.com>
+Workflow+1: Bart Wensley <barton.wensley@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 20 Feb 2019 13:15:11 +0000
+Reviewed-on: https://review.openstack.org/638085
+Project: openstack/stx-config
+Branch: refs/heads/master
