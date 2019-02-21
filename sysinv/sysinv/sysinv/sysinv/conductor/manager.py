@@ -373,9 +373,10 @@ class ConductorManager(service.PeriodicService):
         entity_instance_id = "%s=%s" % (fm_constants.FM_ENTITY_TYPE_HOST,
                                         constants.CONTROLLER_HOSTNAME)
 
-        if not self.fm_api.get_fault(
+        resp, alarm = self.fm_api.get_fault(
                 fm_constants.FM_ALARM_ID_UPGRADE_IN_PROGRESS,
-                entity_instance_id):
+                entity_instance_id)
+        if not alarm:
             fault = fm_api.Fault(
                 alarm_id=fm_constants.FM_ALARM_ID_UPGRADE_IN_PROGRESS,
                 alarm_state=fm_constants.FM_ALARM_STATE_SET,
@@ -9800,7 +9801,8 @@ class ConductorManager(service.PeriodicService):
                 self._set_tpm_config_state(tpm_host, response_dict)
                 # set an alarm for this host and tell
                 # mtce to degrade this node
-                if not self.fm_api.get_fault(alarm_id, entity_instance_id):
+                resp, alarm = self.fm_api.get_fault(alarm_id, entity_instance_id)
+                if not alarm:
                     fault = fm_api.Fault(
                         alarm_id=alarm_id,
                         alarm_state=fm_constants.FM_ALARM_STATE_SET,
