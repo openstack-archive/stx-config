@@ -7,7 +7,10 @@ Exec {
   path => '/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin:/usr/local/sbin'
 }
 
-include ::firewall
+# include ::firewall
+class { '::firewall':
+   ensure => stopped
+}
 
 include ::platform::config
 include ::platform::users
