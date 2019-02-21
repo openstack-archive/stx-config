@@ -7,7 +7,29 @@ Exec {
   path => '/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin:/usr/local/sbin'
 }
 
-include ::firewall
+#
+# As per the commit message that introduces this temporary
+# disabling of the firewall service:
+#
+# Docker and kubernetes add rules to iptables, which can end up
+# persisted in /etc/sysconfig/iptables by calls to iptables-save.
+# When the puppet manifest is applied during node initialization,
+# kubernetes is not yet running, and any related iptables rules
+# will fail.
+#
+# This update disables the restoration of iptables rules from
+# previous boots, to ensure the puppet manifest does not fail
+# to apply due to invalid rules. However, this means that in
+# a DOR scenario (Dead Office Recovery, where both controllers
+# will be intializing at the same time), the firewall rules
+# will not get reapplied.
+#
+# Firewall management will be moved to Calico under story 2005066,
+# at which point this code will be removed.
+#
+class { '::firewall':
+  ensure => stopped
+}
 
 include ::platform::config
 include ::platform::users
