@@ -318,21 +318,17 @@ class AppOperator(object):
             image_tags.extend(ids)
         return list(set(image_tags))
 
-    def _get_image_tags_by_charts(self, app_path, charts):
-        """ Mine the image tags from the chart paths. Add the converted
-            image tags to the overrides if the image tags from the chart
-            paths do not exist. Intended for system app.
+    def _get_image_tags_by_charts(self, app_images_file, charts):
+        """ Mine the image tags for charts from the images file. Add the
+            converted image tags to the overrides if the image tags from
+            the charts do not exist. Intended for system app.
 
             The image tagging conversion(local docker registry address prepended):
             ${LOCAL_DOCKER_REGISTRY_IP}:${REGISTRY_PORT}/<image-name>
             (ie..192.168.204.2:9001/docker.io/mariadb:10.2.13)
         """
 
-        local_docker_registry_ip = self._dbapi.address_get_by_name(
-            cutils.format_address_name(constants.CONTROLLER_HOSTNAME,
-                                       constants.NETWORK_TYPE_MGMT)
-        ).address
-
+        local_registry_server = self._docker.get_local_docker_registry_server()
         image_tags = []
         for chart in charts:
             images_charts = {}
@@ -340,15 +336,13 @@ class AppOperator(object):
             overrides = chart.namespace + '-' + chart.name + '.yaml'
             overrides_file = os.path.join(common.HELM_OVERRIDES_PATH,
                                           overrides)
-            chart_name = os.path.join(app_path, chart.name)
-            chart_path = os.path.join(chart_name, 'values.yaml')
 
-            # Get the image tags from the chart path
-            if os.path.exists(chart_path):
-                with open(chart_path, 'r') as file:
+            # Get the image tags by chart from the images file
+            if os.path.exists(app_images_file):
+                with open(app_images_file, 'r') as file:
                     try:
                         doc = yaml.load(file)
-                        images_charts = doc["images"]["tags"]
+                        images_charts = doc[chart.name]
                     except (TypeError, KeyError):
                         pass
 
@@ -368,9 +362,9 @@ class AppOperator(object):
             tags_updated = False
             for key, image_tag in images_charts.items():
                 if (key not in images_overrides and
-                        not image_tag.startswith(local_docker_registry_ip)):
+                        not image_tag.startswith(local_registry_server)):
                     images_overrides.update(
-                        {key: '{}:{}/{}'.format(local_docker_registry_ip, common.REGISTRY_PORT, image_tag)})
+                        {key: '{}/{}'.format(local_registry_server, image_tag)})
                     tags_updated = True
 
             if tags_updated:
@@ -421,9 +415,10 @@ class AppOperator(object):
             self._helm.generate_helm_application_overrides(
                 app.name, cnamespace=None, armada_format=True, combined=True)
             app.charts = self._get_list_of_charts(app.armada_mfile_abs)
+            self._save_images_list_by_charts(app)
             # Get the list of images from the updated images overrides
             images_to_download = self._get_image_tags_by_charts(
-                app.charts_dir, app.charts)
+                app.imgfile_abs, app.charts)
         else:
             # For custom apps, mine image tags from application path
             images_to_download = self._get_image_tags_by_path(app.path)
@@ -436,8 +431,31 @@ class AppOperator(object):
                 name=app.name,
                 reason="charts specify no docker images.")
 
+        with open(app.imgfile_abs, 'ab') as f:
+            yaml.safe_dump({"download_images": images_to_download}, f,
+                           default_flow_style=False)
+
+    def _save_images_list_by_charts(self, app):
+        # Mine the images from values.yaml files in the charts directory.
+        # The list of images for each chart are saved to the images file.
+        images_by_charts = {}
+        for chart in app.charts:
+            images = {}
+            chart_name = os.path.join(app.charts_dir, chart.name)
+            chart_path = os.path.join(chart_name, 'values.yaml')
+
+            if os.path.exists(chart_path):
+                with open(chart_path, 'r') as file:
+                    try:
+                        y = yaml.load(file)
+                        images = y["images"]["tags"]
+                    except (TypeError, KeyError):
+                        LOG.warn("Chart %s has no image tags" % chart_name)
+            if images:
+                images_by_charts.update({chart.name: images})
+
         with open(app.imgfile_abs, 'wb') as f:
-            yaml.safe_dump(images_to_download, f, explicit_start=True,
+            yaml.safe_dump(images_by_charts, f, explicit_start=True,
                            default_flow_style=False)
 
     def _retrieve_images_list(self, app_images_file):
@@ -454,16 +472,19 @@ class AppOperator(object):
             # between upload and apply, or between applies. Refresh the
             # saved images list.
             saved_images_list = self._retrieve_images_list(app.imgfile_abs)
-            combined_images_list = list(saved_images_list)
+            saved_download_images_list = saved_images_list.get("download_images")
+            combined_images_list = list(saved_download_images_list)
             combined_images_list.extend(
-                self._get_image_tags_by_charts(app.charts_dir, app.charts))
+                self._get_image_tags_by_charts(app.imgfile_abs, app.charts))
             images_to_download = list(set(combined_images_list))
-            if saved_images_list != images_to_download:
+            if set(saved_download_images_list) != set(images_to_download):
+                saved_images_list.update({"download_images": images_to_download})
                 with open(app.imgfile_abs, 'wb') as f:
-                    yaml.safe_dump(images_to_download, f, explicit_start=True,
+                    yaml.safe_dump(saved_images_list, f, explicit_start=True,
                                    default_flow_style=False)
         else:
-            images_to_download = self._retrieve_images_list(app.imgfile_abs)
+            images_to_download = self._retrieve_images_list(
+                app.imgfile_abs).get("download_images")
 
         total_count = len(images_to_download)
         threads = min(MAX_DOWNLOAD_THREAD, total_count)
