@@ -390,6 +390,12 @@ data:
             release_group: osh-openstack-glance
             component: test
   values:
+    bootstrap:
+      structured:
+        images:
+          cirros:
+            properties:
+              hypervisor_type: null
     labels:
       api:
         node_selector_key: openstack-control-plane
