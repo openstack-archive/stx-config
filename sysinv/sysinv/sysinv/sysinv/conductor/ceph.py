@@ -99,7 +99,7 @@ class CephOperator(object):
         try:
             response, body = self._ceph_api.status(body='json',
                                                    timeout=timeout)
-            if (body['output']['health']['overall_status'] !=
+            if (body['output']['health']['status'] !=
                     constants.CEPH_HEALTH_OK):
                 rc = False
         except Exception as e:
