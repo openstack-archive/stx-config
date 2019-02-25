@@ -471,7 +471,7 @@ class CephApiOperator(object):
         try:
             response, body = self._ceph_api.status(body='json',
                                                    timeout=timeout)
-            ceph_status = body['output']['health']['overall_status']
+            ceph_status = body['output']['health']['status']
             if ceph_status != constants.CEPH_HEALTH_OK:
                 LOG.warn("ceph status=%s " % ceph_status)
                 rc = False
