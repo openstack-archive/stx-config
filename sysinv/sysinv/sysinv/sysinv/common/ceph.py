@@ -504,7 +504,7 @@ class CephApiOperator(object):
 
     def osd_host_lookup(self, osd_id):
         response, body = self._ceph_api.osd_crush_tree(body='json')
-        for i in range(0, len(body)):
+        for i in range(0, len(body['output'])):
             # there are 2 chassis lists - cache-tier and root-tier
             # that can be seen in the output of 'ceph osd crush tree':
             # [{"id": -2,"name": "cache-tier", "type": "root",
