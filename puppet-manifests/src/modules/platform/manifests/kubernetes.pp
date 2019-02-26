@@ -185,8 +185,13 @@ class platform::kubernetes::master::init
       command   => 'systemctl daemon-reload',
       logoutput => true,
     }
+    
+    # Initial kubernetes config done on node
+    -> file { "/etc/platform/.initial_k8s_config_complete":
+      ensure => present,
+    }
   } else {
-    if str2bool($::is_initial_config) {
+    if str2bool($::is_initial_k8s_config) {
       # For subsequent controller installs, install kubernetes using the
       # existing certificates.
 
@@ -295,6 +300,11 @@ class platform::kubernetes::master::init
       -> exec { 'perform systemctl daemon reload for kubelet override':
         command   => 'systemctl daemon-reload',
         logoutput => true,
+      }
+      
+      # Initial kubernetes config done on node
+      -> file { "/etc/platform/.initial_k8s_config_complete":
+        ensure => present,
       }
     }
   }
