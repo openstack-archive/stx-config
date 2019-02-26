@@ -125,7 +125,7 @@ def do_host_if_delete(cc, args):
            help="Name of interface [REQUIRED]")
 @utils.arg('iftype',
            metavar='<iftype>',
-           choices=['ae', 'vlan'],
+           choices=['ae', 'vlan', 'virtual'],
            nargs='?',
            help="Type of the interface")
 @utils.arg('datanetworks',
@@ -158,8 +158,9 @@ def do_host_if_delete(cc, args):
            help="Name or ID of network")
 @utils.arg('portsorifaces',
            metavar='<portsorifaces>',
-           nargs='+',
-           help='Name of port(s) or interface(s) [REQUIRED]')
+           nargs='?',
+           default=None,
+           help='Name of port(s) or interface(s)')
 @utils.arg('--ipv4-mode',
            metavar='<ipv4_mode>',
            choices=['disabled', 'static', 'pool'],
@@ -190,6 +191,9 @@ def do_host_if_add(cc, args):
         if args.iftype == 'ae' or args.iftype == 'vlan':
             uses = args.portsorifaces
             portnamesoruuids = None
+        elif args.iftype == 'virtual':
+            uses = None
+            portnamesoruuids = []
         else:
             uses = None
             portnamesoruuids = ','.join(args.portsorifaces)
