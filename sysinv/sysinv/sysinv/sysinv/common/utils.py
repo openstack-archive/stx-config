@@ -46,6 +46,7 @@ import six
 import socket
 import tempfile
 import time
+import tsconfig.tsconfig as tsc
 import uuid
 import wsme
 import yaml
@@ -1925,3 +1926,7 @@ def get_http_port(dbapi):
             constants.SERVICE_PARAM_SECTION_HTTP_CONFIG,
             constants.SERVICE_PARAM_HTTP_PORT_HTTP))
     return http_port
+
+
+def is_initial_config_complete():
+    return os.path.isfile(tsc.INITIAL_CONFIG_COMPLETE_FLAG)

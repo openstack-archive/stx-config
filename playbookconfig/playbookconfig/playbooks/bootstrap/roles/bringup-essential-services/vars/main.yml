@@ -1,0 +1,11 @@
+---
+tiller_img: gcr.io/kubernetes-helm/tiller:v2.12.1
+armada_img: quay.io/airshipit/armada:f807c3a1ec727c883c772ffc618f084d960ed5c9
+source_helm_repo: /opt/cgcs/helm_charts
+target_helm_repo: /www/pages/helm_charts
+kube_admin_yaml_template: /usr/share/puppet/modules/platform/templates/kubeadm.yaml.erb
+rbac_yaml_template: /usr/share/puppet/modules/platform/templates/rbac-kdd.yaml.erb
+calico_yaml_template: /usr/share/puppet/modules/platform/templates/calico.yaml.erb
+kubelet_override_template: /usr/share/puppet/modules/platform/templates/kube-stx-override.conf.erb
+lighttpd_conf_template: /usr/share/puppet/modules/openstack/templates/lighttpd.conf.erb
+lighttpd_inc_conf_template: /usr/share/puppet/modules/openstack/templates/lighttpd-inc.conf.erb
