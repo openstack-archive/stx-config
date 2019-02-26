@@ -1,0 +1,33 @@
+---
+#
+# Copyright (c) 2019 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# SUB-TASK DESCRIPTION:
+#   Resize Postgres, Docker and CGCS partitions for initial
+#   controller unlock.
+#
+
+- name: Resize filesystems (default)
+  command: "{{ item }}"
+  with_items:
+    - lvextend -L20G /dev/cgts-vg/pgsql-lv
+    - lvextend -L10G /dev/cgts-vg/cgcs-lv
+    - lvextend -L16G /dev/cgts-vg/dockerdistribution-lv
+    - lvextend -L40G /dev/cgts-vg/backup-lv
+    - drbdadm -- --assume-peer-has-space resize all
+    - resize2fs /dev/drbd0
+    - resize2fs /dev/drbd3
+    - resize2fs /dev/drbd8
+
+- name: Further resize if root disk size is larger than 240G
+  command: "{{ item }}"
+  with_items:
+    - lvextend -L40G /dev/cgts-vg/pgsql-lv
+    - lvextend -L20G /dev/cgts-vg/cgcs-lv
+    - lvextend -L50G /dev/cgts-vg/backup-lv
+    - drbdadm -- --assume-peer-has-space resize all
+    - resize2fs /dev/drbd0
+    - resize2fs /dev/drbd3
+  when: root_disk_size|int > minimum_root_disk_size
