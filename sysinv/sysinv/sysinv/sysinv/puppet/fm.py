@@ -13,11 +13,28 @@ class FmPuppet(openstack.OpenstackBasePuppet):
 
     SERVICE_NAME = 'fm'
     SERVICE_PORT = 18002
+    USER_DOMAIN = 'Default'
+    PROJECT_DOMAIN = 'Default'
+    PROJECT_NAME = 'services'
+    DEFAULT_REGION_NAME = 'RegionOne'
+    BOOTSTRAP_MGMT_IP = '127.0.0.1'
+    BOOTSTRAP_KEYSTONE_URI = 'http://127.0.0.1:5000'
 
     def get_static_config(self):
         dbuser = self._get_database_username(self.SERVICE_NAME)
         return {
             'fm::db::postgresql::user': dbuser,
+            'fm::keystone::auth::auth_name': self.SERVICE_NAME,
+            'fm::keystone::auth::region': self.DEFAULT_REGION_NAME,
+            'fm::keystone::authtoken::auth_url': self.BOOTSTRAP_MGMT_IP,
+            'fm::keystone::authtoken::auth_uri': self.BOOTSTRAP_KEYSTONE_URI,
+            'fm::keystone::authtoken::user_domain_name': self.USER_DOMAIN,
+            'fm::keystone::authtoken::project_domain_name': self.PROJECT_DOMAIN,
+            'fm::keystone::authtoken::project_name': self.PROJECT_NAME,
+            'fm::keystone::authtoken::region_name': self.DEFAULT_REGION_NAME,
+            'fm::keystone::authtoken::username': self.SERVICE_NAME,
+            'fm::auth::auth_url': self.BOOTSTRAP_KEYSTONE_URI,
+            'platform::fm::params::region_name': self.DEFAULT_REGION_NAME,
         }
 
     def get_secure_static_config(self):
@@ -26,10 +43,12 @@ class FmPuppet(openstack.OpenstackBasePuppet):
 
         return {
             'fm::db::postgresql::password': dbpass,
-
             'fm::keystone::auth::password': kspass,
             'fm::keystone::authtoken::password': kspass,
             'fm::auth::auth_password': kspass,
+            'fm::database_connection':
+                self._format_database_connection(self.SERVICE_NAME,
+                                                 self.BOOTSTRAP_MGMT_IP),
         }
 
     def get_system_config(self):

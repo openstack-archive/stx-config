@@ -1925,3 +1925,7 @@ def get_http_port(dbapi):
             constants.SERVICE_PARAM_SECTION_HTTP_CONFIG,
             constants.SERVICE_PARAM_HTTP_PORT_HTTP))
     return http_port
+
+
+def is_initial_primary_config_complete():
+    return os.path.exists('/etc/platform/.initial_config_complete')

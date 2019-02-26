@@ -182,10 +182,6 @@ class ConductorManager(service.PeriodicService):
 
         self._openstack = openstack.OpenStackOperator(self.dbapi)
         self._puppet = puppet.PuppetOperator(self.dbapi)
-        self._app = kube_app.AppOperator(self.dbapi)
-        self._ceph = iceph.CephOperator(self.dbapi)
-        self._helm = helm.HelmOperator(self.dbapi)
-        self._kube = kubernetes.KubeOperator(self.dbapi)
         self._fernet = fernet.FernetOperator()
 
         # create /var/run/sysinv if required. On DOR, the manifests
@@ -193,6 +189,12 @@ class ConductorManager(service.PeriodicService):
         cutils.check_lock_path()
 
         system = self._create_default_system()
+
+        self._app = kube_app.AppOperator(self.dbapi)
+        self._ceph = iceph.CephOperator(self.dbapi)
+        self._helm = helm.HelmOperator(self.dbapi)
+        self._kube = kubernetes.KubeOperator(self.dbapi)
+        self._fernet = fernet.FernetOperator()
 
         # Upgrade start tasks
         self._upgrade_init_actions()
@@ -3522,10 +3524,12 @@ class ConductorManager(service.PeriodicService):
             puppet_common.REPORT_STATUS_CFG: puppet_common.REPORT_DISK_PARTITON_CONFIG
         }
 
+        force_apply = False if cutils.is_initial_primary_config_complete() else True
         self._config_apply_runtime_manifest(context,
                                             config_uuid,
                                             config_dict,
-                                            host_uuids=[host_uuid])
+                                            host_uuids=[host_uuid],
+                                            force=force_apply)
 
     def ipartition_update_by_ihost(self, context,
                                    ihost_uuid, ipart_dict_array):
@@ -4958,7 +4962,8 @@ class ConductorManager(service.PeriodicService):
             self._audit_ihost_action(host)
 
     def _audit_kubernetes_labels(self, hosts):
-        if not utils.is_kubernetes_config(self.dbapi):
+        if (not utils.is_kubernetes_config(self.dbapi) or
+                not cutils.is_initial_primary_config_complete()):
             LOG.debug("_audit_kubernetes_labels skip")
             return
 
@@ -8112,7 +8117,8 @@ class ConductorManager(service.PeriodicService):
                         config_uuid = self._config_set_reboot_required(config_uuid)
                 ihost_obj.config_target = config_uuid
                 ihost_obj.save(context)
-            self._update_alarm_status(context, ihost_obj)
+            if cutils.is_initial_primary_config_complete():
+                self._update_alarm_status(context, ihost_obj)
 
         _sync_update_host_config_target(self, context, ihost_obj, config_uuid)
 
@@ -8127,7 +8133,8 @@ class ConductorManager(service.PeriodicService):
             if ihost_obj.config_applied != config_uuid:
                 ihost_obj.config_applied = config_uuid
                 ihost_obj.save(context)
-            self._update_alarm_status(context, ihost_obj)
+            if cutils.is_initial_primary_config_complete():
+                self._update_alarm_status(context, ihost_obj)
 
         _sync_update_host_config_applied(self, context, ihost_obj, config_uuid)
 

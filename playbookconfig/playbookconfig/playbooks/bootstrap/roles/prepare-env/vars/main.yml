@@ -1,0 +1,11 @@
+---
+# Softwre version will be set by the playbook
+software_version:
+image_brand: StarlingX
+platform_path: /opt/platform
+config_path: /opt/platform/config
+puppet_path: /opt/platform/puppet
+cgcs_path: /opt/cgcs
+extension_path: /opt/etension
+
+minimum_root_disk_size: 500
