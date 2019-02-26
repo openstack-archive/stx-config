@@ -4931,7 +4931,12 @@ class HostController(rest.RestController):
         self.check_unlock_patching(hostupdate, force_unlock)
 
         hostupdate.configure_required = True
-        hostupdate.notify_vim = True
+        if (personality == constants.CONTROLLER and
+                utils.is_host_active_controller(hostupdate.ihost_patch)):
+            # For the initial controller unlock don't notify vim
+            hostupdate.notify_vim = False
+        else:
+            hostupdate.notify_vim = True
 
         return True
 
