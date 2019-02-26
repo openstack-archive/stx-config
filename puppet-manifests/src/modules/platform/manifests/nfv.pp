@@ -85,3 +85,8 @@ class platform::nfv::api
   include ::platform::nfv::haproxy
 }
 
+class platform::nfv::bootstrap {
+  include ::platform::nfv::params
+  include ::platform::nfv
+  include ::nfv::keystone::auth
+}

@@ -13,10 +13,26 @@ class MtcePuppet(openstack.OpenstackBasePuppet):
     """Class to encapsulate puppet operations for mtce configuration"""
 
     SERVICE_NAME = 'mtce'
+    USER_DOMAIN = 'Default'
+    PROJECT_DOMAIN = 'Default'
+    PROJECT_NAME = 'services'
+    DEFAULT_REGION_NAME = 'RegionOne'
+    KEYSTONE_PORT = 5000
+    BOOTSTRAP_KEYSTONE_IP = '127.0.0.1'
+    BOOTSTRAP_KEYSTONE_URI = 'http://127.0.0.1:5000'
+    DEFAULT_MULTICAST_IP = '239.1.1.2'
 
     def get_static_config(self):
         return {
+            'platform::mtce::params::auth_host': self.BOOTSTRAP_KEYSTONE_IP,
+            'platform::mtce::params::auth_port': self.KEYSTONE_PORT,
+            'platform::mtce::params::auth_uri': self.BOOTSTRAP_KEYSTONE_URI,
             'platform::mtce::params::auth_username': self.SERVICE_NAME,
+            'platform::mtce::params::auth_user_domain': self.USER_DOMAIN,
+            'platform::mtce::params::auth_project_domain': self.PROJECT_DOMAIN,
+            'platform::mtce::params::auth_project': self.PROJECT_NAME,
+            'platform::mtce::params::auth_region': self.DEFAULT_REGION_NAME,
+            'platform::mtce::params::mtce_multicast': self.DEFAULT_MULTICAST_IP
         }
 
     def get_secure_static_config(self):
