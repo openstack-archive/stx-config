@@ -1,0 +1,10 @@
+---
+config_workdir: /tmp/config
+cgcs_config_file: /tmp/config/cgcs_config
+minimum_root_disk_size: 500
+minimum_address_size: 16
+minimum_ipv6_prefix_length: 64
+
+private_pxeboot_subnet: 169.254.202.0/24
+pxecontroller_floating_hostname: pxecontroller
+use_entire_pxeboot_subnet: True

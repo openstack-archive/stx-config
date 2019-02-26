@@ -1310,7 +1310,7 @@ class HostController(rest.RestController):
         """Create a new ihost based off a dictionary of attributes """
 
         log_start = cutils.timestamped("ihost_post_start")
-        LOG.info("SYS_I host %s %s add" % (ihost_dict['hostname'],
+        LOG.info("DBG: SYS_I host %s %s add" % (ihost_dict['hostname'],
                                            log_start))
 
         power_on = ihost_dict.get('power_on', None)
@@ -1323,6 +1323,7 @@ class HostController(rest.RestController):
 
         self._new_host_semantic_checks(ihost_dict)
 
+        LOG.info("DBG: Passed new host semantic check")
         current_ihosts = pecan.request.dbapi.ihost_get_list()
         hostnames = [h['hostname'] for h in current_ihosts]
 
@@ -1340,8 +1341,10 @@ class HostController(rest.RestController):
                       "exists") % ihost_dict['mgmt_ip'])
 
         try:
+            LOG.info("DBG: Getting ihost by mgmt_mac %s" % ihost_dict['mgmt_mac'])
             ihost_obj = pecan.request.dbapi.ihost_get_by_mgmt_mac(
                 ihost_dict['mgmt_mac'])
+            LOG.info("DBG: Got an ihost object")
             # A host with this MAC already exists. We will allow it to be
             # added if the hostname and personality have not been set.
             if ihost_obj['hostname'] or ihost_obj['personality']:
@@ -1360,6 +1363,7 @@ class HostController(rest.RestController):
             ihost_dict['uuid'] = ihost_obj['uuid']
         except exception.NodeNotFound:
             # This is a new host
+            LOG.info("DBG: New host")
             pass
 
         if not ihost_dict.get('uuid'):
@@ -1373,6 +1377,7 @@ class HostController(rest.RestController):
         ihost_orig = copy.deepcopy(ihost_dict)
 
         subfunctions = self._update_subfunctions(ihost_dict)
+        LOG.info("DBG: subfunctions = %s" % subfunctions)
         ihost_dict['subfunctions'] = subfunctions
 
         changed_paths = []
@@ -1400,6 +1405,8 @@ class HostController(rest.RestController):
                                            delta, changed_paths,
                                            current_ihosts)
 
+        LOG.info("DBG: passed bm semantic check and udpate")
+
         if ('capabilities' not in ihost_dict or not ihost_dict['capabilities']):
             ihost_dict['capabilities'] = {}
 
@@ -1407,12 +1414,15 @@ class HostController(rest.RestController):
         # configure and return
         if ihost_dict['personality'] == constants.CONTROLLER:
             if self._no_controllers_exist():
+                LOG.info("DBG: Creating controller filesystem...")
                 pecan.request.rpcapi.create_controller_filesystems(
                     pecan.request.context, ihost_dict['rootfs_device'])
+                LOG.info("DBG: Creating host... with dictionary %s" % ihost_dict)
                 controller_ihost = pecan.request.rpcapi.create_ihost(
                     pecan.request.context, ihost_dict)
                 if 'recordtype' in ihost_dict and \
                    ihost_dict['recordtype'] != "profile":
+                    LOG.info("DBG: Configuring the new host....")
                     pecan.request.rpcapi.configure_ihost(
                         pecan.request.context,
                         controller_ihost)
@@ -1423,6 +1433,8 @@ class HostController(rest.RestController):
 
         # Validate that management name and IP do not already exist
         # If one exists, other value must match in addresses table
+        LOG.info("DBG: Formatting address name")
+
         mgmt_address_name = cutils.format_address_name(
             ihost_dict['hostname'], constants.NETWORK_TYPE_MGMT)
         self._validate_address_not_allocated(mgmt_address_name,
@@ -1434,12 +1446,14 @@ class HostController(rest.RestController):
             del ihost_dict['mgmt_ip']
 
         # Set host to reinstalling
+        LOG.info("DBG: Set host to reinstalling...")
         ihost_dict.update({constants.HOST_ACTION_STATE:
                            constants.HAS_REINSTALLING})
 
         # Creation/Configuration
         if ihost_obj:
             # The host exists - do an update.
+            LOG.info("DBG: Host exists, do update")
             defaults = objects.host.get_defaults()
             for key in defaults:
                 # Internal values that shouldn't be updated
@@ -1454,7 +1468,7 @@ class HostController(rest.RestController):
                                                           ihost_obj)
         else:
             # The host doesn't exist - do an add.
-            LOG.info("create_ihost=%s" % ihost_dict.get('hostname'))
+            LOG.info("DBG: create_ihost=%s" % ihost_dict.get('hostname'))
             ihost_obj = pecan.request.rpcapi.create_ihost(pecan.request.context,
                                                           ihost_dict)
 
@@ -1463,6 +1477,7 @@ class HostController(rest.RestController):
 
         pecan.request.dbapi.network_get_by_type(constants.NETWORK_TYPE_MGMT)
 
+        LOG.info("DBG: New host = %s" % ihost_obj.as_dict())
         # Configure the new ihost
         ihost_ret = pecan.request.rpcapi.configure_ihost(pecan.request.context,
                                                          ihost_obj)
@@ -1471,6 +1486,7 @@ class HostController(rest.RestController):
         ihost_obj['mgmt_ip'] = ihost_ret.mgmt_ip
 
         # Add ihost to mtc
+        LOG.info("DBG: Add ihost to mtc")
         new_ihost_mtc = ihost_obj.as_dict()
         new_ihost_mtc.update({'operation': 'add'})
         new_ihost_mtc = cutils.removekeys_nonmtce(new_ihost_mtc)
@@ -1540,7 +1556,7 @@ class HostController(rest.RestController):
             pass  # VIM audit will pickup
 
         log_end = cutils.timestamped("ihost_post_end")
-        LOG.info("SYS_I host %s %s" % (ihost_obj.hostname, log_end))
+        LOG.info("DBG: SYS_I host %s %s" % (ihost_obj.hostname, log_end))
 
         return Host.convert_with_links(ihost_obj)
 

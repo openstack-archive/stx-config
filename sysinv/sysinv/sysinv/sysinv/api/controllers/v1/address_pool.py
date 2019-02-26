@@ -74,7 +74,10 @@ class AddressPoolPatchType(types.JsonPatchType):
     @staticmethod
     def readonly_attrs():
         """These attributes cannot be updated."""
-        return ['/network', '/prefix']
+        if cutils.is_initial_primary_config_complete():
+            return ['/network', '/prefix']
+        else:
+            return ['/network']
 
     @staticmethod
     def validate(patch):
@@ -333,11 +336,17 @@ class AddressPoolController(rest.RestController):
         addresses = pecan.request.dbapi.addresses_get_by_pool(
             address_pool_id)
         if addresses:
-            raise exception.AddressPoolInUseByAddresses()
+            if cutils.is_initial_primary_config_complete():
+                raise exception.AddressPoolInUseByAddresses()
+            else:
+                # During bootstrap, delete the addresses allocated from
+                # this pool
+                for addr in addresses:
+                    pecan.request.dbapi.address_destroy(addr.uuid)
 
     def _check_pool_readonly(self, address_pool_id):
         networks = pecan.request.dbapi.networks_get_by_pool(address_pool_id)
-        if networks:
+        if networks and cutils.is_initial_primary_config_complete():
             # network managed address pool, no changes permitted
             raise exception.AddressPoolReadonly()
 
@@ -466,6 +475,7 @@ class AddressPoolController(rest.RestController):
         addrpool_dict = addrpool.as_dict()
         self._set_defaults(addrpool_dict)
         self._sort_ranges(addrpool_dict)
+
         # Check for semantic conflicts
         self._check_name_conflict(addrpool_dict)
         self._check_valid_ranges(addrpool_dict)

@@ -2666,7 +2666,7 @@ def _delete(interface, from_profile=False):
         msg = _("Cannot delete an ethernet interface type.")
         raise wsme.exc.ClientSideError(msg)
 
-    if interface['networks']:
+    if (interface['networks'] and cutils.is_initial_primary_config_complete()):
         for network_id in interface['networks']:
             network = pecan.request.dbapi.network_get_by_id(network_id)
             if interface['iftype'] == constants.INTERFACE_TYPE_VIRTUAL and \

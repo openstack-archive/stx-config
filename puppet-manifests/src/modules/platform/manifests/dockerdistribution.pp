@@ -101,3 +101,10 @@ class platform::dockerdistribution
     Class['::platform::docker::config'] -> Class[$name]
   }
 }
+
+class platform::dockerdistribution::bootstrap
+  inherits ::platform::dockerdistribution::params {
+
+  include platform::dockerdistribution::config
+  Class['::platform::docker::config'] -> Class[$name]
+}

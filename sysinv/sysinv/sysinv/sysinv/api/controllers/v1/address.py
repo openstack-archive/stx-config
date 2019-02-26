@@ -353,7 +353,7 @@ class AddressController(rest.RestController):
             raise exception.HostMustBeLocked(host=host['hostname'])
 
     def _check_from_pool(self, pool_uuid):
-        if pool_uuid:
+        if pool_uuid and cutils.is_initial_primary_config_complete():
             raise exception.AddressAllocatedFromPool()
 
     def _check_orphaned_routes(self, interface_id, address):
