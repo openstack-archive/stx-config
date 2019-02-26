@@ -1,0 +1,61 @@
+---
+#
+# Copyright (c) 2019 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# SUB-TASKS DESCRIPTION:
+#   Start up FM, Maintenance and VIM
+#   - Skip auth middleware for FM as it is not functional at this early
+#     stage
+#   - Restart Maintenance Client to pick the new config which will update
+#     the controller-0 status from offline to online.
+#   - Disable VIM plugins. They will be enabled after stx-openstack app has
+#     been installed and VIM services restart.
+#
+
+- block: # Bring up FM, MTC, VIM
+  - name: Apply workaround for fm-api
+    lineinfile:
+      path: /etc/fm/api-paste.ini
+      line: "pipeline=request_id api_v1"
+      regex: "pipeline*"
+
+  - name: Restart FM API and bring up FM Manager
+    command: "{{ item }}"
+    with_items:
+      - /etc/init.d/fm-api restart
+      #- pgrep fm-api
+      - /etc/init.d/fminit start
+      #- pgrep fmManager
+
+  - name: Bring up Maintenance Agent
+    command: "{{ item }}"
+    with_items:
+      - /usr/lib/ocf/resource.d/platform/mtcAgent start
+      #- pgrep mtcAgent
+
+  - name: Restart Maintenance Client
+    command: /etc/init.d/mtcClient restart
+
+  - name: Disable VIM plugins
+    replace:
+      path: /etc/nfv/vim/config.ini
+      regexp: "{{ item }}=.*$"
+      replace: "{{ item }}=True"
+    with_items:
+      - image_plugin_disabled
+      - guest_plugin_disabled
+      - block_storage_plugin_disabled
+      - network_plugin_disabled
+      - compute_plugin_disabled
+
+  - name: Bring up VIM services
+    command: "{{ item }}"
+    with_items:
+      - /usr/lib/ocf/resource.d/nfv/vim-api start
+      - /usr/lib/ocf/resource.d/nfv/vim start
+
+  environment: # block environment
+    OCF_ROOT: "/usr/lib/ocf"
+    OCF_RESKEY_state: "active"

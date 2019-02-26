@@ -1,0 +1,5 @@
+---
+tiller_img: gcr.io/kubernetes-helm/tiller:v2.12.1
+armada_img: quay.io/airshipit/armada:f807c3a1ec727c883c772ffc618f084d960ed5c9
+source_helm_repo: /opt/cgcs/helm_charts
+target_helm_repo: /www/pages/helm_charts
