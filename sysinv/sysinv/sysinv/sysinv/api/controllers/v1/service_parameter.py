@@ -283,6 +283,15 @@ class ServiceParameterController(rest.RestController):
                     % (name, service, section))
             raise wsme.exc.ClientSideError(msg)
 
+        if service == constants.SERVICE_TYPE_CINDER:
+            if (name ==
+                    constants.SERVICE_PARAM_CINDER_DEFAULT_MULTIPATH):
+                msg = _(
+                    "Unable to configure service parameter. ISCSI %s "
+                    "is disabled for HPE3PAR"
+                    % constants.SERVICE_PARAM_CINDER_DEFAULT_MULTIPATH)
+                raise wsme.exc.ClientSideError(msg)
+
         if not value:
             msg = _("The service parameter value is mandatory")
             raise wsme.exc.ClientSideError(msg)
