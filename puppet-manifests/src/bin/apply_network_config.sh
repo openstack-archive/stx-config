@@ -341,7 +341,7 @@ done
 
 upDown=()
 changed=()
-for cfg_path in $(find /var/run/network-scripts.puppet/ -name "${IFNAME_INCLUDE}"); do
+for cfg_path in $(find /var/run/network-scripts.puppet/ -name "${IFNAME_INCLUDE}" | sort); do
     cfg=$(basename $cfg_path)
 
     diff -I ".*Last generated.*" -q /var/run/network-scripts.puppet/$cfg \
