@@ -395,6 +395,31 @@ class platform::kubernetes::firewall
   include ::platform::params
   include ::platform::network::oam::params
   include ::platform::network::mgmt::params
+  include ::platform::docker::params
+
+  if $::platform::docker::params::http_proxy {
+    $http_proxy_str_array = split($::platform::docker::params::http_proxy, ':')
+    $http_proxy_port = $http_proxy_str_array[length($http_proxy_str_array) - 1]
+    if $http_proxy_port =~ /^\d+$/ {
+      $http_proxy_port_val = $http_proxy_port
+    }
+  }
+
+  if $::platform::docker::params::https_proxy {
+    $https_proxy_str_array = split($::platform::docker::params::https_proxy, ':')
+    $https_proxy_port = $https_proxy_str_array[length($https_proxy_str_array) - 1]
+    if $https_proxy_port =~ /^\d+$/ {
+      $https_proxy_port_val = $https_proxy_port
+    }
+  }
+
+  if $http_proxy_port_val {
+    if ($https_proxy_port_val) and ($http_proxy_port_val != $https_proxy_port_val) {
+      $dports = $dports << $http_proxy_port_val << $https_proxy_port_val
+    } else {
+      $dports = $dports << $http_proxy_port_val
+    }
+  }
 
   $system_mode = $::platform::params::system_mode
   $oam_float_ip = $::platform::network::oam::params::controller_address
