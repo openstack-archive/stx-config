@@ -295,6 +295,13 @@ class ServiceParameterController(rest.RestController):
         validators = schema.get(service_parameter.SERVICE_PARAM_VALIDATOR, {})
         validator = validators.get(name)
         if callable(validator):
+            if (name ==
+                    constants.SERVICE_PARAM_CINDER_DEFAULT_MULTIPATH):
+                msg = _(
+                    "Unable to configure service parameter. ISCSI %s "
+                    "is disabled for HPE3PAR"
+                    % constants.SERVICE_PARAM_CINDER_DEFAULT_MULTIPATH)
+                raise wsme.exc.ClientSideError(msg)
             validator(name, value)
 
     @staticmethod
