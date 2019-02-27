@@ -341,7 +341,10 @@ done
 
 upDown=()
 changed=()
-for cfg_path in $(find /var/run/network-scripts.puppet/ -name "${IFNAME_INCLUDE}"); do
+# Loop over a list of config files sorted based on their names
+# This will ensure that the alias interface is listed and processed after its
+# parent.
+for cfg_path in $(find /var/run/network-scripts.puppet/ -name "${IFNAME_INCLUDE}" | sort); do
     cfg=$(basename $cfg_path)
 
     diff -I ".*Last generated.*" -q /var/run/network-scripts.puppet/$cfg \
