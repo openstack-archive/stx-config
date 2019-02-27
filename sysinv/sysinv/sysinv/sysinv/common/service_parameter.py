@@ -49,6 +49,14 @@ EMC_VNX_DATA_NETWORK_TYPES = [
 
 
 def _validate_boolean(name, value):
+    if (name ==
+            constants.SERVICE_PARAM_CINDER_DEFAULT_MULTIPATH):
+        msg = _(
+            "Unable to configure service parameter. ISCSI %s "
+            "is disabled for HPE3PAR"
+            % constants.SERVICE_PARAM_CINDER_DEFAULT_MULTIPATH)
+        raise wsme.exc.ClientSideError(msg)
+
     if value.lower() not in ['true', 'false']:
         raise wsme.exc.ClientSideError(_(
             "Parameter '%s' must be a boolean value." % name))
