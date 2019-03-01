@@ -1,0 +1,9 @@
+Code-Review+2: Bob Church <robert.church@windriver.com>
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Workflow+1: Don Penney <don.penney@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 01 Mar 2019 18:20:04 +0000
+Reviewed-on: https://review.openstack.org/640464
+Project: openstack/stx-config
+Branch: refs/heads/master
