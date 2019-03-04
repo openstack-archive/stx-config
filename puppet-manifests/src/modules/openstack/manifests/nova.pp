@@ -575,7 +575,6 @@ class openstack::nova::api::services
 class openstack::nova::api
   inherits ::openstack::nova::params {
 
-  include ::platform::kubernetes::params
   include ::platform::params
 
   if ($::openstack::nova::params::service_create and
@@ -588,9 +587,6 @@ class openstack::nova::api
 
   if $::openstack::nova::params::configure_endpoint {
     include ::openstack::nova::firewall
-    if $::platform::kubernetes::params::enabled != true {
-      include ::openstack::nova::haproxy
-    }
   }
 }
 
@@ -658,13 +654,7 @@ class openstack::nova::compute::pci
 
 
 class openstack::nova::compute::reload {
-  include ::platform::kubernetes::params
 
-  if $::platform::kubernetes::params::enabled != true {
-    exec { 'pmon-restart-nova-compute':
-      command => 'pmon-restart nova-compute',
-    }
-  }
 }
 
 

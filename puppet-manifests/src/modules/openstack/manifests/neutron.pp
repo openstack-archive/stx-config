@@ -193,39 +193,24 @@ class openstack::neutron::server {
 class openstack::neutron::agents
   inherits ::openstack::neutron::params {
 
-  include ::platform::kubernetes::params
+  $pmon_ensure = absent
 
-  if (str2bool($::disable_worker_services) or
-      $::platform::kubernetes::params::enabled) {
-    $pmon_ensure = absent
-
-    class {'::neutron::agents::l3':
-      enabled => false
-    }
-    class {'::neutron::agents::dhcp':
-      enabled => false
-    }
-    class {'::neutron::agents::metadata':
-      enabled => false,
-    }
-    class {'::neutron::agents::ml2::sriov':
-      enabled => false
-    }
-    class {'::neutron::agents::ml2::ovs':
-      enabled => false
-    }
-  } else {
-    $pmon_ensure = link
-
-    class {'::neutron::agents::metadata':
-      metadata_workers => $::platform::params::eng_workers_by_4
-    }
-
-    include ::neutron::agents::dhcp
-    include ::neutron::agents::l3
-    include ::neutron::agents::ml2::sriov
-    include ::neutron::agents::ml2::ovs
+  class {'::neutron::agents::l3':
+    enabled => false
   }
+  class {'::neutron::agents::dhcp':
+    enabled => false
+  }
+  class {'::neutron::agents::metadata':
+    enabled => false,
+  }
+  class {'::neutron::agents::ml2::sriov':
+    enabled => false
+  }
+  class {'::neutron::agents::ml2::ovs':
+    enabled => false
+  }
+
 
   if $::platform::params::vswitch_type =~ '^ovs' {
     # Ensure bridges and addresses are configured before agent is started
