@@ -2083,6 +2083,7 @@ class HostController(rest.RestController):
             if hostupdate.ihost_patch['operational'] == \
                     constants.OPERATIONAL_ENABLED:
                 self._update_add_ceph_state()
+                self._clear_ceph_stor_state(hostupdate)
 
             if hostupdate.notify_availability:
                 if (hostupdate.notify_availability ==
@@ -4449,6 +4450,18 @@ class HostController(rest.RestController):
             return False
 
     @staticmethod
+    def _clear_ceph_stor_state(hostupdate):
+        api = pecan.request.dbapi
+        stors = api.istor_get_by_ihost(hostupdate.ihost_orig['uuid'])
+        for stor in stors:
+            if stor.state != constants.SB_STATE_CONFIGURED:
+                LOG.info("State of stor: '%s' is '%s', resetting to '%s'." %
+                         (stor.uuid, stor.state,
+                          constants.SB_STATE_CONFIGURED))
+                values = {'state': constants.SB_STATE_CONFIGURED}
+                api.istor_update(stor.uuid, values)
+
+    @staticmethod
     def _update_add_ceph_state():
         api = pecan.request.dbapi
 
@@ -4987,6 +5000,19 @@ class HostController(rest.RestController):
                 raise wsme.exc.ClientSideError(
                     _("%s : Rejected: Can not lock an active "
                         "controller.") % hostupdate.ihost_orig['hostname'])
+
+        # Reject lock while Ceph OSD storage devices are configuring
+        if not force:
+            stors = pecan.request.dbapi.istor_get_by_ihost(
+                hostupdate.ihost_orig['uuid']
+            )
+            for stor in stors:
+                if stor.state == constants.SB_STATE_CONFIGURING:
+                    raise wsme.exc.ClientSideError(
+                        _("%s : Rejected: Can not lock a controller "
+                          "with storage devices in '%s' state.") %
+                         (hostupdate.ihost_orig['hostname'],
+                          constants.SB_STATE_CONFIGURING))
 
         if StorageBackendConfig.has_backend_configured(
                     pecan.request.dbapi,

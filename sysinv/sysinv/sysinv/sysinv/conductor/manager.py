@@ -5710,7 +5710,7 @@ class ConductorManager(service.PeriodicService):
                    'platform::haproxy::runtime',
                    'openstack::keystone::endpoint::runtime',
                    'platform::filesystem::img_conversions::runtime',
-                   'platform::ceph::runtime',
+                   'platform::ceph::runtime_base',
                    ]
 
         if utils.is_aio_duplex_system(self.dbapi):
@@ -5780,8 +5780,25 @@ class ConductorManager(service.PeriodicService):
         config_dict = {
             "personalities": personalities,
             "host_uuids": [node.uuid for node in valid_nodes],
-            "classes": ['platform::ceph::runtime'],
+            "classes": ['platform::ceph::runtime_base'],
             puppet_common.REPORT_STATUS_CFG: puppet_common.REPORT_CEPH_MONITOR_CONFIG
+        }
+        self._config_apply_runtime_manifest(context, config_uuid, config_dict)
+
+    def update_ceph_osd_config(self, context, host, stor_uuid):
+        """ Update Ceph OSD configuration at runtime"""
+        personalities = [host.personality]
+        config_uuid = self._config_update_hosts(context, personalities, [host.uuid])
+
+        # Make sure that we have the correct CRUSH map before running the manifests.
+        cceph.fix_crushmap(self.dbapi)
+
+        config_dict = {
+            "personalities": host.personality,
+            "host_uuids": host.uuid,
+            "stor_uuid": stor_uuid,
+            "classes": ['platform::ceph::runtime_osds'],
+            puppet_common.REPORT_STATUS_CFG: puppet_common.REPORT_CEPH_OSD_CONFIG
         }
         self._config_apply_runtime_manifest(context, config_uuid, config_dict)
 
@@ -6073,6 +6090,20 @@ class ConductorManager(service.PeriodicService):
             elif status == puppet_common.REPORT_FAILURE:
                 # Configuration has failed
                 self.report_ceph_base_config_failure(host_uuid, error)
+            else:
+                args = {'cfg': reported_cfg, 'status': status, 'iconfig': iconfig}
+                LOG.error("No match for sysinv-agent manifest application reported! "
+                          "reported_cfg: %(cfg)s status: %(status)s "
+                          "iconfig: %(iconfig)s" % args)
+        elif reported_cfg == puppet_common.REPORT_CEPH_OSD_CONFIG:
+            host_uuid = iconfig['host_uuid']
+            stor_uuid = iconfig['stor_uuid']
+            if status == puppet_common.REPORT_SUCCESS:
+                # Configuration was successful
+                self.report_ceph_osd_config_success(host_uuid, stor_uuid)
+            elif status == puppet_common.REPORT_FAILURE:
+                # Configuration has failed
+                self.report_ceph_osd_config_failure(host_uuid, stor_uuid, error)
             else:
                 args = {'cfg': reported_cfg, 'status': status, 'iconfig': iconfig}
                 LOG.error("No match for sysinv-agent manifest application reported! "
@@ -6654,6 +6685,27 @@ class ConductorManager(service.PeriodicService):
         # Set monitor to error state
         values = {'state': constants.SB_STATE_CONFIG_ERR, 'task': None}
         self.dbapi.ceph_mon_update(monitor.uuid, values)
+
+    def report_ceph_osd_config_success(self, host_uuid, stor_uuid):
+        """
+           Callback for Sysinv Agent
+        """
+
+        LOG.info("Ceph OSD stor '%s' update succeeded on host: %s" % (stor_uuid, host_uuid))
+
+        values = {'state': constants.SB_STATE_CONFIGURED}
+        self.dbapi.istor_update(stor_uuid, values)
+
+    def report_ceph_osd_config_failure(self, host_uuid, stor_uuid, error):
+        """
+           Callback for Sysinv Agent
+        """
+        LOG.error("Ceph OSD stor '%(stor)s' update failed on host: %(host)s. Error: "
+                  "%(error)s" % {'stor': stor_uuid, 'host': host_uuid, 'error': error})
+
+        # Set OSD to error state
+        values = {'state': constants.SB_STATE_CONFIG_ERR}
+        self.dbapi.istor_update(stor_uuid, values)
 
     def create_controller_filesystems(self, context, rootfs_device):
         """ Create the storage config based on disk size for

@@ -792,6 +792,22 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
             )
         )
 
+    def update_ceph_osd_config(self, context, host, stor_uuid):
+        """Synchronously, have the conductor update the configuration
+        for an OSD.
+
+        :param context: request context.
+        :param host: a host to update OSDs on.
+        :param stor_uuid: uuid of a storage device
+        """
+        return self.call(
+            context, self.make_msg(
+                'update_ceph_osd_config',
+                host=host,
+                stor_uuid=stor_uuid
+            )
+        )
+
     def update_drbd_config(self, context):
         """Synchronously, have the conductor update the drbd configuration.
 

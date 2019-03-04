@@ -451,6 +451,7 @@ SB_API_OP_DELETE = "delete"
 SB_STATE_CONFIGURED = 'configured'
 SB_STATE_CONFIGURING = 'configuring'
 SB_STATE_CONFIG_ERR = 'configuration-failed'
+SB_STATE_CONFIGURING_ON_UNLOCK = 'configuring-on-unlock'
 
 # Storage backend tasks
 SB_TASK_NONE = None
