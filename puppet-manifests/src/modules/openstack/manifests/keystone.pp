@@ -339,51 +339,8 @@ class openstack::keystone::endpoint::runtime {
     include ::nfv::keystone::auth
     include ::fm::keystone::auth
 
-    include ::ceilometer::keystone::auth
-
-    include ::openstack::heat::params
-    if $::openstack::heat::params::service_enabled {
-      include ::heat::keystone::auth
-      include ::heat::keystone::auth_cfn
-    }
-
-    include ::neutron::keystone::auth
     include ::nova::keystone::auth
     include ::nova::keystone::auth_placement
-
-    include ::openstack::panko::params
-    if $::openstack::panko::params::service_enabled {
-      include ::panko::keystone::auth
-    }
-
-    include ::openstack::gnocchi::params
-    if $::openstack::gnocchi::params::service_enabled {
-      include ::gnocchi::keystone::auth
-    }
-
-    include ::openstack::cinder::params
-    if $::openstack::cinder::params::service_enabled {
-      include ::cinder::keystone::auth
-    }
-
-    include ::openstack::glance::params
-    include ::glance::keystone::auth
-
-    include ::openstack::murano::params
-    if $::openstack::murano::params::service_enabled {
-      include ::murano::keystone::auth
-    }
-
-    include ::openstack::magnum::params
-    if $::openstack::magnum::params::service_enabled {
-      include ::magnum::keystone::auth
-      include ::magnum::keystone::domain
-    }
-
-    include ::openstack::ironic::params
-    if $::openstack::ironic::params::service_enabled {
-      include ::ironic::keystone::auth
-    }
 
     include ::platform::ceph::params
     if $::platform::ceph::params::service_enabled {

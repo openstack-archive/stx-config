@@ -448,6 +448,7 @@ class platform::drbd(
   $service_enable = false,
   $service_ensure = 'stopped',
 ) {
+  include ::openstack::cinder::params
   if (str2bool($::is_initial_config_primary) or
     ('lvm' in $openstack::cinder::params::enabled_backends and
       str2bool($::is_standalone_controller) and str2bool($::is_node_cinder_lvm_config))
