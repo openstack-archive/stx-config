@@ -299,6 +299,33 @@ start()
         fi
     fi
 
+    if [ -e $CONFIG_DIR/cert.pem ]
+    then
+        cp $CONFIG_DIR/cert.pem /etc/ssl/private/openstack/cert.pem
+        if [ $? -ne 0 ]
+        then
+            fatal_error "Unable to copy $CONFIG_DIR/cert.pem"
+        fi
+    fi
+
+    if [ -e $CONFIG_DIR/key.pem ]
+    then
+        cp $CONFIG_DIR/key.pem /etc/ssl/private/openstack/key.pem
+        if [ $? -ne 0 ]
+        then
+            fatal_error "Unable to copy $CONFIG_DIR/key.pem"
+        fi
+    fi
+
+    if [ -e $CONFIG_DIR/ca-cert.pem ]
+    then
+        cp $CONFIG_DIR/ca-cert.pem /etc/ssl/private/openstack/ca-cert.pem
+        if [ $? -ne 0 ]
+        then
+            fatal_error "Unable to copy $CONFIG_DIR/ca-cert.pem"
+        fi
+    fi
+
     if [ -e $CONFIG_DIR/iptables.rules ]
     then
         cp $CONFIG_DIR/iptables.rules /etc/platform/iptables.rules
