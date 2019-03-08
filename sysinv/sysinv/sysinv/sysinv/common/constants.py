@@ -842,6 +842,9 @@ CEPH_REPLICATION_MAP_DEFAULT = {
 CEPH_BACKEND_REPLICATION_CAP = 'replication'
 # ceph osd pool min size
 CEPH_BACKEND_MIN_REPLICATION_CAP = 'min_replication'
+# cinder raw cache size
+CEPH_BACKEND_RAW_CACHE_CAP = 'cinder_raw_cache_gib'
+
 CEPH_BACKEND_CAP_DEFAULT = {
     CEPH_BACKEND_REPLICATION_CAP:
         str(CEPH_REPLICATION_FACTOR_DEFAULT),

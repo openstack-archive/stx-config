@@ -58,7 +58,7 @@ LOG = log.getLogger(__name__)
 CAPABILITIES = {
     'backend': [constants.CEPH_BACKEND_REPLICATION_CAP,
                 constants.CEPH_BACKEND_MIN_REPLICATION_CAP],
-    constants.SB_SVC_CINDER: [],
+    constants.SB_SVC_CINDER: [constants.CEPH_BACKEND_RAW_CACHE_CAP],
     constants.SB_SVC_GLANCE: [],
     constants.SB_SVC_SWIFT: [],
     constants.SB_SVC_NOVA: [],

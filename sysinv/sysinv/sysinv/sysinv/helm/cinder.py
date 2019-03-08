@@ -153,6 +153,9 @@ class CinderHelm(openstack.OpenstackBaseHelm):
                 'rbd_ceph_conf':
                     (constants.CEPH_CONF_PATH +
                      constants.SB_TYPE_CEPH_CONF_FILENAME),
+                'image_volume_cache_enabled': 'True',
+                'image_volume_cache_max_size_gb':
+                    StorageBackendConfig.get_cinder_raw_cache_size(self.dbapi),
             }
 
         return conf_backends

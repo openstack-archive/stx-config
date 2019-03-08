@@ -338,6 +338,31 @@ class StorageBackendConfig(object):
         return pool_size, pool_min_size
 
     @staticmethod
+    def get_cinder_raw_cache_size(api, ceph_backend=None):
+        """
+        return the values of 'cinder_raw_cache_gib'
+        :param api:
+        :param ceph_backend: ceph backend object type for a tier
+        :return: cinder_raw_cache_gib
+        """
+        # Get ceph backend from db
+        if not ceph_backend:
+            # get replication of primary tier
+            ceph_backend = StorageBackendConfig.get_backend(
+                api,
+                constants.CINDER_BACKEND_CEPH
+            )
+
+        try:
+            cache_size = int(ceph_backend.capabilities[
+                constants.CEPH_BACKEND_RAW_CACHE_CAP])
+        except Exception:
+            # set as unlimited if not configured
+            cache_size = 0
+
+        return cache_size
+
+    @staticmethod
     def get_ceph_backend_task(api):
         """
         return current ceph backend task
