@@ -269,6 +269,8 @@ class CertificateController(rest.RestController):
                murano: install certificate for rabbit-murano
                murano_ca: install ca certificate for rabbit-murano
                docker_registry: install certificate for docker registry
+               openstack: install certificate for openstack
+               openstack_ca: install ca certificate for openstack
         """
 
         log_start = cutils.timestamped("certificate_do_post_start")
