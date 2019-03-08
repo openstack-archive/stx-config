@@ -247,6 +247,8 @@ class KeystoneHelm(openstack.OpenstackBaseHelm):
                 'host_fqdn_override':
                     self._get_endpoints_host_fqdn_overrides(
                         self.SERVICE_NAME),
+                'port': self._get_endpoints_port_api_public_overrides(),
+                'scheme': self._get_endpoints_scheme_public_overrides(),
             },
             'oslo_cache': {
                 'auth': {
