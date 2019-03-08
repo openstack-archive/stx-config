@@ -329,6 +329,8 @@ data:
         anti:
           type:
             default: requiredDuringSchedulingIgnoredDuringExecution
+    volume:
+      size: 1Gi
   source:
     type: tar
     location: http://172.17.0.1/helm_charts/rabbitmq-0.1.0.tgz
