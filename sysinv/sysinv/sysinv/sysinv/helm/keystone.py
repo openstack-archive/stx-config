@@ -203,6 +203,7 @@ class KeystoneHelm(openstack.OpenstackBaseHelm):
                 "'admin':%(target.role.name)s or 'heat_admin':%(target.user.name)s",
             "protected_services": [
                 ["'aodh':%(target.user.name)s"],
+                ["'barbican':%(target.user.name)s"],
                 ["'ceilometer':%(target.user.name)s"],
                 ["'cinder':%(target.user.name)s"],
                 ["'glance':%(target.user.name)s"],
@@ -250,7 +251,7 @@ class KeystoneHelm(openstack.OpenstackBaseHelm):
             },
             'oslo_cache': {
                 'auth': {
-                    'memcached_secret_key':
+                    'memcache_secret_key':
                         self._get_common_password('auth_memcache_key')
                 }
             },
