@@ -781,6 +781,42 @@ data:
 schema: armada/Chart/v1
 metadata:
   schema: metadata/Document/v1
+  name: openstack-fm-rest-api
+data:
+  chart_name: fm-rest-api-proxy
+  release: openstack-fm-rest-api
+  namespace: openstack
+  wait:
+    timeout: 1800
+    labels:
+      release_group: osh-openstack-fm-rest-api
+  test:
+    enabled: false
+  install:
+    no_hooks: false
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+        - type: job
+          labels:
+            release_group: osh-openstack-fm-rest-api
+        - type: pod
+          labels:
+            release_group: osh-openstack-fm-rest-api
+            component: test
+  source:
+    type: tar
+    location: http://172.17.0.1/helm_charts/fm-rest-api-0.1.0.tgz
+    subpath: fm-rest-api
+    reference: master
+  dependencies:
+    - helm-toolkit
+---
+
+schema: armada/Chart/v1
+metadata:
+  schema: metadata/Document/v1
   name: openstack-neutron
 data:
   chart_name: neutron
