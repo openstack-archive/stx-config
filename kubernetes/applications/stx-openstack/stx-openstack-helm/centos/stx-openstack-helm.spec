@@ -59,6 +59,7 @@ make nova-api-proxy
 make rbd-provisioner
 make garbd
 make ceph-pools-audit
+make fm-rest-api
 
 # terminate helm server (the last backgrounded task)
 kill %1
