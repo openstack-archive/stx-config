@@ -8,7 +8,7 @@
         - build-openstack-releasenotes
         - openstack-tox-linters
         - sysinv-tox-py27
-        - sysinv-tox-py35
+        - sysinv-tox-py37
         - sysinv-tox-flake8
         - sysinv-tox-pylint
         - controllerconfig-tox-flake8
@@ -29,7 +29,7 @@
         - build-openstack-releasenotes
         - openstack-tox-linters
         - sysinv-tox-py27
-        - sysinv-tox-py35
+        - sysinv-tox-py37
         - sysinv-tox-flake8
         - sysinv-tox-pylint
         - controllerconfig-tox-flake8
@@ -53,7 +53,6 @@
     parent: tox
     description: |
       Run py27 test for sysinv
-    nodeset: ubuntu-xenial
     required-projects:
       - openstack/stx-update
       - openstack/stx-fault
@@ -65,11 +64,10 @@
       tox_extra_args: -c sysinv/sysinv/sysinv/tox.ini
 
 - job:
-    name: sysinv-tox-py35
+    name: sysinv-tox-py37
     parent: tox
     description: |
       Run py35 test for sysinv
-    nodeset: ubuntu-xenial
     required-projects:
       - openstack/stx-update
       - openstack/stx-fault
@@ -77,8 +75,10 @@
     files:
       - sysinv/sysinv/*
     vars:
-      tox_envlist: py35
+      tox_envlist: py37
       tox_extra_args: -c sysinv/sysinv/sysinv/tox.ini
+      bindep_profile: test py37
+      python_version: 3.7
 
 - job:
     name: sysinv-tox-flake8
