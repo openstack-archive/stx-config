@@ -263,13 +263,7 @@ class platform::compute::allocate
 class platform::compute::extend
   inherits ::platform::compute::hugepage::params {
 
-  # nova-compute reads on init, extended nova compute options
-  # used with nova accounting
-  file { '/etc/nova/compute_extend.conf':
-      ensure  => 'present',
-      replace => true,
-      content => template('platform/compute_extend.conf.erb')
-  }
+  notice('Deprecated platform compute extend')
 }
 
 # Mount resctrl to allow Cache Allocation Technology per VM

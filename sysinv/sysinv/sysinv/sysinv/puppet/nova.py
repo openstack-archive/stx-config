@@ -486,14 +486,12 @@ class NovaPuppet(openstack.OpenstackBasePuppet):
         global_filter, update_filter = self._get_lvm_global_filter(host)
 
         values = {
-            'openstack::nova::storage::final_pvs': final_pvs,
-            'openstack::nova::storage::adding_pvs': adding_pvs,
-            'openstack::nova::storage::removing_pvs': removing_pvs,
-            'openstack::nova::storage::lvm_global_filter': global_filter,
-            'openstack::nova::storage::lvm_update_filter': update_filter,
-            'openstack::nova::storage::instance_backing': instance_backing,
-            'openstack::nova::storage::concurrent_disk_operations':
-                concurrent_disk_operations, }
+            'platform::worker::storage::final_pvs': final_pvs,
+            'platform::worker::storage::adding_pvs': adding_pvs,
+            'platform::worker::storage::removing_pvs': removing_pvs,
+            'platform::worker::storage::lvm_global_filter': global_filter,
+            'platform::worker::storage::lvm_update_filter': update_filter,
+            'platform::worker::storage::instance_backing': instance_backing}
 
         # If NOVA is a service on a ceph-external backend, use the ephemeral_pool
         # and ceph_conf file that are stored in that DB entry.
