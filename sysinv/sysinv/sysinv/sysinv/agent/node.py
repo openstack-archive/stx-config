@@ -394,7 +394,10 @@ class NodeOperator(object):
                     if size == SIZE_1G_MB:
                         hp_attr = {}
                         if vs_hp_size == size:
-                            nr_hugepages -= vs_hp_nr
+                            if nr_hugepages > vs_hp_nr:
+                                nr_hugepages -= vs_hp_nr
+                            else:
+                                nr_hugepages = 0
                             hp_attr.update({
                                 'vswitch_hugepages_size_mib': vs_hp_size,
                                 'vswitch_hugepages_nr': vs_hp_nr,
@@ -418,7 +421,10 @@ class NodeOperator(object):
                             hp_attr = {}
                             if vs_hp_size == size and initial_report is False:
                                 # User manually set 2M pages
-                                nr_hugepages -= vs_hp_nr
+                                if nr_hugepages > vs_hp_nr:
+                                    nr_hugepages -= vs_hp_nr
+                                else:
+                                    nr_hugepages = 0
                                 hp_attr.update({
                                     'vswitch_hugepages_size_mib': vs_hp_size,
                                     'vswitch_hugepages_nr': vs_hp_nr,
