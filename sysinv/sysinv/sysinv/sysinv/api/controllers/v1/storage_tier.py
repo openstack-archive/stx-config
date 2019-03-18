@@ -435,8 +435,9 @@ def _check(op, tier):
 
         if tier['name'] == constants.SB_TIER_DEFAULT_NAMES[
                 constants.SB_TIER_TYPE_CEPH]:
-            raise wsme.exc.ClientSideError(_("Storage Tier %s cannot be "
-                                             "deleted.") % tier['name'])
+            pass
+            #raise wsme.exc.ClientSideError(_("Storage Tier %s cannot be "
+            #                                 "deleted.") % tier['name'])
 
         if tier['status'] != constants.SB_TIER_STATUS_DEFINED:
             raise wsme.exc.ClientSideError(_("Storage Tier %s cannot be "

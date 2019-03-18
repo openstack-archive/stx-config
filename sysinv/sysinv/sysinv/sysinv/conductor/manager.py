@@ -283,14 +283,41 @@ class ConductorManager(service.PeriodicService):
         self.dbapi.remotelogging_create(system_id_attribute_value)
         self.dbapi.ptp_create(system_id_attribute_value)
 
+        # Create the default primary cluster
+        cluster_uuid = str(uuid.uuid4())  # generate fsid as Ceph is not configured
+        LOG.info(">>> creating cluster!")
+        cluster = self.dbapi.cluster_create(
+            {'uuid': cluster_uuid,
+             'cluster_uuid': cluster_uuid,
+             'type': constants.CINDER_BACKEND_CEPH,
+             'name': constants.CLUSTER_CEPH_DEFAULT_NAME,
+             'system_id': system.id})
+
+        # Create the default primary ceph storage tier
+        self.dbapi.storage_tier_create(
+            {'forclusterid': cluster.id,
+             'name': constants.SB_TIER_DEFAULT_NAMES[constants.SB_TIER_TYPE_CEPH],
+             'type': constants.SB_TIER_TYPE_CEPH,
+             'status': constants.SB_TIER_STATUS_DEFINED,
+             'capabilities': {}})
+
+        #LOG.info(">>> system_type: %s, system_mode: %s" % (system_type, system_mode))
         # set default storage_backend
-        values.update({'backend': constants.SB_TYPE_FILE,
-                       'name': constants.SB_DEFAULT_NAMES[constants.SB_TYPE_FILE],
-                       'state': constants.SB_STATE_CONFIGURED,
-                       'task': constants.SB_TASK_NONE,
-                       'services': None,
-                       'capabilities': {}})
-        self.dbapi.storage_backend_create(values)
+        #if (system_type and system_mode and
+        #    system_type == constants.TIS_AIO_BUILD and
+        #    system_mode == constants.SYSTEM_MODE_SIMPLEX
+        #):
+        #    task = None
+        #else:
+        #    task = constants.SB_TASK_RECONFIG_CONTROLLER
+        #LOG.info(">>> task: %s" % task)
+        #values.update({'backend': constants.SB_TYPE_CEPH,
+        #               'name': constants.SB_DEFAULT_NAMES[constants.SB_TYPE_CEPH],
+        #               'state': constants.SB_STATE_CONFIGURED,
+        #               'task': task,
+        #               'services': None,
+        #               'capabilities': {}})
+        #self.dbapi.storage_backend_create(values)
 
         # populate service table
         for optional_service in constants.ALL_OPTIONAL_SERVICES:
@@ -1538,6 +1565,7 @@ class ConductorManager(service.PeriodicService):
         """
 
         # Update cluster and peers model
+        LOG.info(">>> _configure_storage_host")
         self._ceph.update_ceph_cluster(host)
 
         # Only update the manifest if the host is running the same version as

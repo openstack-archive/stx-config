@@ -142,6 +142,7 @@ class CephOperator(object):
                     constants.SB_TIER_TYPE_CEPH])[0]
         except IndexError:
             # No existing DB record for the cluster, try to create one
+            LOG.info(">>> SHOULD NOT BE HERE!")
             self._create_db_ceph_cluster()
 
     def _create_db_ceph_cluster(self):

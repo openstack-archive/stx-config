@@ -85,22 +85,25 @@ if os.path.exists('/var/run/.sysinv_running_in_lab'):
     @utils.arg('name',
                metavar='<name>',
                help='Name of the Cluster [REQUIRED]')
-    @utils.arg('--peers',
-               metavar='<peers>',
-               help='The inclusive range of peers to allocate '
-               "<name~status>[,<name~status>,...]")
+    @utils.arg('--cluster-uuid',
+               metavar='<cluster-uuid>',
+               help='Uuid of the cluster'
+               "<uuid>")
     def do_cluster_add(cc, args):
         """Add Cluster."""
 
-        field_list = ['name', 'peers']
+        field_list = ['name', 'cluster_uuid']
 
         # Prune input fields down to required/expected values
         data = dict((k, v) for (k, v) in vars(args).items()
                     if k in field_list and not (v is None))
-
-        if 'peers' in data:
-            data['peers'] = _get_peer_tuples(data)
-
+        
+        #data['cluster_uuid'] = '7a191610-a8dc-4f2b-ab34-fb52956de595'
+        data['name'] = 'ceph_cluster1'
+        #data['system_id'] = 1
+        
+        print (">>> data: %s" % data)
+        
         cluster = cc.cluster.create(**data)
         uuid = getattr(cluster, 'uuid', '')
         try:

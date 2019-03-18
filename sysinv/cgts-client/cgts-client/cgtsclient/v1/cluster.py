@@ -11,7 +11,7 @@ from cgtsclient.common import base
 from cgtsclient import exc
 
 
-CREATION_ATTRIBUTES = ['type', 'name', 'status', 'info', 'peers']
+CREATION_ATTRIBUTES = ['type', 'name', 'status', 'cluster_uuid']
 
 
 class Cluster(base.Resource):
