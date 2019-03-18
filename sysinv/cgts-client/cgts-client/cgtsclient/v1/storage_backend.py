@@ -138,23 +138,6 @@ def _display_next_steps():
 def backend_add(cc, backend, args):
     backend = backend.replace('-', '_')
 
-    # add ceph mons to controllers
-    if backend == constants.SB_TYPE_CEPH:
-        # Controllers should always have monitors.
-        # Not finding a controller means it's not yet configured,
-        # so move forward.
-        try:
-            ihost = ihost_utils._find_ihost(cc, constants.CONTROLLER_0_HOSTNAME)
-            ceph_mon_utils.ceph_mon_add(cc, args, ihost.uuid)
-        except exc.CommandError:
-            pass
-
-        try:
-            ihost = ihost_utils._find_ihost(cc, constants.CONTROLLER_1_HOSTNAME)
-            ceph_mon_utils.ceph_mon_add(cc, args, ihost.uuid)
-        except exc.CommandError:
-            pass
-
     # allowed storage_backend fields
     allowed_fields = ['name', 'services', 'confirmed', 'ceph_conf']
 
