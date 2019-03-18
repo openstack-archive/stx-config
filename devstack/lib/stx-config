@@ -197,6 +197,8 @@ function install_controllerconfig {
 }
 
 function install_sysinv {
+
+    sed  -i '/cfg.BoolOpt(.fatal_deprecations.,/,/help=.make deprecations fatal./d' $SYSINV_DIR/sysinv/openstack/common/log.py
     setup_develop $SYSINV_DIR
     sudo install -d -m 755 $SYSINV_ETC_GOENABLEDD
     sudo install -p -D -m 755 $SYSINV_DIR/etc/sysinv/sysinv_goenabled_check.sh $SYSINV_ETC_GOENABLEDD/sysinv_goenabled_check.sh
