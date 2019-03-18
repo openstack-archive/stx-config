@@ -43,7 +43,6 @@ def upgrade(migrate_engine):
         Column('uuid', String(36), unique=True),
         Column('database_gib', Integer),
         Column('cgcs_gib', Integer),
-        Column('img_conversions_gib', Integer),
         Column('backup_gib', Integer),
         Column('forisystemid', Integer,
                ForeignKey(i_system.c.id, ondelete='CASCADE')),
@@ -222,8 +221,6 @@ def upgrade(migrate_engine):
                           'uuid': controller_fs_uuid,
                           'database_gib': storcfg['database_gib'],
                           'cgcs_gib': storcfg['image_gib'],
-                          'img_conversions_gib': storcfg[
-                              'img_conversions_gib'],
                           'backup_gib': storcfg['backup_gib'],
                           'forisystemid': storcfg['forisystemid'],
                           }
