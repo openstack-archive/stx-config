@@ -1726,6 +1726,17 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
                                        host_uuid=host_uuid,
                                        label_dict=label_dict))
 
+    def update_grub_mem_config(self, context, host_uuid):
+        """Synchronously, have the conductor update grub mem.
+
+        :param context: request context.
+        :param host_uuid: uuid or id of the host
+        """
+        return self.call(context,
+                         self.make_msg('update_grub_mem_config',
+                                       host_uuid=host_uuid,
+                                       ))
+
     def update_host_memory(self, context, host_uuid):
         """Asynchronously, have a conductor update the host memory
 
