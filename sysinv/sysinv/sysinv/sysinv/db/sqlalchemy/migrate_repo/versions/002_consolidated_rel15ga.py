@@ -900,7 +900,6 @@ def upgrade(migrate_engine):
     i_storconfig = Table('i_storconfig', meta, autoload=True)
     i_storconfig.create_column(Column('glance_backend', String(255)))
     i_storconfig.create_column(Column('glance_gib', Integer, default=0))
-    i_storconfig.create_column(Column('img_conversions_gib', String(255)))
 
     table_names = ['i_extoam', 'i_infra']
     for name in table_names:
