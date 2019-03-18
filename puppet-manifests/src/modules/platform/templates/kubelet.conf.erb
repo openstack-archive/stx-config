@@ -1,2 +1,6 @@
 # Overrides config file for kubelet
-KUBELET_EXTRA_ARGS=--pod-infra-container-image=<%= @k8s_registry %>/pause:3.1
+<%- if @k8s_registry != nil -%>
+KUBELET_EXTRA_ARGS=--pod-infra-container-image=<%= @k8s_registry %>/pause:3.1 --feature-gates=HugePages=<%= @k8s_hugepage %>
+<%- else -%>
+KUBELET_EXTRA_ARGS=--feature-gates=HugePages=<%= @k8s_hugepage %>
+<%- end -%>

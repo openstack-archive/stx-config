@@ -16,6 +16,7 @@ from sysinv.api.controllers.v1 import vim_api
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.common import utils as cutils
+from sysinv.helm import common as helm_common
 from sysinv.openstack.common import excutils
 from sysinv.openstack.common import log
 from sysinv.openstack.common.gettextutils import _
@@ -223,6 +224,10 @@ class LabelController(rest.RestController):
             try:
                 new_label = pecan.request.dbapi.label_create(uuid, values)
                 new_records.append(new_label)
+                if key == helm_common.LABEL_COMPUTE_LABEL:
+                    LOG.info("update grub mem when assign compute label")
+                    pecan.request.rpcapi.update_grub_mem_config(
+                            pecan.request.context, host.uuid)
             except exception.HostLabelAlreadyExists:
                 pass
 
