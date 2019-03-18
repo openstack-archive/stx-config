@@ -33,6 +33,7 @@ from oslo_config import cfg
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.common.utils import memoized
+from sysinv.helm import common as helm_common
 from sysinv.openstack.common.gettextutils import _
 from sysinv.openstack.common import log
 
@@ -254,6 +255,11 @@ def get_vswitch_type():
     system = pecan.request.dbapi.isystem_get_one()
     return system.capabilities.get('vswitch_type')
 
+def is_openstack_compute(ihost):
+    for obj in pecan.request.dbapi.label_get_by_host(ihost['uuid']):
+        if helm_common.LABEL_COMPUTE_LABEL == obj.label_key:
+            return True
+    return False
 
 def get_https_enabled():
     system = pecan.request.dbapi.isystem_get_one()
