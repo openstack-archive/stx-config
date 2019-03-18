@@ -14,6 +14,7 @@ from tsconfig import tsconfig
 
 from sysinv.puppet import base
 
+
 HOSTNAME_INFRA_SUFFIX = '-infra'
 
 NOVA_UPGRADE_LEVEL_PIKE = 'pike'
@@ -650,6 +651,9 @@ class PlatformPuppet(base.BasePuppet):
 
             vs_pages_updated = False
 
+            # This will be used for check if hugepage to be updated.
+            huge_pages_to_be_updated = False
+
             for node, memory_list in memory_numa_list.items():
 
                 memory = memory_list[0]
@@ -673,6 +677,11 @@ class PlatformPuppet(base.BasePuppet):
                         node, vswitch_size * 1024, vswitch_pages)
                 vswitch_nodes.append(vswitch_node)
 
+                # If any user'hugepage request pending ,
+                # set True to allow update hugepage.
+                if (memory.vm_hugepages_nr_2M_pending is not None or
+                        memory.vm_hugepages_nr_1G_pending is not None):
+                    huge_pages_to_be_updated = True
                 vm_hugepages_nr_2M = memory.vm_hugepages_nr_2M_pending \
                     if memory.vm_hugepages_nr_2M_pending is not None \
                     else memory.vm_hugepages_nr_2M
@@ -722,26 +731,29 @@ class PlatformPuppet(base.BasePuppet):
             vm_2M = "\"%s\"" % ','.join([str(i) for i in vm_2M_pages])
             vm_1G = "\"%s\"" % ','.join([str(i) for i in vm_1G_pages])
 
-            config.update({
-                'platform::compute::params::worker_base_reserved':
-                    platform_reserved_memory,
-                'platform::compute::params::compute_vswitch_reserved':
-                    vswitch_reserved_memory,
-                'platform::compute::hugepage::params::nr_hugepages_2M':
-                    nr_hugepages_2Ms,
-                'platform::compute::hugepage::params::nr_hugepages_1G':
-                    nr_hugepages_1Gs,
-                'platform::compute::hugepage::params::vswitch_2M_pages':
-                    vswitch_2M,
-                'platform::compute::hugepage::params::vswitch_1G_pages':
-                    vswitch_1G,
-                'platform::compute::hugepage::params::vm_4K_pages':
-                    vm_4K,
-                'platform::compute::hugepage::params::vm_2M_pages':
-                    vm_2M,
-                'platform::compute::hugepage::params::vm_1G_pages':
-                    vm_1G,
-            })
+            # If user request pending or has openstack_compute label
+            # then allow update.
+            if huge_pages_to_be_updated or self.is_openstack_compute(host):
+                config.update({
+                    'platform::compute::params::worker_base_reserved':
+                        platform_reserved_memory,
+                    'platform::compute::params::compute_vswitch_reserved':
+                        vswitch_reserved_memory,
+                    'platform::compute::hugepage::params::nr_hugepages_2M':
+                        nr_hugepages_2Ms,
+                    'platform::compute::hugepage::params::nr_hugepages_1G':
+                        nr_hugepages_1Gs,
+                    'platform::compute::hugepage::params::vswitch_2M_pages':
+                        vswitch_2M,
+                    'platform::compute::hugepage::params::vswitch_1G_pages':
+                        vswitch_1G,
+                    'platform::compute::hugepage::params::vm_4K_pages':
+                        vm_4K,
+                    'platform::compute::hugepage::params::vm_2M_pages':
+                        vm_2M,
+                    'platform::compute::hugepage::params::vm_1G_pages':
+                        vm_1G,
+                })
             if vs_pages_updated:
                 grub_hugepages_1G = "hugepagesz=1G hugepages=%d" % (
                     sum(vswitch_1G_pages) + sum(vm_1G_pages))
