@@ -69,6 +69,10 @@ class KubernetesPuppet(base.BasePuppet):
 
     def get_host_config(self, host):
         config = {}
+
+        # update host label for all k8s all nodes
+        config.update(self._get_host_label_config(host))
+
         if host.personality != constants.WORKER:
             return config
 
@@ -131,3 +135,15 @@ class KubernetesPuppet(base.BasePuppet):
     def _get_dns_service_ip(self):
         # Setting this to a constant for now. Will be configurable later
         return constants.DEFAULT_DNS_SERVICE_IP
+
+    def _get_host_label_config(self, host):
+        config = {}
+        labels = self._get_host_label(host)
+        host_label_keys = []
+        for label in labels:
+            host_label_keys.append(label.label_key)
+        config.update({'platform::kubernetes::params::host_labels': host_label_keys})
+        return config
+
+    def _get_host_label(self, host):
+        return self.dbapi.label_get_by_host(host.uuid)
