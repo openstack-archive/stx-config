@@ -41,15 +41,14 @@ def upgrade(migrate_engine):
         # If there is data in the table then migrate it
         database_gib = fs[0].database_gib
         cgcs_gib = fs[0].cgcs_gib
-        img_conversions_gib = fs[0].img_conversions_gib
         backup_gib = fs[0].backup_gib
         scratch_gib = fs[0].scratch_gib
         forisystemid = fs[0].forisystemid
 
         LOG.info("Migrate the controllerfs table, database_gib=%s, "
-                 "cgcs_gib=%s, img_conversions_gib=%s, backup_gib=%s, "
+                 "cgcs_gib=%s, backup_gib=%s, "
                  "scratch_gib=%s" %
-                 (database_gib, cgcs_gib, img_conversions_gib, backup_gib,
+                 (database_gib, cgcs_gib, backup_gib,
                   scratch_gib))
 
         # Delete the original row
@@ -118,25 +117,9 @@ def upgrade(migrate_engine):
                       }
             controller_fs_insert.execute(values)
 
-        if img_conversions_gib > 0:
-            controller_fs_insert = controller_fs.insert()
-            controller_fs_uuid = str(uuid.uuid4())
-            values = {'created_at': datetime.now(),
-                      'updated_at': None,
-                      'deleted_at': None,
-                      'uuid': controller_fs_uuid,
-                      'name': 'img-conversions',
-                      'size': img_conversions_gib,
-                      'replicated': False,
-                      'logical_volume': 'img-conversions-lv',
-                      'forisystemid': forisystemid,
-                      }
-            controller_fs_insert.execute(values)
-
     # Drop the old columns
     controller_fs.drop_column('database_gib')
     controller_fs.drop_column('cgcs_gib')
-    controller_fs.drop_column('img_conversions_gib')
     controller_fs.drop_column('backup_gib')
     controller_fs.drop_column('scratch_gib')
 
