@@ -35,14 +35,17 @@ class platform::compute::grub::params (
     'irqaffinity',
   ],
 ) {
+  include ::platform::kubernetes::params
 
+  $host_labels = $::platform::kubernetes::params::host_labels
   if $::is_broadwell_processor {
     $eptad = 'kvm-intel.eptad=0'
   } else {
     $eptad = ''
   }
 
-  if $::is_gb_page_supported {
+  if $::is_gb_page_supported and 'openstack-compute-node' in $host_labels
+     and $::platform::params::vswitch_type != 'none' {
     if $g_hugepages != undef {
       $gb_hugepages = $g_hugepages
     } else {
@@ -221,38 +224,46 @@ define allocate_pages (
 class platform::compute::allocate
   inherits ::platform::compute::hugepage::params {
 
-  # determine the node file system
-  if str2bool($::is_per_numa_supported) {
-    $nodefs = '/sys/devices/system/node'
-  } else {
-    $nodefs = '/sys/kernel/mm'
-  }
+  include ::platform::kubernetes::params
 
-  if $nr_hugepages_2M != undef {
-    $nr_hugepages_2M_array = regsubst($nr_hugepages_2M, '[\(\)\"]', '', 'G').split(' ')
-    $nr_hugepages_2M_array.each | String $val | {
-      $per_node_2M = $val.split(':')
-      if size($per_node_2M)== 3 {
-        $node = $per_node_2M[0]
-        $page_size = $per_node_2M[1]
-        allocate_pages { "Start ${node} ${page_size}":
-          path       => "${nodefs}/${node}/hugepages/hugepages-${page_size}/nr_hugepages",
-          page_count => $per_node_2M[2],
+  $host_labels = $::platform::kubernetes::params::host_labels
+
+  #only allocate hugepages for k8s nodes with label 'openstack-compute-node'
+  if 'openstack-compute-node' in $host_labels and
+    $::platform::params::vswitch_type != 'none' {
+    # determine the node file system
+    if str2bool($::is_per_numa_supported) {
+      $nodefs = '/sys/devices/system/node'
+    } else {
+      $nodefs = '/sys/kernel/mm'
+    }
+
+    if $nr_hugepages_2M != undef {
+      $nr_hugepages_2M_array = regsubst($nr_hugepages_2M, '[\(\)\"]', '', 'G').split(' ')
+      $nr_hugepages_2M_array.each | String $val | {
+        $per_node_2M = $val.split(':')
+        if size($per_node_2M)== 3 {
+          $node = $per_node_2M[0]
+          $page_size = $per_node_2M[1]
+          allocate_pages { "Start ${node} ${page_size}":
+            path       => "${nodefs}/${node}/hugepages/hugepages-${page_size}/nr_hugepages",
+            page_count => $per_node_2M[2],
+          }
         }
       }
     }
-  }
 
-  if $nr_hugepages_1G  != undef {
-    $nr_hugepages_1G_array = regsubst($nr_hugepages_1G , '[\(\)\"]', '', 'G').split(' ')
-    $nr_hugepages_1G_array.each | String $val | {
-      $per_node_1G = $val.split(':')
-      if size($per_node_1G)== 3 {
-        $node = $per_node_1G[0]
-        $page_size = $per_node_1G[1]
-        allocate_pages { "Start ${node} ${page_size}":
-          path       => "${nodefs}/${node}/hugepages/hugepages-${page_size}/nr_hugepages",
-          page_count => $per_node_1G[2],
+    if $nr_hugepages_1G  != undef {
+      $nr_hugepages_1G_array = regsubst($nr_hugepages_1G , '[\(\)\"]', '', 'G').split(' ')
+      $nr_hugepages_1G_array.each | String $val | {
+        $per_node_1G = $val.split(':')
+        if size($per_node_1G)== 3 {
+          $node = $per_node_1G[0]
+          $page_size = $per_node_1G[1]
+          allocate_pages { "Start ${node} ${page_size}":
+            path       => "${nodefs}/${node}/hugepages/hugepages-${page_size}/nr_hugepages",
+            page_count => $per_node_1G[2],
+          }
         }
       }
     }
@@ -309,8 +320,11 @@ class platform::compute::pmqos (
 
 class platform::compute {
 
-  Class[$name] -> Class['::platform::vswitch']
-
+  include ::platform::kubernetes::params
+  $host_labels = $::platform::kubernetes::params::host_labels
+  if 'openstack-compute-node' in $host_labels and 'openvswitch' in $host_labels {
+    Class[$name] -> Class['::platform::vswitch']
+  }
   require ::platform::compute::grub::audit
   require ::platform::compute::hugetlbf
   require ::platform::compute::allocate
