@@ -10851,3 +10851,25 @@ class ConductorManager(service.PeriodicService):
 
         """
         return self._app.perform_app_delete(rpc_app)
+
+    def update_grub_mem_config(self, context, host_uuid):
+        """Update the grub memory options configuration"""
+        # only apply the manifest on the host that has worker sub function
+        host = self.dbapi.ihost_get(host_uuid)
+        if constants.WORKER in host.subfunctions:
+            force = (not utils.is_host_simplex_controller(host))
+            LOG.info("update_grub_mem_config, host uuid: (%s), force: (%s)",
+                     host_uuid, str(force))
+            personalities = [constants.CONTROLLER, constants.WORKER]
+            config_uuid = self._config_update_hosts(context,
+                                                    personalities,
+                                                    host_uuids=[host_uuid])
+            config_dict = {
+                "personalities": personalities,
+                "host_uuids": [host_uuid],
+                "classes": ['platform::compute::grub::runtime']
+            }
+            self._config_apply_runtime_manifest(context, config_uuid,
+                                                config_dict,
+                                                force=force,
+                                                host_uuids=[host_uuid])

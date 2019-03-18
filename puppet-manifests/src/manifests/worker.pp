@@ -14,6 +14,7 @@ include ::platform::dhclient
 include ::platform::partitions
 include ::platform::lvm::compute
 include ::platform::compute
+include ::platform::kubernetes::params
 include ::platform::vswitch
 include ::platform::network
 include ::platform::fstab
