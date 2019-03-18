@@ -268,3 +268,11 @@ class BasePuppet(object):
                 return str(address)
         except netaddr.AddrFormatError:
             return address
+
+    def is_openstack_compute(self, host):
+        if self.dbapi is None:
+            return False
+        for obj in self.dbapi.label_get_by_host(host.id):
+            if helm_common.LABEL_COMPUTE_LABEL == obj.label_key:
+                return True
+        return False

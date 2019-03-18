@@ -9,7 +9,10 @@ class platform::vswitch::params(
 class platform::vswitch
   inherits ::platform::vswitch::params {
 
-  Class[$name] -> Class['::platform::network']
+  include ::platform::kubernetes::params
+  $host_labels = $::platform::kubernetes::params::host_labels
+  if 'openstack-compute-node' in $host_labels and 'openvswitch' in $host_labels {
+    Class[$name] -> Class['::platform::network']
 
   if $::platform::params::vswitch_type != 'none' {
     $enable_unsafe_noiommu_mode = bool2num(!$iommu_enabled)
@@ -19,7 +22,8 @@ class platform::vswitch
     }
   }
 
-  include $vswitch_class
+    include $vswitch_class
+  }
 }
 
 

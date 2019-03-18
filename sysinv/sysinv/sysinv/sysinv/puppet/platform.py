@@ -12,10 +12,12 @@ import operator
 from sysinv.common import constants
 from sysinv.common import exception
 from sysinv.common import utils
+from sysinv.helm import common as helm_common
 
 from tsconfig import tsconfig
 
 from sysinv.puppet import base
+
 
 HOSTNAME_INFRA_SUFFIX = '-infra'
 
@@ -656,7 +658,8 @@ class PlatformPuppet(base.BasePuppet):
 
     def _get_host_memory_config(self, host):
         config = {}
-        if constants.WORKER in utils.get_personalities(host):
+        if (constants.WORKER in utils.get_personalities(host)
+               and self.is_openstack_compute(host)):
             host_memory = self.dbapi.imemory_get_by_ihost(host.id)
             memory_numa_list = utils.get_numa_index_list(host_memory)
 
