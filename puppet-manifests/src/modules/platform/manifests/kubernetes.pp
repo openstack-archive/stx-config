@@ -6,6 +6,7 @@ class platform::kubernetes::params (
   $etcd_endpoint = undef,
   $service_domain = undef,
   $dns_service_ip = undef,
+  $host_labels = [],
   $ca_crt = undef,
   $ca_key = undef,
   $sa_key = undef,
@@ -13,8 +14,11 @@ class platform::kubernetes::params (
 ) { }
 
 class platform::kubernetes::kubeadm {
-  include ::platform::docker::params
 
+  include ::platform::docker::params
+  include ::platform::kubernetes::params
+
+  $host_labels = $::platform::kubernetes::params::host_labels
   $iptables_file = "net.bridge.bridge-nf-call-ip6tables = 1
     net.bridge.bridge-nf-call-iptables = 1"
 
@@ -22,6 +26,21 @@ class platform::kubernetes::kubeadm {
     $k8s_registry = $::platform::docker::params::k8s_registry
   } else {
     $k8s_registry = undef
+  }
+
+  #only set k8s_hugepage true when subfunction is worker and openstack-compute-node is not in host_labels
+  if str2bool($::is_worker_subfunction)
+    and !('openstack-compute-node'
+          in $host_labels) {
+    $k8s_hugepage = true
+  } else {
+    $k8s_hugepage = false
+  }
+
+  # enable extra paremeters such as hugepage
+  file { '/etc/sysconfig/kubelet':
+    ensure  => file,
+    content => template('platform/kubelet.conf.erb'),
   }
 
   # Update iptables config. This is required based on:
