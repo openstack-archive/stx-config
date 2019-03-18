@@ -515,9 +515,6 @@ def _create(storage_lvm):
                        storage_lvm,
                        storage_lvm.pop('confirmed', False))
 
-    StorageBackendConfig.set_img_conversions_defaults(pecan.request.dbapi,
-                                                      controller_fs_api)
-
     # We have a valid configuration. create it.
     system = pecan.request.dbapi.isystem_get_one()
     storage_lvm['forisystemid'] = system.id

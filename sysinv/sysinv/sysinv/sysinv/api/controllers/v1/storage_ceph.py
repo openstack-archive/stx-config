@@ -695,11 +695,6 @@ def _check_and_update_rbd_provisioner(new_storceph, remove=False):
 
 def _apply_backend_changes(op, sb_obj):
     services = api_helper.getListFromServices(sb_obj.as_dict())
-    # Make sure img_conversion partition is present
-    if (constants.SB_SVC_CINDER in services or
-         constants.SB_SVC_GLANCE in services):
-        StorageBackendConfig.set_img_conversions_defaults(
-            pecan.request.dbapi, controller_fs_api)
 
     if op == constants.SB_API_OP_CREATE:
         if sb_obj.name == constants.SB_DEFAULT_NAMES[
