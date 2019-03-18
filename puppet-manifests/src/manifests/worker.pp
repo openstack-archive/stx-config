@@ -14,7 +14,11 @@ include ::platform::dhclient
 include ::platform::partitions
 include ::platform::lvm::compute
 include ::platform::compute
-include ::platform::vswitch
+include ::platform::kubernetes::params
+$host_labels = $::platform::kubernetes::params::host_labels
+if 'openstack-compute-node' in $host_labels and 'openvswitch' in $host_labels {
+  include ::platform::vswitch
+}
 include ::platform::network
 include ::platform::fstab
 include ::platform::password
