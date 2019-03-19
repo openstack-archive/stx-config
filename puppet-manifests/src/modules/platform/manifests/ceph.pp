@@ -167,7 +167,8 @@ class platform::ceph::monitor
 
   if $service_enabled {
     if $system_type == 'All-in-one' and 'duplex' in $system_mode {
-      if str2bool($::is_controller_active) {
+      if (str2bool($::is_controller_active) or
+          str2bool($::is_standalone_controller)) {
         # Ceph mon is configured on a DRBD partition, on the active controller,
         # when 'ceph' storage backend is added in sysinv.
         # Then SM takes care of starting ceph after manifests are applied.
