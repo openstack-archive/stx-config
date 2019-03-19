@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
+# Copyright (C) 2019 Intel Corporation
+#
 # stx-config API reference documentation build configuration file
 #
 # This file is execfile()d with the current directory set to

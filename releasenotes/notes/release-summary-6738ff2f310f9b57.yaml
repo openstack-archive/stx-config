@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (C) 2019 Intel Corporation
 ---
 prelude: >
     The StarlingX Config project is a new repository that provides the
