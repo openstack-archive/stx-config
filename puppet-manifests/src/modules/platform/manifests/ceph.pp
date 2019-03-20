@@ -412,6 +412,7 @@ class platform::ceph::rgw
       rgw_frontends => "${rgw_frontend_type} port=${auth_host}:${rgw_port}",
       # service is managed by SM
       rgw_enable    => false,
+      rgw_ensure    => false,
       # The location of the log file shoule be the same as what's specified in
       # /etc/logrotate.d/radosgw in order for log rotation to work properly
       log_file      => $rgw_log_file,
