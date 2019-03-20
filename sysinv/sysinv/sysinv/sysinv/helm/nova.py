@@ -118,14 +118,6 @@ class NovaHelm(openstack.OpenstackBaseHelm):
         heat_image = self._operator.chart_operators[
             constants.HELM_CHART_HEAT].docker_image
 
-        # TODO: Remove after ceph upgrade
-        # Format the name of the stx specific ceph config helper
-        ceph_config_helper_image = "{}:{}/{}/{}{}:{}".format(
-            self._get_management_address(), common.REGISTRY_PORT,
-            common.REPO_LOC,
-            common.DOCKER_SRCS[self.docker_repo_source][common.IMG_PREFIX_KEY],
-            'ceph-config-helper', self.docker_repo_tag)
-
         return {
             'tags': {
                 'bootstrap': heat_image,
@@ -148,7 +140,6 @@ class NovaHelm(openstack.OpenstackBaseHelm):
                 'nova_scheduler': self.docker_image,
                 'nova_spiceproxy': self.docker_image,
                 'nova_spiceproxy_assets': self.docker_image,
-                'nova_storage_init': ceph_config_helper_image,
             }
         }
 
