@@ -51,18 +51,12 @@ class GlanceHelm(openstack.OpenstackBaseHelm):
     def _get_images_overrides(self):
         heat_image = self._operator.chart_operators[
             constants.HELM_CHART_HEAT].docker_image
-        ceph_config_helper_image = "{}:{}/{}/{}{}:{}".format(
-            self._get_management_address(), common.REGISTRY_PORT,
-            common.REPO_LOC,
-            common.DOCKER_SRCS[self.docker_repo_source][common.IMG_PREFIX_KEY],
-            'ceph-config-helper', self.docker_repo_tag)
 
         return {
             'tags': {
                 'bootstrap': heat_image,
                 'db_drop': heat_image,
                 'db_init': heat_image,
-                'glance_storage_init': ceph_config_helper_image,
                 'glance_api': self.docker_image,
                 'glance_db_sync': self.docker_image,
                 'glance_registry': self.docker_image,
