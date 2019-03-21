@@ -264,7 +264,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
             'agent': agent,
             'ovs': ovs,
             'securitygroup': {
-                'firewall_driver': 'noop',
+                'firewall_driver': 'openvswitch',
             },
         }
 
