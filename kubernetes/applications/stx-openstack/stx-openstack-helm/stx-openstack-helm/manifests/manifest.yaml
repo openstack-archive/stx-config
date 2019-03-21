@@ -983,7 +983,7 @@ data:
           ovs_driver:
             vhost_user_enabled: true
           securitygroup:
-            firewall_driver: noop
+            firewall_driver: openvswitch
         openvswitch_agent:
           agent:
             tunnel_types: vxlan
