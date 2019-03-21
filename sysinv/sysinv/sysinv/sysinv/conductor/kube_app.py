@@ -1254,21 +1254,25 @@ class DockerHelper(object):
                 os.chown(kube_config, 1000, grp.getgrnam("wrs").gr_gid)
 
                 overrides_dir = common.HELM_OVERRIDES_PATH
+
+                if not os.path.exists(overrides_dir):
+                    os.makedirs(overrides_dir)
+
                 manifests_dir = constants.APP_SYNCED_DATA_PATH
                 LOG.info("kube_config=%s, manifests_dir=%s, "
                          "overrides_dir=%s." % (kube_config, manifests_dir,
                                                 overrides_dir))
-                binds = {
-                    kube_config: {'bind': '/armada/.kube/config', 'mode': 'ro'},
-                    manifests_dir: {'bind': '/manifests', 'mode': 'ro'},
-                    overrides_dir: {'bind': '/overrides', 'mode': 'ro'}}
+
+                mounts_test = [docker.types.Mount('/armada/.kube/config', kube_config, read_only=True, type='bind'),
+                          docker.types.Mount('/manifests', manifests_dir, read_only=True, type='bind'),
+                          docker.types.Mount('/overrides', overrides_dir, read_only=True, type='bind')]
 
                 container = client.containers.run(
                     CONF.armada_image_tag,
                     name=ARMADA_CONTAINER_NAME,
                     detach=True,
-                    volumes=binds,
-                    restart_policy={'Name': 'always'},
+                    mounts=mounts_test,
+                    restart_policy={'Name': 'unless-stopped'},
                     command=None)
                 LOG.info("Armada service started!")
                 return container
