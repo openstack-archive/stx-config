@@ -137,9 +137,6 @@ log_opts = [
     cfg.BoolOpt('publish_errors',
                 default=False,
                 help='publish error events'),
-    cfg.BoolOpt('fatal_deprecations',
-                default=False,
-                help='make deprecations fatal'),
 
     # NOTE(mikal): there are two options here because sometimes we are handed
     # a full instance (and could include more information), and other times we
