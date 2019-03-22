@@ -124,7 +124,6 @@ class CephOperator(object):
         # cluster UUID value that is valid and consistent for the state of the
         # installation. Also make sure that we have a cluster DB entry
         # established
-        LOG.debug("_init_db_cluster_and_tier: Reteiving cluster record")
         try:
             self._db_cluster = self._db_api.clusters_get_all(
                 type=constants.CINDER_BACKEND_CEPH)[0]
@@ -132,7 +131,7 @@ class CephOperator(object):
                 # Retrieve ceph cluster fsid and update database
                 fsid = self._get_fsid()
                 if uuidutils.is_uuid_like(fsid):
-                    LOG.debug("Update cluster record: fsid=%s." % fsid)
+                    LOG.info("Update cluster record: fsid=%s." % fsid)
                     self._db_cluster.cluster_uuid = fsid
                     self._db_api.cluster_update(
                         self.cluster_db_uuid,
@@ -155,7 +154,7 @@ class CephOperator(object):
 
         # Try to use ceph cluster fsid
         fsid = self._get_fsid()
-        LOG.info("Create new cluster record: fsid=%s." % fsid)
+        LOG.info("Create new ceph cluster record: fsid=%s." % fsid)
         # Create the default primary cluster
         self._db_cluster = self._db_api.cluster_create(
             {'uuid': fsid if uuidutils.is_uuid_like(fsid) else str(uuid.uuid4()),
@@ -165,6 +164,7 @@ class CephOperator(object):
              'system_id': isystem.id})
 
         # Create the default primary ceph storage tier
+        LOG.info("Create primary ceph tier record.")
         self._db_primary_tier = self._db_api.storage_tier_create(
             {'forclusterid': self.cluster_id,
              'name': constants.SB_TIER_DEFAULT_NAMES[constants.SB_TIER_TYPE_CEPH],
