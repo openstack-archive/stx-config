@@ -1,0 +1,9 @@
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Code-Review+2: John Kung <john.kung@windriver.com>
+Workflow+1: John Kung <john.kung@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 22 Mar 2019 21:04:37 +0000
+Reviewed-on: https://review.openstack.org/641779
+Project: openstack/stx-config
+Branch: refs/heads/f/keystone-db
