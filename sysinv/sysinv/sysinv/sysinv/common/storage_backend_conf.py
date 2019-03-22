@@ -220,6 +220,7 @@ class StorageBackendConfig(object):
         }
 
         ceph_mons = dbapi.ceph_mon_get_list()
+        ceph_mon = None
         for ceph_mon in ceph_mons:
             if ceph_mon['hostname'] == constants.CONTROLLER_0_HOSTNAME:
                 targets.update({'%s-%s' % (constants.CONTROLLER_0_HOSTNAME,
@@ -231,7 +232,8 @@ class StorageBackendConfig(object):
                 targets.update({'%s-%s' % (ceph_mon['hostname'],
                                            network_type): 'ceph-mon-2-ip'})
 
-        ceph_mon['ceph_mon_gib'] = ceph_mons[0]['ceph_mon_gib']
+        if ceph_mon:
+            ceph_mon['ceph_mon_gib'] = ceph_mons[0]['ceph_mon_gib']
 
         results = {}
         addrs = dbapi.addresses_get_all()
