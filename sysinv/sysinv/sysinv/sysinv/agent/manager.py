@@ -1123,6 +1123,10 @@ class AgentManager(service.PeriodicService):
                                       "conductor.")
                         pass
 
+                # Is this the first time since boot we are reporting to conductor?
+                imsg_dict.update({constants.SYSINV_AGENT_FIRST_REPORT:
+                                  not os.path.exists(SYSINV_FIRST_REPORT_FLAG)})
+
                 self.platform_update_by_host(rpcapi,
                                              icontext,
                                              self._ihost_uuid,
