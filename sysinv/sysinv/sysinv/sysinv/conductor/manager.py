@@ -283,15 +283,6 @@ class ConductorManager(service.PeriodicService):
         self.dbapi.remotelogging_create(system_id_attribute_value)
         self.dbapi.ptp_create(system_id_attribute_value)
 
-        # set default storage_backend
-        values.update({'backend': constants.SB_TYPE_FILE,
-                       'name': constants.SB_DEFAULT_NAMES[constants.SB_TYPE_FILE],
-                       'state': constants.SB_STATE_CONFIGURED,
-                       'task': constants.SB_TASK_NONE,
-                       'services': None,
-                       'capabilities': {}})
-        self.dbapi.storage_backend_create(values)
-
         # populate service table
         for optional_service in constants.ALL_OPTIONAL_SERVICES:
             self.dbapi.service_create({'name': optional_service,
