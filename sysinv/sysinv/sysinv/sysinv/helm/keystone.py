@@ -60,8 +60,6 @@ class KeystoneHelm(openstack.OpenstackBaseHelm):
                 }
             }
         }
-        if self.docker_repo_source != common.DOCKER_SRC_OSH:
-            overrides.update({'user': {'keystone': {'uid': 0}}})
         return overrides
 
     def _get_images_overrides(self):

@@ -383,6 +383,10 @@ data:
         anti:
           type:
             default: requiredDuringSchedulingIgnoredDuringExecution
+      security_context:
+        keystone:
+          pod:
+            runAsUser: 0
   source:
     type: tar
     location: http://172.17.0.1/helm_charts/keystone-0.1.0.tgz
@@ -718,6 +722,12 @@ data:
         node_selector_key: openstack-control-plane
         node_selector_value: enabled
     pod:
+      # TODO(rchurch):
+      # Change-Id: I5a60efd133c156ce2ecac31d22e94b25e4e837bf broke armada apply
+      # of this manifest. Turning it off for now. Need to determine way forward
+      # here.
+      mandatory_access_control:
+        type: null
       replicas:
         api_metadata: 1
         placement: 1
@@ -733,6 +743,17 @@ data:
       user:
         nova:
           uid: 0
+      # TODO:(rchurch) Change-Id: Ib8e4b93486588320fd2d562c3bc90b65844e52e5
+      # introduced readiness/liveness probes for nova. nova_scheduler probes
+      # fail and cause a long delay and eventual failure of the armada
+      # application apply. Need to determine the fix to re-enable this.
+      probes:
+        readiness:
+          nova_scheduler:
+            enabled: false
+        liveness:
+          nova_scheduler:
+            enabled: false
     conf:
       ceph:
         enabled: true
@@ -914,6 +935,29 @@ data:
         anti:
           type:
             default: requiredDuringSchedulingIgnoredDuringExecution
+      # TODO:(rchurch) Change-Id: Ib99ceaabbad1d1e0faf34cc74314da9aa688fa0a
+      # introduced readiness/liveness probes for neutron. Four of the probes
+      # fail and cause a long delay and eventual failure of the armada
+      # application apply. Need to determine the fix to re-enable these.
+      probes:
+        readiness:
+          dhcp_agent:
+            enabled: false
+          l3_agent:
+            enabled: false
+          metadata_agent:
+            enabled: false
+          sriov_agent:
+            enabled: false
+        liveness:
+          dhcp_agent:
+            enabled: false
+          l3_agent:
+            enabled: false
+          metadata_agent:
+            enabled: false
+          sriov_agent:
+            enabled: false
     labels:
       agent:
         dhcp:
