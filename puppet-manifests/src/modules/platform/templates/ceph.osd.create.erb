@@ -1,0 +1,43 @@
+/bin/true # puppet requires this for correct template parsing
+
+# This is needed to pin a specific OSD id with a corresponding UUID.
+# Problem is ceph-disk prepare doesn't accept ceph OSD id as cli
+# parameter. Therefore, the OSD with desired OSD ID and UUID must
+# exist before puppet ceph module executes ceph-disk prepare.
+
+set -x
+
+osd_id=<%= @osd_id %>
+osd_uuid=<%= @osd_uuid %>
+
+# Ignore if Ceph is down, this case should only happen on DOR
+timeout 10 ceph -s
+if [ $? -ne 0 ]; then
+    exit 0
+fi
+
+# Check if OSD exists and has the correct UUID
+osds=( $(ceph osd ls) )
+if [[ " ${osds[@]} " =~ " ${osd_id} " ]]; then
+    # Get UUID, this is slower than osd ls as it also lists PGs with problems
+    # but the only way to get the uuid of an OSD.
+    found_uuid=$(ceph osd dump | grep "^osd.${osd_id} " | awk '{print $NF}')
+    if [ "${found_uuid}" != "${osd_uuid}" ]; then
+        set -e
+        # At B&R ceph's crushmap is restored but, although OSDs are properly
+        # allocated to their hosts in the tree, crushmap does not store
+        # OSD UUIDs. Therefore, when the OSD is prepared there is a chance
+        # that they will no longer match the id in sysinv db, so we have to
+        # recreate it.
+        ceph osd rm ${osd_id}
+        set +e
+    else
+        # OSD exists and has the correct uuid
+        exit 0
+    fi
+fi
+
+# Create the OSD with desired id and uuid
+set -e
+ceph osd create ${osd_uuid} ${osd_id}
+set +ex
