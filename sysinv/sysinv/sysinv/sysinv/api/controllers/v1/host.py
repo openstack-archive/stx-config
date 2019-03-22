@@ -5277,26 +5277,7 @@ class HostController(rest.RestController):
         elif StorageBackendConfig.has_backend_configured(
                 pecan.request.dbapi,
                 constants.CINDER_BACKEND_CEPH):
-            if utils.is_aio_simplex_system(pecan.request.dbapi):
-                # Check if host has enough OSDs configured for each tier
-                tiers = pecan.request.dbapi.storage_tier_get_all()
-                ceph_tiers = [t for t in tiers if t.type == constants.SB_TIER_TYPE_CEPH]
-                max_replication, __ = \
-                    StorageBackendConfig.get_ceph_max_replication(pecan.request.dbapi)
-                for tier in ceph_tiers:
-                    replication = max_replication  # In case tier has no storage backend configured
-                    if tier.get('forbackendid'):
-                        bk = pecan.request.dbapi.storage_ceph_get(tier.forbackendid)
-                        replication, __ = \
-                            StorageBackendConfig.get_ceph_pool_replication(pecan.request.dbapi, bk)
-                    stors = pecan.request.dbapi.istor_get_by_tier(tier.id)
-                    if len(stors) < replication:
-                        word = 'is' if replication == 1 else 'are'
-                        msg = ("Can not unlock node until at least %(replication)s osd stor %(word)s "
-                              "configured for tier '%(tier)s'."
-                               % {'replication': str(replication), 'word': word, 'tier': tier['name']})
-                        raise wsme.exc.ClientSideError(msg)
-            else:
+            if not utils.is_aio_simplex_system(pecan.request.dbapi):
                 if utils.is_aio_duplex_system(pecan.request.dbapi):
                     host_stors = pecan.request.dbapi.istor_get_by_ihost(ihost['id'])
                     if not host_stors:

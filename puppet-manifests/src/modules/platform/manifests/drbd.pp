@@ -445,16 +445,15 @@ class platform::drbd::cephmon ()
   $system_mode = $::platform::params::system_mode
   $system_type = $::platform::params::system_type
 
-  #TODO: This will change once we remove the native cinder service
-  if (str2bool($::is_initial_config_primary) or
-      (str2bool($::is_controller_active) and str2bool($::is_initial_cinder_ceph_config))
-  ){
+  if str2bool($::is_standalone_controller) and ! str2bool($::is_node_ceph_configured) {
     # Active controller, first time configuration.
+    alert(">>> 1 Active controller, first time configuration.")
     $drbd_primary = true
     $drbd_initial = true
     $drbd_automount = true
 
-  } elsif str2bool($::is_standalone_controller){
+  } elsif str2bool($::is_standalone_controller) {
+    alert(">>> 2 Active standalone controller, successive reboots.")
     # Active standalone controller, successive reboots.
     $drbd_primary = true
     $drbd_initial = undef
@@ -462,6 +461,7 @@ class platform::drbd::cephmon ()
   } else {
     # Node unlock, reboot or standby configuration
     # Do not mount ceph
+    alert(">>> 3 Node unlock, reboot or standby configuration. Do not mount ceph.")
     $drbd_primary = undef
     $drbd_initial = undef
     $drbd_automount = undef

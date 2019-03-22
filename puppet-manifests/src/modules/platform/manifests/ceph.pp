@@ -153,11 +153,11 @@ class platform::ceph::post
   }
 
   if $service_enabled {
+    # Ceph configuration on this node is done
     file { $node_ceph_configured_flag:
       ensure => present
     }
   }
-
 }
 
 
@@ -169,8 +169,8 @@ class platform::ceph::monitor
 
   if $service_enabled {
     if $system_type == 'All-in-one' and 'duplex' in $system_mode {
-      if str2bool($::is_controller_active) {
-        # Ceph mon is configured on a DRBD partition, on the active controller,
+      if str2bool($::is_standalone_controller) {
+        # Ceph mon is configured on a DRBD partition,
         # when 'ceph' storage backend is added in sysinv.
         # Then SM takes care of starting ceph after manifests are applied.
         $configure_ceph_mon = true
@@ -200,6 +200,7 @@ class platform::ceph::monitor
   }
 
   if $configure_ceph_mon {
+    alert(">>> configuring ceph-mon")
     file { '/var/lib/ceph':
       ensure => 'directory',
       owner  => 'root',
@@ -236,6 +237,32 @@ class platform::ceph::monitor
     # ensure configuration is complete before creating monitors
     Class['::ceph'] -> Ceph::Mon <| |>
 
+    # ensure we load the crushmap at first unlock
+    if $system_type == 'All-in-one' and str2bool($::is_standalone_controller) {
+      if 'duplex' in $system_mode {
+        $crushmap_txt = '/etc/sysinv/crushmap-controller-model.txt'
+      } else {
+        $crushmap_txt = '/etc/sysinv/crushmap-aio-sx.txt'
+      }
+      $crushmap_bin = '/etc/sysinv/crushmap.bin'
+      alert(">>> load crushmap: $crushmap_txt")
+      Ceph::Mon <| |>
+      -> exec { 'Compile crushmap':
+        command   => "crushtool -c ${crushmap_txt} -o ${crushmap_bin}",
+        onlyif    => "test ! -f ${crushmap_bin}",
+        logoutput => true,
+      }
+      -> exec { 'Set crushmap':
+        command   => "ceph osd setcrushmap -i ${crushmap_bin}",
+        unless    => 'ceph osd crush rule list --format plain | grep -e "storage_tier_ruleset"',
+        logoutput => true,
+      }
+      -> Platform_ceph_osd <| |>
+    }
+
+    # Ensure networking is up before Monitors are configured
+    Class['::platform::network'] -> Ceph::Mon <| |>
+
     # default configuration for all ceph monitor resources
     Ceph::Mon {
       fsid => $cluster_uuid,
@@ -248,17 +275,13 @@ class platform::ceph::monitor
         public_addr => $floating_mon_ip,
       }
 
-      if (str2bool($::is_controller_active) and
-          str2bool($::is_initial_cinder_ceph_config) and
-          !str2bool($::is_standalone_controller)) {
-
-
-        # When we configure ceph after both controllers are active,
-        # we need to stop the monitor, unmount the monitor partition
+      if str2bool($::is_standalone_controller) {
+        # When we configure ceph we need to stop the monitor, unmount the monitor partition
         # and set the drbd role to secondary, so that the handoff to
         # SM is done properly once we swact to the standby controller.
-        # TODO: Remove this once SM supports in-service config reload.
+        alert(">>> stopping ceph monitor")
         Ceph::Mon <| |>
+        -> Platform_ceph_osd <| |>
         -> exec { 'Stop Ceph monitor':
           command   =>'/etc/init.d/ceph stop mon',
           onlyif    => '/etc/init.d/ceph status mon',
@@ -311,11 +334,17 @@ define platform_ceph_osd(
       "osd.${$osd_id}/crush_location": value => "root=${tier_name}-tier host=${$::platform::params::hostname}-${$tier_name}";
     }
   }
-  file { "/var/lib/ceph/osd/ceph-${osd_id}":
+  
+  Class['::platform::network']  # Make sure networking is up before running ceph cmds
+  -> file { "/var/lib/ceph/osd/ceph-${osd_id}":
     ensure => 'directory',
     owner  => 'root',
     group  => 'root',
     mode   => '0755',
+  }
+  -> exec { "ceph osd create ${osd_uuid} ${osd_id}":
+    logoutput => true,
+    command   => template('platform/ceph.osd.create.erb'),
   }
   -> ceph::osd { $disk_path:
     uuid => $osd_uuid,
