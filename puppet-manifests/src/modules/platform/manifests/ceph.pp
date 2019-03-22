@@ -236,6 +236,29 @@ class platform::ceph::monitor
     # ensure configuration is complete before creating monitors
     Class['::ceph'] -> Ceph::Mon <| |>
 
+    # ensure we load the crushmap at first unlock
+    if $system_type == 'All-in-one' and $::is_standalone_controller {
+      if 'duplex' in $system_mode {
+        $crushmap_txt = '/etc/sysinv/crushmap-controller-model.txt'
+      } else {
+        $crushmap_txt = '/etc/sysinv/crushmap-aio-sx.txt'
+      }
+      $crushmap_bin = '/etc/sysinv/crushmap.bin'
+
+      Ceph::Mon <| |>
+      -> exec { 'Compile crushmap':
+        command   => "crushtool -c ${crushmap_txt} -o ${crushmap_bin}",
+        onlyif    => "test ! -f ${crushmap_bin}",
+        logoutput => true,
+      }
+      -> exec { 'Set crushmap':
+        command   => "ceph osd setcrushmap -i ${crushmap_bin}",
+        unless    => 'ceph osd crush rule list --format plain | grep -e "storage_tier_ruleset"',
+        logoutput => true,
+      }
+      -> Platform_ceph_osd <| |>
+    }
+
     # default configuration for all ceph monitor resources
     Ceph::Mon {
       fsid => $cluster_uuid,
@@ -316,6 +339,10 @@ define platform_ceph_osd(
     owner  => 'root',
     group  => 'root',
     mode   => '0755',
+  }
+  -> exec { "ceph osd create ${osd_uuid} ${osd_id}":
+    logoutput => true,
+    command   => template('platform/ceph.osd.create.erb'),
   }
   -> ceph::osd { $disk_path:
     uuid => $osd_uuid,
