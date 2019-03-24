@@ -698,7 +698,9 @@ class ConfigAssistant():
 
         value_mapping = {
             "y": sysinv_constants.DISTRIBUTED_CLOUD_ROLE_SYSTEMCONTROLLER,
+            "Y": sysinv_constants.DISTRIBUTED_CLOUD_ROLE_SYSTEMCONTROLLER,
             "n": None,
+            "N": None,
         }
         user_input = prompt_for(
             "Configure Distributed Cloud System Controller [y/N]: ", 'n',
