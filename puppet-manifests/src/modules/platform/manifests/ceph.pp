@@ -302,6 +302,9 @@ define platform_ceph_osd(
   $journal_path,
   $tier_name,
 ) {
+  ceph_config{
+      "osd.${$osd_id}/devs": value => "${$data_path}";
+  }
   # Only set the crush location for additional tiers
   if $tier_name != 'storage' {
     ceph_config {
