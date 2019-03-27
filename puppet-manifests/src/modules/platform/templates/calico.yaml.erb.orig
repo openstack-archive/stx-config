@@ -1,10 +1,4 @@
 ---
-# Calico Version v3.6
-# Based off:
-# https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/
-#              hosted/kubernetes-datastore/calico-networking/typha/calico.yaml
-# Original file located in the source tree as calico.yaml.erb.orig
-#
 # Source: calico/templates/calico-config.yaml
 # This ConfigMap is used to configure a self-hosted Calico installation.
 kind: ConfigMap
@@ -719,8 +713,6 @@ spec:
             # Auto-detect the BGP IP address.
             - name: IP
               value: "autodetect"
-            - name: IP_AUTODETECTION_METHOD
-              value: "can-reach=<%= @apiserver_advertise_address %>"
             # Enable IPIP
             - name: CALICO_IPV4POOL_IPIP
               value: "Always"
@@ -734,7 +726,7 @@ spec:
             # chosen from this range. Changing this value after installation will have
             # no effect. This should fall within `--cluster-cidr`.
             - name: CALICO_IPV4POOL_CIDR
-              value: "<%= @pod_network_cidr %>"
+              value: "192.168.0.0/16"
             # Disable file logging so `kubectl logs` works.
             - name: CALICO_DISABLE_FILE_LOGGING
               value: "true"

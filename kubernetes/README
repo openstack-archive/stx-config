@@ -37,3 +37,26 @@ with additional required metadata (TBD).
 
 These applications would each get their own subdirectory under
 "applications".
+
+
+=====
+Notes on Upversioning Calico.
+(Current version v3.6)
+Refer to configuration instructions here:
+https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/calico
+
+It is important to test in a multi-controller environment (ie: AIO-DX)  that the
+pods can be pinged by their endpoint.  So a pod running on controller-1 can be pinged
+from controller-0, and vica versa.
+
+An additional test (run on controller-0)
+
+curl -O -L https://github.com/projectcalico/calicoctl/releases/download/v3.6.1/calicoctl
+chmod +x calicoctl
+sudo mv calicoctl /usr/local/bin
+export DATASTORE_TYPE=kubernetes
+# query daemon health/status
+sudo calicoctl node status
+
+
+
