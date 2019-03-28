@@ -15,6 +15,16 @@ class platform::compute::config
       replace => true,
       content => template('platform/worker_reserved.conf.erb')
   }
+
+  file { '/etc/systemd/system.conf.d/platform-cpuaffinity.conf':
+      ensure  => 'present',
+      replace => true,
+      content => template('platform/systemd-system-cpuaffinity.conf.erb')
+  }
+}
+
+class platform::compute::config::runtime {
+  include ::platform::compute::config
 }
 
 class platform::compute::grub::params (
