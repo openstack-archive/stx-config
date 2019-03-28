@@ -1,0 +1,34 @@
+# Calico platform service Global Network Policy for OAM interface
+
+apiVersion: "crd.projectcalico.org/v1"
+kind: GlobalNetworkPolicy
+metadata:
+  name: oam-all-gnp
+spec:
+  selector: "has(iftype) && iftype == 'oam'"
+  order: <%= @t_order %>
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Allow
+    ipVersion: <%= @t_ip_version %>
+    protocol: TCP
+    destination:
+      ports: <%= @t_tcp_ports %>
+  - action: Allow
+    ipVersion: <%= @t_ip_version %>
+    protocol: UDP
+    destination:
+      ports: <%= @t_udp_ports %>
+  - action: Allow
+    protocol: <%= @t_icmp_proto %>
+  - action: Allow
+    protocol: <%= @t_igmp_proto %>
+  egress:
+  - action: Allow
+    ipVersion: <%= @t_ip_version %>
+    protocol: TCP
+  - action: Allow
+    ipVersion: <%= @t_ip_version %>
+    protocol: UDP
