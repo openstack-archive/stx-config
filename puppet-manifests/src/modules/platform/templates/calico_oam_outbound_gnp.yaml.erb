@@ -1,0 +1,18 @@
+# Calico outbound Global Network Policy for OAM interface
+
+apiVersion: "crd.projectcalico.org/v1"
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-oam-outbound-gnp
+spec:
+  selector: "has(iftype) && iftype == 'oam'"
+  order: 0
+  types:
+  - Egress
+  egress:
+  - action: Allow
+    ipVersion: <%= @t_ip_version %>
+    protocol: UDP
+  - action: Allow
+    ipVersion: <%= @t_ip_version %>
+    protocol: TCP
