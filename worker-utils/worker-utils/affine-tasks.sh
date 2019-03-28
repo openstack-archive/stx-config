@@ -26,6 +26,8 @@ start ()
         log "Initial Configuration incomplete. Skipping affining tasks."
         exit 0
     fi
+    # TODO: Should revisit this since this leaves a few lingering floating
+    # tasks and does not really work with cgroup cpusets. Leave as-is for now.
     affine_tasks_to_platform_cores
     [[ $? -eq 0 ]] && log "Tasks re-affining done." || log "Tasks re-affining failed."
 }

@@ -35,6 +35,8 @@ function affine_tasks {
     # cores. They will be reaffined to platform cores later on as part of nova-compute
     # launch.
     log_debug "Affining all tasks to all available CPUs..."
+    # TODO: Should revisit this since this leaves a few lingering floating
+    # tasks and does not really work with cgroup cpusets. Leave as-is for now.
     affine_tasks_to_all_cores
     RET=$?
     if [ $RET -ne 0 ]; then
