@@ -1,0 +1,21 @@
+# Calico platform service Global Network Policy for OAM interface
+
+apiVersion: "crd.projectcalico.org/v1"
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-oam-svc-<%= @t_svc_name %>-gnp
+spec:
+  selector: "has(iftype) && iftype == 'oam'"
+  order: <%= @t_svc_order %>
+  types:
+  - Ingress
+  ingress:
+  - action: Allow
+<% if @t_ip_version != nil -%>
+    ipVersion: <%= @t_ip_version %>
+<% end -%>
+    protocol: <%= @t_svc_proto %>
+<% if @t_svc_ports != nil -%>
+    destination:
+      ports: <%= @t_svc_ports %>
+<% end -%>
