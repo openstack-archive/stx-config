@@ -22,6 +22,7 @@ include ::platform::users
 include ::platform::sysctl::controller
 include ::platform::filesystem::controller
 include ::platform::firewall::oam
+include ::platform::firewall::calico::oam
 include ::platform::dhclient
 include ::platform::partitions
 include ::platform::lvm::controller
