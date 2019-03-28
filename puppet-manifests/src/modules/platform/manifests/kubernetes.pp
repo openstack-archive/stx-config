@@ -6,11 +6,120 @@ class platform::kubernetes::params (
   $etcd_endpoint = undef,
   $service_domain = undef,
   $dns_service_ip = undef,
+  $host_labels = [],
   $ca_crt = undef,
   $ca_key = undef,
   $sa_key = undef,
   $sa_pub = undef,
+  $k8s_cpuset = undef,
+  $k8s_nodeset = undef,
 ) { }
+
+class platform::kubernetes::cgroup::params (
+  $cgroup_root = '/sys/fs/cgroup',
+  $cgroup_name = 'k8s-infra',
+  $controllers = ['cpuset', 'cpu', 'cpuacct', 'memory', 'systemd'],
+) {}
+
+class platform::kubernetes::cgroup::controllers
+  inherits ::platform::kubernetes::cgroup::params {
+
+  # The kubernetes cgroup_manager_linux func Exists() checks that specific
+  # subsystem cgroup paths actually exist on the system.
+  # The particular cgroup cgroupRoot must exist for the following controllers:
+  # "cpu", "cpuacct", "cpuset", "memory", "systemd".
+  # Reference:
+  #  https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/cm/cgroup_manager_linux.go
+
+  # Create kubelet cgroup for the minimal set of required controllers.
+  notice("Create ${cgroup_root} controllers: ${controllers}")
+  $controllers.each |String $controller| {
+    exec { "chk_cgroup_${controller}_exist":
+      command => "true",
+      path    => ["/usr/bin","/usr/sbin", "/bin"],
+      onlyif  => "test -d ${cgroup_root}/${controller}"
+    }
+    file { "${cgroup_root}/${controller}/${cgroup_name}":
+      ensure => directory,
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0700',
+      require => Exec["chk_cgroup_${controller}_exist"],
+    }
+  }
+}
+
+class platform::kubernetes::cgroup::cpuset
+  inherits ::platform::kubernetes::cgroup::params {
+  include ::platform::kubernetes::params
+
+  $k8s_cpuset = $::platform::kubernetes::params::k8s_cpuset
+  $k8s_nodeset = $::platform::kubernetes::params::k8s_nodeset
+
+  # Default to float across all cpus and numa nodes
+  if !defined('$k8s_cpuset') {
+    $k8s_cpuset = generate('/bin/cat', '/sys/devices/system/cpu/online')
+    notice("System default cpuset ${k8s_cpuset}.")
+  }
+  if !defined('$k8s_nodeset') {
+    $k8s_nodeset = generate('/bin/cat', '/sys/devices/system/node/online')
+    notice("System default nodeset ${k8s_nodeset}.")
+  }
+
+  # Modify k8s cpuset resources to reflect platform configured cores.
+  $cgdir = "${cgroup_root}/cpuset/${cgroup_name}"
+  $cgmems = "${cgdir}/cpuset.mems"
+  $cgcpus = "${cgdir}/cpuset.cpus"
+  $cgtasks = "${cgdir}/tasks"
+
+  notice("Set k8s nodeset ${k8s_nodeset} at: ${cgmems}")
+  exec { "create ${cgmems}":
+    command => "/bin/echo ${k8s_nodeset} > ${cgmems} || :",
+    onlyif  => "test -d ${cgdir}",
+  }
+  -> file { "${cgmems}":
+    ensure => file,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
+  }
+
+  # NOTE: Child cgroups cpuset must be subset of parent. In the case where
+  # child directories already exist and we change the parent's cpuset to
+  # be a subset of what the children have, will cause the command to fail
+  # with "-bash: echo: write error: device or resource busy".
+  # In this case we allow the command to succeed by adding "|| :".
+  # Otherwise a complex tree walk procedure is required, or we should disallow
+  # multiple invocations of this exec.
+  notice("Set k8s cpuset ${k8s_cpuset} at: ${cgcpus}")
+  exec { "create ${cgcpus}":
+    command => "/bin/echo ${k8s_cpuset} > ${cgcpus} || :",
+    onlyif  => "test -d ${cgdir}",
+  }
+  -> file { "${cgcpus}":
+    ensure => file,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
+  }
+
+  file { "${cgtasks}":
+    ensure => file,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
+  }
+}
+
+class platform::kubernetes::cgroup
+  inherits ::platform::kubernetes::params {
+
+  contain ::platform::kubernetes::cgroup::controllers
+  contain ::platform::kubernetes::cgroup::cpuset
+
+  Class['::platform::kubernetes::cgroup::controllers']
+  -> Class['::platform::kubernetes::cgroup::cpuset']
+}
 
 class platform::kubernetes::kubeadm {
   include ::platform::docker::params
@@ -276,6 +385,7 @@ class platform::kubernetes::master
   inherits ::platform::kubernetes::params {
 
   contain ::platform::kubernetes::kubeadm
+  contain ::platform::kubernetes::cgroup
   contain ::platform::kubernetes::master::init
   contain ::platform::kubernetes::firewall
 
@@ -285,6 +395,7 @@ class platform::kubernetes::master
   # kubeadm init is run.
   Class['::platform::dns'] -> Class[$name]
   Class['::platform::kubernetes::kubeadm']
+  -> Class['::platform::kubernetes::cgroup']
   -> Class['::platform::kubernetes::master::init']
   -> Class['::platform::kubernetes::firewall']
 }
@@ -338,10 +449,17 @@ class platform::kubernetes::worker
   # will already be configured and includes support for running pods.
   if $::personality != 'controller' {
     contain ::platform::kubernetes::kubeadm
+    contain ::platform::kubernetes::cgroup
     contain ::platform::kubernetes::worker::init
 
     Class['::platform::kubernetes::kubeadm']
+    -> Class['::platform::kubernetes::cgroup']
     -> Class['::platform::kubernetes::worker::init']
+  } else {
+    # Reconfigure cgroups cpusets on AIO
+    contain ::platform::kubernetes::cgroup
+
+    Class['::platform::kubernetes::cgroup']
   }
 
   file { '/var/run/.disable_worker_services':
