@@ -144,6 +144,19 @@ class platform::kubernetes::master::init
       logoutput => true,
     }
 
+    if $::platform::docker::params::k8s_registry {
+      $gcr_k8s_registry = $::platform::docker::params::k8s_registry
+    } else {
+      $gcr_k8s_registry = 'gcr.k8s.io'
+    }
+
+    # Fix bug https://bugs.launchpad.net/starlingx/+bug/1822419.
+    # Change default coredns image version to 1.2.6
+    -> exec { 'patch coredns image version':
+      command   => 'kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system patch deployment coredns -p \'{"spec":{"template":{"spec":{"containers":[{"name":"coredns","image":"\${gcr_k8s_registry}/coredns:1.2.6"}]}}}}\'', # lint:ignore:140chars
+      logoutput => true,
+    }
+
     # kubernetes 1.12 uses coredns rather than kube-dns.
     # Restrict the dns pod to master nodes
     -> exec { 'restrict coredns to master nodes':
