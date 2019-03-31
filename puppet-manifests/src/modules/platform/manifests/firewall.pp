@@ -570,10 +570,6 @@ class platform::firewall::oam (
     version   => 'ipv6',
   }
 
-  -> platform::firewall::services { 'platform:firewall:services':
-    version => $version,
-  }
-
   # Set default table policies
   -> firewallchain { 'INPUT:filter:IPv4':
     ensure => present,

@@ -84,7 +84,6 @@ class platform::fm::api
       sync_db => $::platform::params::init_database,
     }
 
-    include ::platform::fm::firewall
     include ::platform::fm::haproxy
   }
 }

@@ -81,7 +81,6 @@ class platform::nfv::api
     include ::nfv::keystone::auth
   }
 
-  include ::platform::nfv::firewall
   include ::platform::nfv::haproxy
 }
 
