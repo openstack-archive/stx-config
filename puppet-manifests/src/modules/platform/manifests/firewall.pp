@@ -156,78 +156,6 @@ define platform::firewall::common (
   }
 }
 
-# Declare OAM service rules
-define platform::firewall::services (
-  $version,
-) {
-  # platform rules to be applied before custom rules
-  Firewall {
-    require => undef,
-  }
-
-  $provider = $version ? {'ipv4' => 'iptables', 'ipv6' => 'ip6tables'}
-
-  $proto_icmp = $version ? {'ipv4' => 'icmp', 'ipv6' => 'ipv6-icmp'}
-
-  # Provider specific service rules
-  firewall { "010 platform accept sm ${version}":
-    proto    => 'udp',
-    dport    => [2222, 2223],
-    action   => 'accept',
-    provider => $provider,
-  }
-
-  firewall { "011 platform accept ssh ${version}":
-    proto    => 'tcp',
-    dport    => 22,
-    action   => 'accept',
-    provider => $provider,
-  }
-
-  firewall { "200 platform accept icmp ${version}":
-    proto    => $proto_icmp,
-    action   => 'accept',
-    provider => $provider,
-  }
-
-  firewall { "201 platform accept ntp ${version}":
-    proto    => 'udp',
-    dport    => 123,
-    action   => 'accept',
-    provider => $provider,
-  }
-
-  firewall { "202 platform accept snmp ${version}":
-    proto    => 'udp',
-    dport    => 161,
-    action   => 'accept',
-    provider => $provider,
-  }
-
-  firewall { "202 platform accept snmp trap ${version}":
-    proto    => 'udp',
-    dport    => 162,
-    action   => 'accept',
-    provider => $provider,
-  }
-
-  firewall { "203 platform accept ptp ${version}":
-    proto    => 'udp',
-    dport    => [319, 320],
-    action   => 'accept',
-    provider => $provider,
-  }
-
-  # allow IGMP Query traffic if IGMP Snooping is
-  # enabled on the TOR switch
-  firewall { "204 platform accept igmp ${version}":
-    proto    => 'igmp',
-    action   => 'accept',
-    provider => $provider,
-  }
-}
-
-
 define platform::firewall::hooks (
   $version = undef,
 ) {
@@ -568,10 +496,6 @@ class platform::firewall::oam (
   -> platform::firewall::common { 'platform:firewall:ipv6':
     interface => $interface_name,
     version   => 'ipv6',
-  }
-
-  -> platform::firewall::services { 'platform:firewall:services':
-    version => $version,
   }
 
   # Set default table policies
