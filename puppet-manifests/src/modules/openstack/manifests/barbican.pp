@@ -137,7 +137,6 @@ class openstack::barbican::api
 
   if $service_enabled {
     include ::openstack::barbican::service
-    include ::openstack::barbican::firewall
     include ::openstack::barbican::haproxy
   }
 }

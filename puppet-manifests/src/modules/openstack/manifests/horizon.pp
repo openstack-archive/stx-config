@@ -174,7 +174,6 @@ class openstack::horizon
       user        => 'root',
     }
 
-    include ::openstack::horizon::firewall
   }
 }
 

@@ -439,7 +439,6 @@ class platform::ceph::rgw
     }
   }
 
-  include ::platform::ceph::firewall
   include ::platform::ceph::haproxy
 }
 

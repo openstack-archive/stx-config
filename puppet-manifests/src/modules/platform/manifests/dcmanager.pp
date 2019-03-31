@@ -76,7 +76,6 @@ class platform::dcmanager::api
     }
 
 
-    include ::platform::dcmanager::firewall
     include ::platform::dcmanager::haproxy
   }
 }

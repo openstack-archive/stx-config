@@ -151,7 +151,6 @@ class platform::sysinv::api
     'DEFAULT/sysinv_api_workers': value => $::platform::params::eng_workers_by_5;
   }
 
-  include ::platform::sysinv::firewall
   include ::platform::sysinv::haproxy
 }
 
