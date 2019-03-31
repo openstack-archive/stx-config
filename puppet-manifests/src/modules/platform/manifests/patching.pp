@@ -67,7 +67,6 @@ class platform::patching::api (
     include ::patching::keystone::auth
   }
 
-  include ::platform::patching::firewall
   include ::platform::patching::haproxy
 }
 
