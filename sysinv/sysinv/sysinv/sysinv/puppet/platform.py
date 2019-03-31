@@ -6,7 +6,6 @@
 
 import copy
 import itertools
-import os
 import operator
 
 from sysinv.common import constants
@@ -46,7 +45,6 @@ class PlatformPuppet(base.BasePuppet):
         config.update(self._get_region_config())
         config.update(self._get_distributed_cloud_role())
         config.update(self._get_sm_config())
-        config.update(self._get_firewall_config())
         config.update(self._get_drbd_sync_config())
         config.update(self._get_remotelogging_config())
         config.update(self._get_snmp_config())
@@ -328,16 +326,6 @@ class PlatformPuppet(base.BasePuppet):
             'platform::sm::params::infra_ip_multicast':
                 multicast_address.address,
         }
-
-    def _get_firewall_config(self):
-        config = {}
-        rules_filepath = os.path.join(tsconfig.PLATFORM_CONF_PATH,
-                                      'iptables.rules')
-        if os.path.isfile(rules_filepath):
-            config.update({
-                'platform::firewall::oam::rules_file': rules_filepath
-            })
-        return config
 
     def _get_host_platform_config(self, host, config_uuid):
         if not config_uuid:
