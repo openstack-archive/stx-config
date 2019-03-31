@@ -202,7 +202,6 @@ class openstack::keystone::api
     }
   }
 
-  include ::openstack::keystone::firewall
   include ::openstack::keystone::haproxy
 }
 

@@ -47,7 +47,6 @@ class platform::smapi
   }
 
   include ::platform::params
-  include ::platform::smap::firewall
   include ::platform::smapi::haproxy
   $bind_host_name = $::platform::params::hostname
   file { '/etc/sm-api/sm-api.conf':
