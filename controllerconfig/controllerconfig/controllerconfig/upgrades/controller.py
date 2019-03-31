@@ -1129,14 +1129,6 @@ def extract_data_from_archive(archive, staging_dir, from_release, to_release):
     backup_restore.restore_etc_ssl_dir(archive,
                                        configpath=tmp_config_path)
 
-    # Restore firewall rules file if it is in the archive
-    if backup_restore.file_exists_in_archive(
-            archive, 'config/iptables.rules'):
-        extract_relative_file(archive, 'config/iptables.rules',
-                              tmp_config_path)
-        extract_relative_file(archive, 'etc/platform/iptables.rules',
-                              PLATFORM_CONF_PATH)
-
     # Extract etc files
     archive.extract('etc/hostname', '/')
     archive.extract('etc/hosts', '/')
