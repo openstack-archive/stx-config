@@ -1,17 +1,17 @@
 """
-Copyright (c) 2015-2016 Wind River Systems, Inc.
+Copyright (c) 2015-2019 Wind River Systems, Inc.
 
 SPDX-License-Identifier: Apache-2.0
 
 """
 
 from netaddr import IPRange
-from configutilities.common.exceptions import ConfigFail
-from configutilities.common.exceptions import ValidateFail
-from configutilities.common.utils import is_mtu_valid
-from configutilities.common.utils import is_valid_vlan
-from configutilities.common.utils import validate_network_str
-from configutilities.common.utils import validate_address_str
+from controllerconfig.common.exceptions import ConfigFail
+from controllerconfig.common.exceptions import ValidateFail
+from controllerconfig.utils import is_mtu_valid
+from controllerconfig.utils import is_valid_vlan
+from controllerconfig.utils import validate_network_str
+from controllerconfig.utils import validate_address_str
 
 DEFAULT_CONFIG = 0
 REGION_CONFIG = 1
