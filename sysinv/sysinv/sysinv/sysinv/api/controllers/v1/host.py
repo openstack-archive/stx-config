@@ -6289,7 +6289,7 @@ class HostController(rest.RestController):
         for mon in monitor_list:
             ihost = pecan.request.dbapi.ihost_get(mon['forihostid'])
             if ihost.id == hostupdate.ihost_orig['id']:
-                self._ceph.update_crushmap(hostupdate)
+                self._ceph.set_crushmap()
 
     @staticmethod
     def _handle_lock_action(hostupdate):

@@ -556,8 +556,10 @@ class CephApiOperator(object):
 
     def update_crushmap(self, hostupdate):
         self.set_crushmap()
-        storage_num = int(hostupdate.ihost_orig['hostname'][8:])
-        if (storage_num >= 2 and
+        storage_hosts = pecan.request.dbapi.ihost_get_by_personality(constants.STORAGE)
+        storage_num = len(list(storage_hosts))
+
+        if (storage_num > 2 and
                 hostupdate.ihost_orig['invprovision'] !=
                 constants.PROVISIONED):
 
