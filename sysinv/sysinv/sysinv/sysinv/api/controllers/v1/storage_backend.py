@@ -183,8 +183,7 @@ class StorageBackendController(rest.RestController):
 
     _custom_actions = {
         'detail': ['GET'],
-        'summary': ['GET'],
-        'usage': ['GET']
+        'summary': ['GET']
     }
 
     def __init__(self, from_isystems=False):
@@ -430,44 +429,6 @@ class StorageBackendController(rest.RestController):
     def detail(self):
         """Retrieve a list of storage_backends with detail."""
         raise wsme.exc.ClientSideError(_("detail not implemented."))
-
-    @expose('json')
-    def usage(self):
-        """Retrieve usage summary"""
-        storage_backends = pecan.request.dbapi.storage_backend_get_list()
-
-        res = []
-        pools_usage = None
-        for s_b in storage_backends:
-            if s_b.backend == constants.SB_TYPE_CEPH:
-                # Get the ceph object
-                tier_name = self._tier_lookup.get(s_b.id, None)
-                if not tier_name:
-                    ceph_obj = pecan.request.dbapi.storage_ceph_get(s_b.id)
-                    tier_name = self._tier_lookup[s_b.id] = ceph_obj.tier_name
-
-                # Get ceph usage if needed
-                if not pools_usage:
-                    pools_usage = pecan.request.rpcapi.get_ceph_pools_df_stats(
-                        pecan.request.context)
-
-                if pools_usage:
-                    for p in pools_usage:
-                        entry = self._build_ceph_entry(s_b.name, tier_name, p)
-                        if entry:
-                            res.append(entry)
-            elif s_b.backend == constants.SB_TYPE_LVM:
-                cinder_lvm_pool = \
-                    pecan.request.rpcapi.get_cinder_lvm_usage(pecan.request.context)
-
-                if cinder_lvm_pool:
-                    entry = self._build_lvm_entry(cinder_lvm_pool)
-                    if entry:
-                        res.append(entry)
-            elif s_b.backend == constants.SB_TYPE_FILE:
-                if s_b.services and constants.SB_SVC_GLANCE in s_b.services:
-                    res.append(self._build_fs_entry_for_glance())
-        return res
 
     @cutils.synchronized(LOCK_NAME)
     @wsme.validate(types.uuid, [StorageBackendPatchType])
