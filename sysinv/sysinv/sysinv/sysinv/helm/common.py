@@ -47,3 +47,38 @@ LABEL_REMOTE_STORAGE = 'remote-storage'
 # Label values
 LABEL_VALUE_ENABLED = 'enabled'
 LABEL_VALUE_DISABLED = 'disabled'
+
+DEFAULT_UEFI_LOADER_PATH = {
+    "x86_64": "/usr/share/OVMF",
+    "aarch64": "/usr/share/AAVMF"
+}
+
+
+def get_mount_uefi_overrides():
+    uefi_config = {
+        'volumes': [
+            {
+                'name': 'ovmf',
+                'hostPath': {
+                    'path': DEFAULT_UEFI_LOADER_PATH['x86_64']
+                }
+            },
+            {
+                'name': 'aavmf',
+                'hostPath': {
+                    'path': DEFAULT_UEFI_LOADER_PATH['aarch64']
+                }
+            }
+        ],
+        'volumeMounts': [
+            {
+                'name': 'ovmf',
+                'mountPath': DEFAULT_UEFI_LOADER_PATH['x86_64']
+            },
+            {
+                'name': 'aavmf',
+                'mountPath': DEFAULT_UEFI_LOADER_PATH['aarch64']
+            }
+        ]
+    }
+    return uefi_config
