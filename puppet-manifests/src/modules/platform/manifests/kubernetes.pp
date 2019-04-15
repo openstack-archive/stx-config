@@ -207,8 +207,17 @@ class platform::kubernetes::master::init
       logoutput => true,
     }
 
+    if $::platform::params::system_type == 'All-in-one' and $::platform::params::system_mode == 'simplex' {
+      exec { '1 coredns for simplex mode':
+        require   => [File['/etc/kubernetes/admin.conf']],
+        command   => 'kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system scale --replicas=1 deployment coredns', # lint:ignore:140chars
+        logoutput => true,
+      }
+    }
+
     # Remove the taint from the master node
-    -> exec { 'remove taint from master node':
+    exec { 'remove taint from master node':
+      require   => [Exec['Use anti-affinity for coredns pods']],
       command   => "kubectl --kubeconfig=/etc/kubernetes/admin.conf taint node ${::platform::params::hostname} node-role.kubernetes.io/master- || true", # lint:ignore:140chars
       logoutput => true,
     }
@@ -328,8 +337,17 @@ class platform::kubernetes::master::init
         logoutput => true,
       }
 
+      if $::platform::params::system_type == 'All-in-one' and $::platform::params::system_mode == 'simplex' {
+        exec { '1 coredns for simplex mode':
+          require   => [File['/etc/kubernetes/admin.conf']],
+          command   => 'kubectl --kubeconfig=/etc/kubernetes/admin.conf -n kube-system scale --replicas=1 deployment coredns', # lint:ignore:140chars
+          logoutput => true,
+        }
+      }
+
       # Remove the taint from the master node
-      -> exec { 'remove taint from master node':
+      exec { 'remove taint from master node':
+        require   => [Exec['Use anti-affinity for coredns pods']],
         command   => "kubectl --kubeconfig=/etc/kubernetes/admin.conf taint node ${::platform::params::hostname} node-role.kubernetes.io/master- || true", # lint:ignore:140chars
         logoutput => true,
       }
