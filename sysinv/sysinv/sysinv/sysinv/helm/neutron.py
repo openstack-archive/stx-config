@@ -325,6 +325,17 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
             'sriov_nic': sriov_nic,
         }
 
+    def _get_flat_physical_networks(self):
+        flat_physical_networks = []
+        datanetworks = self.dbapi.datanetworks_get_all()
+        for datanetwork in datanetworks:
+            if datanetwork.network_type == 'flat':
+                flat_physical_networks.append(str(datanetwork.name))
+        if flat_physical_networks:
+            return "," + ",".join(flat_physical_networks)
+        else:
+            return ""
+
     def _get_ml2_physical_network_mtus(self):
         ml2_physical_network_mtus = []
         datanetworks = self.dbapi.datanetworks_get_all()
@@ -336,6 +347,9 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
 
     def _get_neutron_ml2_config(self):
         ml2_config = {
+            'ml2_type_flat': {
+                'flat_networks': 'public' + self._get_flat_physical_networks()
+            },
             'ml2': {
                 'physical_network_mtus': self._get_ml2_physical_network_mtus()
             },

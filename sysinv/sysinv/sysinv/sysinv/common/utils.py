@@ -1974,3 +1974,11 @@ def recur_update(orig_dict, new_dict):
         else:
             orig_dict[key] = new_dict[key]
     return orig_dict
+
+
+def get_port_name_by_interface_name(ifname, interfaces, ports):
+    for iface in interfaces:
+        if ifname == iface:
+            ifaceid = interfaces[iface]['id']
+            return ports[ifaceid]['name']
+    return ''
