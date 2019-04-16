@@ -40,3 +40,6 @@ ansible
 
 # playbookconfig
 playbookconfig
+
+# node-feature-discovery
+node-feature-discovery

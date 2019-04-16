@@ -1,4 +1,5 @@
 kubernetes/applications/stx-openstack/stx-openstack-helm
+kubernetes/applications/node-feature-discovery
 worker-utils
 workerconfig
 controllerconfig
