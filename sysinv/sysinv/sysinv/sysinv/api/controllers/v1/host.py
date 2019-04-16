@@ -4220,21 +4220,6 @@ class HostController(rest.RestController):
                   "Please refer to system admin guide for more details.") %
                 (ihost['hostname']))
 
-    def _semantic_check_worker_cpu_assignments(self, host):
-        """
-        Perform semantic checks that cpu assignments are valid. Changes in
-        vswitch_type may alter vswitch core requirements.
-        """
-        # If vswitch_type is none, enforce 0 vswitch cpu cores
-        if constants.VSWITCH_TYPE_NONE == cutils.get_vswitch_type(
-                pecan.request.dbapi):
-            host_cpus = pecan.request.dbapi.icpu_get_by_ihost(host['uuid'])
-            for cpu in host_cpus:
-                if cpu.allocated_function == constants.VSWITCH_FUNCTION:
-                    raise wsme.exc.ClientSideError(
-                        _('vSwitch cpus can only be used with a vswitch_type '
-                          'specified.'))
-
     @staticmethod
     def _handle_ttys_dcd_change(ihost, ttys_dcd):
         """
@@ -4590,21 +4575,39 @@ class HostController(rest.RestController):
                 constants.STORAGE
             )
 
-            storage_enabled = 0
-            for ihost in ihosts:
-                if ihost.operational == constants.OPERATIONAL_ENABLED:
-                    storage_enabled = storage_enabled + 1
+            if ihosts:
+                # For a storage configuration, nothing needs to be changed.
+                LOG.info("This is to restore a storage configuration.")
+                storage_enabled = 0
+                for ihost in ihosts:
+                    if ihost.operational == constants.OPERATIONAL_ENABLED:
+                        storage_enabled = storage_enabled + 1
 
-            if storage_enabled and storage_enabled == len(ihosts):
-                LOG.info("All storage hosts are %s. Restore crushmap..." %
-                         constants.OPERATIONAL_ENABLED)
+                if storage_enabled and storage_enabled == len(ihosts):
+                    LOG.info("All storage hosts are %s. Restore crushmap..." %
+                             constants.OPERATIONAL_ENABLED)
+                    try:
+                        if not pecan.request.rpcapi.restore_ceph_config(
+                                pecan.request.context, after_storage_enabled=True):
+                            raise Exception("restore_ceph_config returned false")
+                    except Exception as e:
+                        raise wsme.exc.ClientSideError(
+                            _("Restore Ceph config failed: %s" % e))
+            elif utils.is_aio_system(pecan.request.dbapi):
+                # For an AIO system, now is the time to restore/overwrite
+                # crushmap.
+                LOG.info("For AIO system, Restore crushmap...")
                 try:
                     if not pecan.request.rpcapi.restore_ceph_config(
-                            pecan.request.context, after_storage_enabled=True):
+                                pecan.request.context, after_storage_enabled=True):
                         raise Exception("restore_ceph_config returned false")
                 except Exception as e:
                     raise wsme.exc.ClientSideError(
                         _("Restore Ceph config failed: %s" % e))
+
+            else:
+                # Need more work for 2+2
+                LOG.info("Need more work for 2+2")
 
     @staticmethod
     def update_ihost_action(action, hostupdate):
@@ -4947,13 +4950,7 @@ class HostController(rest.RestController):
         self.check_unlock_patching(hostupdate, force_unlock)
 
         hostupdate.configure_required = True
-        if (os.path.isfile(constants.ANSIBLE_BOOTSTRAP_FLAG) and
-                hostupdate.ihost_patch['hostname'] == 'controller-0'):
-            # For the first unlock of the initial controller bootstrapped by
-            # Ansible, don't notify vim.
-            hostupdate.notify_vim = False
-        else:
-            hostupdate.notify_vim = True
+        hostupdate.notify_vim = True
 
         return True
 
@@ -5200,9 +5197,6 @@ class HostController(rest.RestController):
                                                  force_unlock)
             self._semantic_check_data_addresses(ihost)
             self._semantic_check_data_vrs_attributes(ihost)
-
-        # Check if cpu assignments are valid
-        self._semantic_check_worker_cpu_assignments(ihost)
 
         # check if the platform reserved memory is valid
         ihost_inodes = pecan.request.dbapi.inode_get_by_ihost(ihost['uuid'])
