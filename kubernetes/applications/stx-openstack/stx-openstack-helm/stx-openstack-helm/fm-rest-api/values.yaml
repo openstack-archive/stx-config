@@ -1,0 +1,197 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Default values for fm-rest-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+labels:
+  fm_api:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+
+images:
+  tags:
+    fm_rest_api: docker.io/starlingx/stx-fm-rest-api:master-centos-stable-latest
+    ks_endpoints: docker.io/starlingx/stx-heat:master-centos-stable-latest
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
+  pullPolicy: IfNotPresent
+  local_registry:
+    active: false
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 18003
+
+ingress:
+  enabled: false
+  annotations: {}
+  paths: []
+  hosts:
+    - fm-rest-api
+  tls: []
+
+conf:
+  paste:
+    app:api_v1:
+      paste.app_factory: fm.api.app:app_factory
+    filter:authtoken:
+      acl_public_routes: /, /v1
+      paste.filter_factory: fm.api.middleware.auth_token:AuthTokenMiddleware.factory
+    filter:request_id:
+      paste.filter_factory: oslo_middleware:RequestId.factory
+    pipeline:fm-api:
+      pipeline: request_id authtoken api_v1
+
+  fm:
+    DEFAULT:
+      use_syslog: True
+      syslog_log_facility: local2
+      trap_destinations:
+      region_name: RegionOne
+      event_log_max_size: 4000
+    database:
+      idle_timeout: 60
+      max_pool_size: 1
+      max_overflow: 20
+    oslo_middleware:
+      enable_proxy_headers_parsing: True
+    keystone_authtoken:
+      auth_type: password
+      auth_version: v3
+    sysinv:
+      catalog_info: platform:sysinv:internalURL
+      os_region_name: RegionOne
+    api:
+      api_paste_config: /etc/fm/api-paste.ini
+      api_workers: 2
+      bind_port: 18003
+
+dependencies:
+  static:
+    ks_endpoints:
+      jobs:
+        - fm-ks-user
+        - fm-ks-service
+      services:
+        - endpoint: internal
+          service: identity
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  job_ks_endpoints: true
+
+endpoints:
+  cluster_domain_suffix: cluster.local
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: password
+      service_username:
+        username: fm
+        password: password
+    hosts:
+      default: mariadb
+    host_fqdn_override:
+      default: null
+    path: /fm
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  local_image_registry:
+    name: docker-registry
+    namespace: docker-registry
+    hosts:
+      default: localhost
+      internal: docker-registry
+      node: localhost
+    host_fqdn_override:
+      default: null
+    port:
+      registry:
+        node: 5000
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      fm:
+        role: admin
+        region_name: RegionOne
+        username: fm
+        password: password
+        project_name: service
+        user_domain_name: service
+        project_domain_name: service
+    hosts:
+      default: keystone-api
+      public: keystone
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 80
+        internal: 5000
+  alarming:
+    name: fm
+    hosts:
+      default: fm-rest-api
+      public: fm
+    host_fqdn_override:
+      default: null
+    path:
+      default: "/v2.1/%(tenant_id)s"
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 8774
+        public: 80
+pod:
+  resources:
+    jobs:
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+secrets:
+  identity:
+    admin: fm-keystone-admin
+    fm: fm-keystone-user
+  tls:
+    alarming:
+      fm_api:
+        public: fm-rest-api-tls-public
+
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

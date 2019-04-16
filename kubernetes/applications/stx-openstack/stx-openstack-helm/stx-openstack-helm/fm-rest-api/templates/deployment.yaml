@@ -1,0 +1,78 @@
+{{/*
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+*/}}
+
+{{- $envAll := . }}
+{{- $serviceAccountName := "fm-rest-api" }}
+{{ tuple $envAll "fmapi" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: fm-rest-api
+  labels:
+    app: {{ include "fm-rest-api.name" . }}
+    chart: {{ include "fm-rest-api.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "fm-rest-api.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "fm-rest-api.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ $serviceAccountName }}
+      containers:
+        - name: fm-rest-api
+          volumeMounts:
+            - name: fm-rest-api-bin
+              mountPath: /tmp/fm-rest-api.sh
+              subPath: fm-rest-api.sh
+              readOnly: true
+            - name: fm-rest-api-etc
+              mountPath: /etc/fm/api-paste.ini
+              subPath: api-paste.ini
+              readOnly: true
+            - name: fm-rest-api-etc
+              mountPath: /etc/fm/fm.conf
+              subPath: fm.conf
+              readOnly: true
+          command:
+            - /tmp/fm-rest-api.sh
+          image: "{{ .Values.images.tags.fm_rest_api }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 18003
+              protocol: TCP
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+       - name: fm-rest-api-etc
+         configMap:
+           name: fm-rest-api-etc
+           defaultMode: 0644
+       - name: fm-rest-api-bin
+         configMap:
+           name: fm-rest-api-bin
+           defaultMode: 0755
