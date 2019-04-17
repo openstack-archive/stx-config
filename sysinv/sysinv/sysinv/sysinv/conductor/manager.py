@@ -10846,17 +10846,19 @@ class ConductorManager(service.PeriodicService):
         """
         self._app.perform_app_upload(rpc_app, tarfile)
 
-    def perform_app_apply(self, context, rpc_app):
+    def perform_app_apply(self, context, rpc_app, is_initial_apply):
         """Handling of application install request (via AppOperator)
 
         :param context: request context.
         :param rpc_app: data object provided in the rpc request
+        :param is_initial_apply: is first application
 
         """
         app_installed = self._app.perform_app_apply(rpc_app)
-        if app_installed:
+        if app_installed and is_initial_apply:
             # Update the VIM configuration as it may need to manage the newly
-            # installed application.
+            # installed application. Only do this if the application
+            # was not already applied.
             self._update_vim_config(context)
 
         return app_installed

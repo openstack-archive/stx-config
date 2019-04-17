@@ -1768,15 +1768,17 @@ class ConductorAPI(sysinv.openstack.common.rpc.proxy.RpcProxy):
                                        rpc_app=rpc_app,
                                        tarfile=tarfile))
 
-    def perform_app_apply(self, context, rpc_app):
+    def perform_app_apply(self, context, rpc_app, is_initial_apply):
         """Handle application apply request
 
         :param context: request context.
         :param rpc_app: data object provided in the rpc request
+        :param is_initial_apply: is first application
         """
         return self.cast(context,
                          self.make_msg('perform_app_apply',
-                                       rpc_app=rpc_app))
+                                       rpc_app=rpc_app,
+                                       is_initial_apply=is_initial_apply))
 
     def perform_app_remove(self, context, rpc_app):
         """Handle application remove request
