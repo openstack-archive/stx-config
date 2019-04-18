@@ -93,7 +93,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
 
     def update_dynamic_options(self, overrides):
         if utils.is_virtual():
-            overrides.update({
+            utils.recur_update(overrides, {
                 'plugins': {
                     'ml2_conf': {
                         'ovs_driver': {
@@ -108,7 +108,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
         for param in service_parameters:
             if param.section == constants.SERVICE_PARAM_SECTION_NETWORK_DEFAULT:
                 if param.name == constants.SERVICE_PARAM_NAME_DEFAULT_SERVICE_PLUGINS:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'neutron': {
                             'DEFAULT': {
                                 'service_plugins': str(param.value)
@@ -116,7 +116,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                         }
                     })
                 if param.name == constants.SERVICE_PARAM_NAME_DEFAULT_DNS_DOMAIN:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'neutron': {
                             'DEFAULT': {
                                 'dns_domain': str(param.value)
@@ -124,7 +124,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                         }
                     })
                 if param.name == constants.SERVICE_PARAM_NAME_BASE_MAC:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'neutron': {
                             'DEFAULT': {
                                 'base_mac': str(param.value)
@@ -132,7 +132,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                         }
                     })
                 if param.name == constants.SERVICE_PARAM_NAME_DVR_BASE_MAC:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'neutron': {
                             'DEFAULT': {
                                 'dvr_base_mac': str(param.value)
@@ -141,7 +141,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                     })
             elif param.section == constants.SERVICE_PARAM_SECTION_NETWORK_ML2:
                 if param.name == constants.SERVICE_PARAM_NAME_ML2_MECHANISM_DRIVERS:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'plugins': {
                             'ml2_conf': {
                                 'ml2': {
@@ -151,7 +151,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                         }
                     })
                 if param.name == constants.SERVICE_PARAM_NAME_ML2_EXTENSION_DRIVERS:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'plugins': {
                             'ml2_conf': {
                                 'ml2': {
@@ -161,7 +161,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                         }
                     })
                 if param.name == constants.SERVICE_PARAM_NAME_ML2_TENANT_NETWORK_TYPES:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'plugins': {
                             'ml2_conf': {
                                 'ml2': {
@@ -172,7 +172,7 @@ class NeutronHelm(openstack.OpenstackBaseHelm):
                     })
             elif param.section == constants.SERVICE_PARAM_SECTION_NETWORK_DHCP:
                 if param.name == constants.SERVICE_PARAM_NAME_DHCP_FORCE_METADATA:
-                    overrides.update({
+                    utils.recur_update(overrides, {
                         'dhcp_agent': {
                             'DEFAULT': {
                                 'force_metadata': str(param.value)
