@@ -4419,24 +4419,6 @@ class ConductorManager(service.PeriodicService):
             except exception.ServerNotFound:
                 LOG.exception("Invalid ihost_uuid %s" % ihost_uuid)
                 return
-
-            try:
-                neutron_host_id = \
-                    self._openstack.get_neutron_host_id_by_name(
-                        context, ihost['hostname'])
-                if not neutron_host_id:
-                    self._openstack.create_neutron_host(context,
-                                                        ihost_uuid,
-                                                        ihost['hostname'])
-                elif neutron_host_id != ihost_uuid:
-                    self._openstack.delete_neutron_host(context,
-                                                        neutron_host_id)
-                    self._openstack.create_neutron_host(context,
-                                                        ihost_uuid,
-                                                        ihost['hostname'])
-            except Exception:  # TODO: DPENNEY: Needs better exception
-                LOG.exception("Failed in neutron stuff")
-
         ihost_val = {'subfunctions': subfunctions}
         self.dbapi.ihost_update(ihost_uuid, ihost_val)
 
