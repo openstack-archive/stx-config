@@ -1,7 +1,0 @@
-[run]
-branch = True
-source =  controllerconfig
-omit = controllerconfig/tests/*
-
-[report]
-ignore_errors = True
